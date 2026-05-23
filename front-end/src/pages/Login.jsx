@@ -1,12 +1,7 @@
 import { CoinsIcon, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import Input from "../components/Input";
 
-function Login() {
-  const [showPassword, setShowPassword] = useState(false);
-
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
+export default function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-purple-50 p-4 font-sans">
       <div className="w-full max-w-116">
@@ -25,45 +20,21 @@ function Login() {
           </div>
 
           <form className="flex flex-col gap-4">
+            <Input
+              label="E-mail"
+              id="email"
+              type="email"
+              placeholder="example@email.com"
+              required
+            />
             <div className="flex flex-col gap-1">
-              <label
-                htmlFor="email"
-                className="text-sm font-bold text-gray-700"
-              >
-                E-mail
-              </label>
-              <input
-                type="email"
-                id="email"
-                placeholder="example@email.com"
+              <Input
+                label="Password"
+                id="password"
+                type="password"
+                placeholder="••••••••"
                 required
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-purple-500"
               />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="password"
-                className="text-sm font-bold text-gray-700"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  placeholder="••••••••"
-                  required
-                  className="w-full pr-10 rounded-lg border border-gray-300 px-4 py-2 outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-purple-500"
-                />
-                <button
-                  type="button"
-                  onClick={toggleShowPassword}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-purple-600 focus:outline-none"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
               <a
                 href="#recover"
                 className="self-end text-xs font-bold text-purple-600 hover:text-purple-700 hover:underline"
@@ -92,5 +63,3 @@ function Login() {
     </div>
   );
 }
-
-export default Login;
