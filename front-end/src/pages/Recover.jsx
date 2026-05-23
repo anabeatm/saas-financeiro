@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Input from "../components/Input";
+import { ArrowLeft } from "lucide-react";
 
 export default function Recover() {
   return (
@@ -28,13 +29,10 @@ export default function Recover() {
           >
             Send
           </button>
-          <div className="mt-2 flex items-center justify-center gap-2 text-sm">
-            <p className="text-gray-500">Remember your password?</p>
-            <Link
-              to="/login"
-              className="font-semibold text-[#a88d6f] hover:text-[#d6bfa7] hover:underline"
-            >
-              Login here
+          <div className="mt-2 flex justify-center gap-2 text-sm text-[#a88d6f] hover:text-[#d6bfa7] hover:underline">
+            <Link to="/login" className="flex gap-1 items-center font-semibold">
+              <ArrowLeft />
+              Return to login
             </Link>
           </div>
         </form>
