@@ -7,7 +7,7 @@ export default function Input({ label, id, type = "text", ...props }) {
   return (
     <div className="flex flex-col gap-1 w-full">
       {label && (
-        <label htmlFor={id} className="text-sm font-bold text-gray-700">
+        <label htmlFor={id} className="text-sm font-semibold text-[#0c0c0c]">
           {label}
         </label>
       )}
