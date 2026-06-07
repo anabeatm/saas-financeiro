@@ -6,6 +6,7 @@ import {
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Recover from "./pages/Recover";
+import Dashboard from "./pages/Dashboard";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
   {
     path: "/recover",
     element: <Recover />,
+  },
+  {
+    path: "/dashboard",
+    element: <Dashboard />,
   },
 ]);
 
