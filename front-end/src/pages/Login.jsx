@@ -64,6 +64,7 @@ export default function Login() {
           type="email"
           placeholder="example@email.com"
           required
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <div className="flex flex-col gap-1">
@@ -73,6 +74,7 @@ export default function Login() {
             type="password"
             placeholder="••••••••"
             required
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <Link
