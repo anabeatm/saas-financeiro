@@ -19,11 +19,22 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    const form = e.target;
+
     if (isBlankField) {
       addToast({
         type: "error",
         title: "Required fields",
         description: "Please, fill in your email and password to continue",
+      });
+      return;
+    }
+
+    if (!form.email.validity.valid) {
+      addToast({
+        type: "error",
+        title: "Invalid email",
+        description: "Please enter a valid format (e.g., your@email.com)",
       });
       return;
     }
@@ -105,7 +116,7 @@ export default function Login() {
         <Button type="submit" disabled={isLoading}>
           {isLoading ? (
             <>
-              Entering... <Loader2 className="h-4"/>
+              Entering... <Loader2 className="h-4" />
             </>
           ) : (
             <>Enter</>
