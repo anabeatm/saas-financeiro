@@ -12,12 +12,23 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const isFormValid = email.trim() !== "" && password.trim() !== "";
+  const isBlankField = email.trim() == "" || password.trim() == "";
   const navigate = useNavigate();
   const { addToast } = useToast();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (isBlankField) {
+      addToast({
+        type: "error",
+        title: "Campos obrigatórios",
+        description:
+          "Por favor, preencha o e-mail e a senha para continuar",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -57,7 +68,7 @@ export default function Login() {
 
   return (
     <AuthLayout title="Login" subtitle="Welcome back to FinEXP" showLogo={true}>
-      <form onSubmit={handleLogin} className="flex flex-col gap-4">
+      <form noValidate onSubmit={handleLogin} className="flex flex-col gap-4">
         <Input
           label="E-mail"
           id="email"
@@ -84,7 +95,7 @@ export default function Login() {
             Forgot your password?
           </Link>
         </div>
-        <Button type="submit" disabled={!isFormValid || isLoading}>
+        <Button type="submit" disabled={isLoading}>
           {isLoading ? (
             <>
               Entering... <Loader2 />
