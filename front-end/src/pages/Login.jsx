@@ -23,7 +23,16 @@ export default function Login() {
       addToast({
         type: "error",
         title: "Required fields",
-        description: "Please fill in your email and password to continue",
+        description: "Please, fill in your email and password to continue",
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      addToast({
+        type: "error",
+        title: "Invalid password",
+        description: "The password must be at least 6 characters long",
       });
       return;
     }
@@ -96,7 +105,7 @@ export default function Login() {
         <Button type="submit" disabled={isLoading}>
           {isLoading ? (
             <>
-              Entering... <Loader2 />
+              Entering... <Loader2 className="h-4"/>
             </>
           ) : (
             <>Enter</>
