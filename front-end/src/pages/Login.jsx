@@ -22,9 +22,8 @@ export default function Login() {
     if (isBlankField) {
       addToast({
         type: "error",
-        title: "Campos obrigatórios",
-        description:
-          "Por favor, preencha o e-mail e a senha para continuar",
+        title: "Required fields",
+        description: "Please fill in your email and password to continue",
       });
       return;
     }
@@ -40,7 +39,7 @@ export default function Login() {
       localStorage.setItem("token", response.data.token);
       addToast({
         type: "success",
-        title: "Login realizado com sucesso!",
+        title: "Login successful!",
       });
 
       setTimeout(() => {
@@ -50,15 +49,14 @@ export default function Login() {
       if (error.response && error.response.status === 401) {
         addToast({
           type: "error",
-          title: "Falha na autenticação",
-          description: "E-mail ou senha incorretos",
+          title: "Authentication failed",
+          description: "Incorrect email or password",
         });
       } else {
         addToast({
           type: "error",
-          title: "Erro ao fazer login",
-          description:
-            "Ocorreu um problema ao tentar conectar. Tente novamente",
+          title: "Error logging in",
+          description: "There was a problem connecting. Please try again",
         });
       }
     } finally {
