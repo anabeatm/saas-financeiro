@@ -6,6 +6,7 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import AuthLayout from "../components/AuthLayout";
 import { useToast } from "../components/ToastContext";
+import PasswordStrength from "../components/PasswordStrength";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -13,7 +14,10 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const isBlankField =
-    name.trim() == "" || email.trim() == "" || password.trim() == "" || confirmPassword.trim() == "";
+    name.trim() == "" ||
+    email.trim() == "" ||
+    password.trim() == "" ||
+    confirmPassword.trim() == "";
   const navigate = useNavigate();
   const { addToast } = useToast();
 
@@ -49,7 +53,9 @@ export default function Register() {
       return;
     }
 
-    {/*TODO: confirmar com o Frank */}
+    {
+      /*TODO: confirmar com o Frank */
+    }
     if (password !== confirmPassword) {
       addToast({
         type: "error",
@@ -58,8 +64,6 @@ export default function Register() {
       });
       return;
     }
-
-    // setIsLoading(true);
 
     try {
       await axios.post("/auth/register", {
@@ -91,8 +95,6 @@ export default function Register() {
           description: "There was a problem connecting. Please try again",
         });
       }
-    } finally {
-      // setIsLoading(false);
     }
   };
 
@@ -133,6 +135,9 @@ export default function Register() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+
+        <PasswordStrength password={password} />
+
         <Input
           label="Confirm Password"
           id="confirm-password"
