@@ -13,7 +13,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const isBlankField =
-    name.trim() == "" || email.trim() == "" || password.trim() == "";
+    name.trim() == "" || email.trim() == "" || password.trim() == "" || confirmPassword.trim() == "";
   const navigate = useNavigate();
   const { addToast } = useToast();
 
@@ -26,8 +26,7 @@ export default function Register() {
       addToast({
         type: "error",
         title: "Required fields",
-        description:
-          "Please, fill in your name, email and password to continue",
+        description: "Please, fill in all fields to continue",
       });
       return;
     }
@@ -50,19 +49,29 @@ export default function Register() {
       return;
     }
 
+    {/*TODO: confirmar com o Frank */}
+    if (password !== confirmPassword) {
+      addToast({
+        type: "error",
+        title: "Passwords do not match",
+        description: "Please make sure your passwords match",
+      });
+      return;
+    }
+
     // setIsLoading(true);
 
     try {
-      const response = await axios.post("/auth/register", {
+      await axios.post("/auth/register", {
         name: name,
         email: email,
         password: password,
       });
 
-      localStorage.setItem("token", response.data.token);
       addToast({
         type: "success",
         title: "Register successful!",
+        description: "Account created. Please log in to continue",
       });
 
       setTimeout(() => {
@@ -72,13 +81,13 @@ export default function Register() {
       if (error.response && error.response.status === 400) {
         addToast({
           type: "error",
-          title: "Authentication failed",
-          description: "Incorrect email or password",
+          title: "Registration failed",
+          description: "This email might already be in use",
         });
       } else {
         addToast({
           type: "error",
-          title: "Error register in",
+          title: "Error registering",
           description: "There was a problem connecting. Please try again",
         });
       }
