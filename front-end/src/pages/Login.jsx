@@ -25,7 +25,7 @@ export default function Login() {
       addToast({
         type: "error",
         title: "Required fields",
-        description: "Please, fill in your email and password to continue",
+        description: "Please, fill in all fields to continue",
       });
       return;
     }
