@@ -37,13 +37,23 @@ export default function ChangePassword() {
         description: "The password must be at least 6 characters long",
       });
       return;
-    }
+      }
+      
+      if (currentPassword === newPassword) {
+        addToast({
+          type: "error",
+          title: "Passwords cannot be the same",
+          description:
+            "A new password cannot be the same as the current password",
+        });
+        return;
+      }
 
     if (newPassword !== confirmPassword) {
       addToast({
         type: "error",
-        title: "Passwords don't match.",
-        description: "Make sure you enter the same password in both fields",
+        title: "Passwords don't match",
+        description: "Make sure you enter the same password in both New Password and Confirm Password fields",
       });
       return;
     }
