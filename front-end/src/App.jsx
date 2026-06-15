@@ -8,6 +8,15 @@ import Register from "./pages/Register";
 import Recover from "./pages/Recover";
 import Dashboard from "./pages/Dashboard";
 import ResetPassword from "./pages/ResetPassword";
+import ChangePassword from "./pages/ChangePassword";
+
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
 const router = createBrowserRouter([
   {
@@ -30,8 +39,21 @@ const router = createBrowserRouter([
   { path: "/reset-password/:token", element: <ResetPassword /> },
 
   {
+    path: "/app/profile/password",
+    element: (
+      <ProtectedRoute>
+        <ChangePassword />
+      </ProtectedRoute>
+    ),
+  },
+
+  {
     path: "/dashboard",
-    element: <Dashboard />,
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
 ]);
 
