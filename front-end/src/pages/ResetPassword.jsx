@@ -24,6 +24,7 @@ export default function ResetPassword() {
         title: "Invalid link",
         description: "The recovery link is missing or incomplete",
       });
+      return;
     }
 
     if (isBlankField) {
@@ -68,12 +69,20 @@ export default function ResetPassword() {
         navigate("/login");
       }, 2000);
     } catch (error) {
-      addToast({
-        type: "error",
-        title: "Reset failed.",
-        description:
-          "The recovery link is invalid or has expired. Please request a new one",
-      });
+      if (error.response && error.response.status === 400) {
+        addToast({
+          type: "error",
+          title: "Reset failed",
+          description:
+            "The recovery link is invalid or has expired. Please request a new one",
+        });
+      } else {
+        addToast({
+          type: "error",
+          title: "Error while resetting password",
+          description: "There was a problem connecting. Please try again",
+        });
+      }
     }
   };
 
