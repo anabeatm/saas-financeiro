@@ -43,7 +43,7 @@ export default function Recover() {
         type: "success",
         title: "Instructions sent",
         description:
-          "If there is an account associated with this email, you will receive a link to reset your password shortly",
+          "You will receive a link to reset your password shortly, check your inbox or spam folder",
       });
       setEmail("");
     }

@@ -54,7 +54,7 @@ export default function ResetPassword() {
     }
 
     try {
-      await axios.post("auth/reset-password", {
+      await axios.post("/auth/reset-password", {
         token: token,
         newPassword: password,
       });
