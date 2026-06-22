@@ -25,6 +25,49 @@ import {
   Area,
 } from "recharts";
 
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-xl min-w-37.5">
+        <p className="text-gray-500 font-semibold text-sm mb-3 border-b border-gray-100 pb-2">
+          {label}
+        </p>
+
+        <div className="flex flex-col gap-2">
+          {payload.map((entry, index) => {
+            const labelName =
+              entry.name === "Revenues" ? "Revenues" : "Expenses";
+
+            return (
+              <div
+                key={index}
+                className="flex justify-between items-center gap-6 text-sm"
+              >
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: entry.color }}
+                  ></div>
+                  <span className="text-gray-600 font-medium">{labelName}</span>
+                </div>
+
+                <span className="font-bold text-gray-800">
+                  R${" "}
+                  {entry.value.toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
 
@@ -343,7 +386,7 @@ export default function Dashboard() {
                       tickLine={false}
                       axisLine={false}
                     />
-                    <Tooltip />
+                    <Tooltip content={<CustomTooltip />} />
                     <Legend
                       iconType="circle"
                       wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
