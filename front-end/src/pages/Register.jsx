@@ -54,7 +54,7 @@ export default function Register() {
     }
 
     {
-      /*TODO: confirmar com o Frank */
+      /*TODO: mostrar se senhas batem em tempo real */
     }
     if (password !== confirmPassword) {
       addToast({
@@ -102,6 +102,7 @@ export default function Register() {
     <AuthLayout
       title="Create your account"
       subtitle="Join us and start your jouney"
+      showLogo={true}
     >
       <form
         noValidate
