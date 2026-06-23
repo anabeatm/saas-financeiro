@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+// import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Input from "../components/Input";
@@ -8,18 +8,28 @@ import AuthLayout from "../components/AuthLayout";
 import { useToast } from "../components/ToastContext";
 import PasswordStrength from "../components/PasswordStrength";
 
-export default function Register() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+import UserService from "../../services/UserService";
+
+const Register = () => {
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  // const [name, setName] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [password, setPassword] = useState("");
+  // const [confirmPassword, setConfirmPassword] = useState("");
   const isBlankField =
-    name.trim() == "" ||
-    email.trim() == "" ||
-    password.trim() == "" ||
-    confirmPassword.trim() == "";
+    user.name.trim() == "" ||
+    user.email.trim() == "" ||
+    user.password.trim() == "" ||
+    user.confirmPassword.trim() == "";
   const navigate = useNavigate();
   const { addToast } = useToast();
+
+  const userService = new UserService();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -44,7 +54,7 @@ export default function Register() {
       return;
     }
 
-    if (password.length < 6) {
+    if (user.password.length < 6) {
       addToast({
         type: "error",
         title: "Invalid password",
@@ -56,7 +66,7 @@ export default function Register() {
     {
       /*TODO: mostrar se senhas batem em tempo real */
     }
-    if (password !== confirmPassword) {
+    if (user.password !== user.confirmPassword) {
       addToast({
         type: "error",
         title: "Passwords do not match",
@@ -66,11 +76,7 @@ export default function Register() {
     }
 
     try {
-      await axios.post("/auth/register", {
-        name: name,
-        email: email,
-        password: password,
-      });
+      await userService.insert(user);
 
       addToast({
         type: "success",
@@ -98,6 +104,10 @@ export default function Register() {
     }
   };
 
+  const handleUser = (e) => {
+    setUser({ ...user, [e.target.id]: e.target.value });
+  };
+
   return (
     <AuthLayout
       title="Create your account"
@@ -115,8 +125,8 @@ export default function Register() {
           type="text"
           placeholder="Ana Beatriz"
           required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={user.name}
+          onChange={handleUser}
         />
         <Input
           label="E-mail"
@@ -124,8 +134,8 @@ export default function Register() {
           type="email"
           placeholder="example@email.com"
           required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={user.email}
+          onChange={handleUser}
         />
         <Input
           label="Password"
@@ -133,20 +143,20 @@ export default function Register() {
           type="password"
           placeholder="••••••••"
           required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={user.password}
+          onChange={handleUser}
         />
 
-        <PasswordStrength password={password} />
+        <PasswordStrength password={user.password} />
 
         <Input
           label="Confirm Password"
-          id="confirm-password"
+          id="confirmPassword"
           type="password"
           placeholder="••••••••"
           required
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          value={user.confirmPassword}
+          onChange={handleUser}
         />
         <Button type="submit">Register</Button>
 
@@ -162,4 +172,6 @@ export default function Register() {
       </form>
     </AuthLayout>
   );
-}
+};
+
+export default Register;
