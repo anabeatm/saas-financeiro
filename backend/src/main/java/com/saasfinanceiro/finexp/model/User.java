@@ -1,20 +1,17 @@
 package com.saasfinanceiro.finexp.model;
 
-import java.util.List;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Setter;
 
 @Entity
 @Data
@@ -33,17 +30,7 @@ public class User {
     @Size(max = 8, message = "Password need to be 8 max length")
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Setter(value = AccessLevel.NONE)
-    private List<UserProfile> userProfile;
-
-    public void setUserProfile(List<UserProfile> userProfiles) {
-        if (userProfiles != null) {
-            for (UserProfile u : userProfiles) {
-                u.setUser(this);
-            }
-        }
-        this.userProfile = userProfiles;
-    }
-
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "userpreferences_id", referencedColumnName = "id")
+    private UserPreferences userPreferences;
 }
