@@ -1,12 +1,11 @@
 import { useState } from "react";
 // import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import Input from "../components/Input";
-import Button from "../components/Button";
+import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
-import { useToast } from "../components/ToastContext";
+import Button from "../components/Button";
+import Input from "../components/Input";
 import PasswordStrength from "../components/PasswordStrength";
+import { useToast } from "../components/ToastContext";
 
 import UserService from "../../services/UserService";
 
@@ -87,20 +86,12 @@ const Register = () => {
       setTimeout(() => {
         navigate("/login");
       }, 1000);
-    } catch (error) {
-      if (error.response && error.response.status === 400) {
-        addToast({
-          type: "error",
-          title: "Registration failed",
-          description: "This email might already be in use",
-        });
-      } else {
-        addToast({
-          type: "error",
-          title: "Error registering",
-          description: "There was a problem connecting. Please try again",
-        });
-      }
+    } catch (errorMessage) {
+      addToast({
+        type: "error",
+        title: "Error registering",
+        description: errorMessage,
+      });
     }
   };
 

@@ -22,4 +22,25 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("app-token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+      return Promise.reject("Your session expired. Please, try login again");
+    }
+    if (error.response && error.response.data && error.response.data.message) {
+      return Promise.reject(error.response.data.message);
+    } else if (error.message === "Network Error") {
+      return Promise.reject("Error conecting server. Verify backend");
+    } else {
+      return Promise.reject("An unexpected error occurred. Try again.");
+    }
+  },
+);
+
 export default api;
