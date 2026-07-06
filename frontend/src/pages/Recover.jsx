@@ -7,7 +7,7 @@ import AuthLayout from "../components/AuthLayout";
 import { useToast } from "../components/ToastContext";
 import { ArrowLeft } from "lucide-react";
 
-export default function Recover() {
+const Recover = () => {
   const [email, setEmail] = useState("");
   const { addToast } = useToast();
 
@@ -76,3 +76,5 @@ export default function Recover() {
     </AuthLayout>
   );
 }
+
+export default Recover;

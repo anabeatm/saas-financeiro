@@ -8,7 +8,7 @@ import Button from "../components/Button";
 import AuthLayout from "../components/AuthLayout";
 import { useToast } from "../components/ToastContext";
 
-export default function Login() {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -135,3 +135,5 @@ export default function Login() {
     </AuthLayout>
   );
 }
+
+export default Login;

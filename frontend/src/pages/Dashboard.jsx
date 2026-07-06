@@ -68,7 +68,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-export default function Dashboard() {
+const Dashboard = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -490,3 +490,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+export default Dashboard;

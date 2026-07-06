@@ -7,7 +7,7 @@ import Button from "../components/Button";
 import { useToast } from "../components/ToastContext";
 import PasswordStrength from "../components/PasswordStrength";
 
-export default function ChangePassword() {
+const ChangePassword=()=> {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -142,3 +142,5 @@ export default function ChangePassword() {
     </AuthLayout>
   );
 }
+
+export default ChangePassword;

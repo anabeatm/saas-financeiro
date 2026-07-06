@@ -1,13 +1,13 @@
-import { useState } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
-import Input from "../components/Input";
 import Button from "../components/Button";
-import { useToast } from "../components/ToastContext";
+import Input from "../components/Input";
 import PasswordStrength from "../components/PasswordStrength";
+import { useToast } from "../components/ToastContext";
 
-export default function ResetPassword() {
+const ResetPassword = () => {
   const { token } = useParams();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -120,4 +120,6 @@ export default function ResetPassword() {
       </form>
     </AuthLayout>
   );
-}
+};
+
+export default ResetPassword;
