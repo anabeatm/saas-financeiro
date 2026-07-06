@@ -1,10 +1,10 @@
 import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import Input from "../components/Input";
-import Button from "../components/Button";
-import AuthLayout from "../components/AuthLayout";
-import { useToast } from "../components/ToastContext";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
+import AuthLayout from "../../components/AuthLayout";
+import { useToast } from "../../components/ToastContext";
 import { ArrowLeft } from "lucide-react";
 
 const Recover = () => {

@@ -1,14 +1,14 @@
 import {
   createBrowserRouter,
-  RouterProvider,
   Navigate,
+  RouterProvider,
 } from "react-router-dom";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Recover from "./pages/Recover";
-import Dashboard from "./pages/Dashboard";
-import ResetPassword from "./pages/ResetPassword";
-import ChangePassword from "./pages/ChangePassword";
+import Dashboard from "./pages/api/Dashboard";
+import ChangePassword from "./pages/auth/ChangePassword";
+import Login from "./pages/auth/Login";
+import Recover from "./pages/auth/Recover";
+import Register from "./pages/auth/Register";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("token");

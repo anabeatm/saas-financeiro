@@ -1,11 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AuthLayout from "../components/AuthLayout";
-import Input from "../components/Input";
-import Button from "../components/Button";
-import { useToast } from "../components/ToastContext";
-import PasswordStrength from "../components/PasswordStrength";
+import AuthLayout from "../../components/AuthLayout";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
+import { useToast } from "../../components/ToastContext";
+import PasswordStrength from "../../components/PasswordStrength";
 
 const ChangePassword=()=> {
   const [currentPassword, setCurrentPassword] = useState("");

@@ -3,10 +3,10 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { CoinsIcon, Loader2 } from "lucide-react";
-import Input from "../components/Input";
-import Button from "../components/Button";
-import AuthLayout from "../components/AuthLayout";
-import { useToast } from "../components/ToastContext";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
+import AuthLayout from "../../components/AuthLayout";
+import { useToast } from "../../components/ToastContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");

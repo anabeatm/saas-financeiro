@@ -1,13 +1,13 @@
 import { useState } from "react";
 // import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import AuthLayout from "../components/AuthLayout";
-import Button from "../components/Button";
-import Input from "../components/Input";
-import PasswordStrength from "../components/PasswordStrength";
-import { useToast } from "../components/ToastContext";
+import AuthLayout from "../../components/AuthLayout";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import PasswordStrength from "../../components/PasswordStrength";
+import { useToast } from "../../components/ToastContext";
 
-import UserService from "../../services/UserService";
+import UserService from "../../../services/UserService";
 
 const Register = () => {
   const [user, setUser] = useState({
