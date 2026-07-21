@@ -28,4 +28,6 @@ public class PasswordResetToken {
 
     @Column(nullable = false)
     private LocalDateTime expiresIn;
+
+    private boolean used = false;
 }

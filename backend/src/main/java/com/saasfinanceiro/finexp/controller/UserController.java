@@ -30,14 +30,14 @@ public class UserController {
         return ResponseEntity.ok(service.listAll());
     }
 
-    @PostMapping
-    public ResponseEntity<User> insert(@RequestBody @Valid User user) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.insert(user));
-    }
+    // @PostMapping
+    // public ResponseEntity<User> insert(@RequestBody @Valid User user) {
+    //     return ResponseEntity.status(HttpStatus.CREATED).body(service.insert(user));
+    // }
 
     @PutMapping
     public ResponseEntity<User> update(@RequestBody @Valid User user) {
-        return ResponseEntity.ok(service.uprdate(user));
+        return ResponseEntity.ok(service.update(user));
     }
 
     @GetMapping("/{id}")

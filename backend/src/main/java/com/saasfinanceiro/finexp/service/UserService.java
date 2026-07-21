@@ -31,7 +31,7 @@ public class UserService {
         repository.delete(user);
     }
 
-    public User uprdate(User user) {
+    public User update(User user) {
         User sectionUser = searchId(user.getId());
         sectionUser.setName(user.getName());
         sectionUser.setEmail(user.getEmail());
