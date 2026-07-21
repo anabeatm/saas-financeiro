@@ -19,11 +19,11 @@ import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.repository.UserRepository;
 
 @Component
-public class SecutiryFilter extends OncePerRequestFilter {
+public class SecurityFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
     private final UserRepository userRepository;
 
-    private SecutiryFilter(TokenService tokenService, UserRepository userRepository) {
+    private SecurityFilter(TokenService tokenService, UserRepository userRepository) {
         this.tokenService=tokenService;
         this.userRepository=userRepository;
     }
