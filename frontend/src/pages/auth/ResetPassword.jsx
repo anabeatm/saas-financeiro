@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AuthLayout from "../../components/AuthLayout";
@@ -6,6 +5,7 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import PasswordStrength from "../../components/PasswordStrength";
 import { useToast } from "../../components/ToastContext";
+import authService from "../../services/AuthService";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -55,34 +55,26 @@ const ResetPassword = () => {
     }
 
     try {
-      await axios.post("/auth/reset-password", {
-        token: token,
-        newPassword: password,
-      });
+      await authService.resetPassword(token, password);
       addToast({
         type: "success",
         title: "Password changed!",
         description:
           "Your password has been successfully updated. Please log in to continue",
       });
+
       setTimeout(() => {
         navigate("/login");
       }, 2000);
-    } catch (error) {
-      if (error.response && error.response.status === 400) {
-        addToast({
-          type: "error",
-          title: "Reset failed",
-          description:
-            "The recovery link is invalid or has expired. Please request a new one",
-        });
-      } else {
-        addToast({
-          type: "error",
-          title: "Error while resetting password",
-          description: "There was a problem connecting. Please try again",
-        });
-      }
+    } catch (errorMessage) {
+      addToast({
+        type: "error",
+        title: "Reset failed",
+        description:
+          typeof errorMessage === "string"
+            ? errorMessage
+            : "The recovery link is invalid or has expired.",
+      });
     }
   };
 

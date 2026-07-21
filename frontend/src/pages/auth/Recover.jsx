@@ -1,15 +1,16 @@
-import { useState } from "react";
-import axios from "axios";
-import { Link } from "react-router-dom";
-import Input from "../../components/Input";
-import Button from "../../components/Button";
-import AuthLayout from "../../components/AuthLayout";
-import { useToast } from "../../components/ToastContext";
 import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import AuthLayout from "../../components/AuthLayout";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import { useToast } from "../../components/ToastContext";
+import authService from "../../services/AuthService";
 
 const Recover = () => {
   const [email, setEmail] = useState("");
   const { addToast } = useToast();
+  const navigate = useNavigate();
 
   const handleRecover = async (e) => {
     e.preventDefault();
@@ -35,9 +36,30 @@ const Recover = () => {
     }
 
     try {
-      await axios.post("/auth/forgot-password", { email });
-    } catch (error) {
-      console.error(error);
+      const response = await authService.forgotPassword(email);
+
+      addToast({
+        type: "success",
+        title: "Instructions sent",
+        description: response.message || "Check your inbox or spam folder",
+      });
+
+      if (response.debugToken) {
+        console.log("DEBUG TOKEN:", response.debugToken);
+        setTimeout(() => {
+          navigate(`/reset-password/${response.debugToken}`);
+        }, 1500);
+      }
+      setEmail("");
+    } catch (errorMessage) {
+      addToast({
+        type: "error",
+        title: "Recovery failed",
+        description:
+          typeof errorMessage === "string"
+            ? errorMessage
+            : "Please enter a valid email",
+      });
     } finally {
       addToast({
         type: "success",
@@ -75,6 +97,6 @@ const Recover = () => {
       </form>
     </AuthLayout>
   );
-}
+};
 
 export default Recover;

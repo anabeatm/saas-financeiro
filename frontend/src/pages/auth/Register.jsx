@@ -7,7 +7,7 @@ import Input from "../../components/Input";
 import PasswordStrength from "../../components/PasswordStrength";
 import { useToast } from "../../components/ToastContext";
 
-import UserService from "../../../services/UserService";
+import authService from "../../services/AuthService";
 
 const Register = () => {
   const [user, setUser] = useState({
@@ -16,7 +16,7 @@ const Register = () => {
     password: "",
     confirmPassword: "",
   });
-  
+
   const isBlankField =
     user.name.trim() == "" ||
     user.email.trim() == "" ||
@@ -24,8 +24,6 @@ const Register = () => {
     user.confirmPassword.trim() == "";
   const navigate = useNavigate();
   const { addToast } = useToast();
-
-  const userService = new UserService();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -72,7 +70,7 @@ const Register = () => {
     }
 
     try {
-      await userService.insert(user);
+      await authService.register(user);
 
       addToast({
         type: "success",
