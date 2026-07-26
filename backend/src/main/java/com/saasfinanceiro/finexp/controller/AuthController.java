@@ -16,11 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.saasfinanceiro.finexp.dto.auth.ForgotPasswordRequest;
 import com.saasfinanceiro.finexp.dto.auth.ForgotPasswordResponse;
+import com.saasfinanceiro.finexp.dto.auth.LoginRequest;
+import com.saasfinanceiro.finexp.dto.auth.LoginResponse;
 import com.saasfinanceiro.finexp.dto.auth.ResetPasswordRequest;
 import com.saasfinanceiro.finexp.model.PasswordResetToken;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.repository.PasswordResetTokenRepository;
 import com.saasfinanceiro.finexp.repository.UserRepository;
+import com.saasfinanceiro.finexp.security.TokenService;
 import com.saasfinanceiro.finexp.service.UserService;
 
 @RestController
@@ -30,13 +33,33 @@ public class AuthController {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
+    private final TokenService tokenService;
 
     public AuthController(UserRepository userRepository, PasswordResetTokenRepository passwordResetTokenRepository,
-            PasswordEncoder passwordEncoder, UserService userService) {
+            PasswordEncoder passwordEncoder, UserService userService, TokenService tokenService) {
         this.userRepository = userRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
+        this.tokenService = tokenService;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
+        Optional<User> uOptional = userRepository.findByEmail(request.email());
+
+        if (uOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect email or password");
+        }
+
+        User user = uOptional.get();
+
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect email or password");
+        }
+
+        String token = tokenService.generateToken(user);
+        return ResponseEntity.ok(new LoginResponse(token));
     }
 
     @PostMapping("/register")
