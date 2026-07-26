@@ -5,7 +5,7 @@ import AuthLayout from "../../components/AuthLayout";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { useToast } from "../../components/ToastContext";
-import authService from "../../services/AuthService";
+import authService from "../../../services/AuthService";
 
 const Recover = () => {
   const [email, setEmail] = useState("");

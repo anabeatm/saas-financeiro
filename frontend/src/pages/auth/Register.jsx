@@ -7,7 +7,7 @@ import Input from "../../components/Input";
 import PasswordStrength from "../../components/PasswordStrength";
 import { useToast } from "../../components/ToastContext";
 
-import authService from "../../services/AuthService";
+import authService from "../../../services/AuthService";
 
 const Register = () => {
   const [user, setUser] = useState({

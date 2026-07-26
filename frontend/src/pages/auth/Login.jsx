@@ -1,11 +1,10 @@
-import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import { CoinsIcon, Loader2 } from "lucide-react";
-import Input from "../../components/Input";
-import Button from "../../components/Button";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../../components/AuthLayout";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
 import { useToast } from "../../components/ToastContext";
 
 const Login = () => {
@@ -63,7 +62,7 @@ const Login = () => {
       });
 
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/app/dashboard");
       }, 1000);
     } catch (error) {
       if (error.response && error.response.status === 401) {
@@ -134,6 +133,6 @@ const Login = () => {
       </form>
     </AuthLayout>
   );
-}
+};
 
 export default Login;
