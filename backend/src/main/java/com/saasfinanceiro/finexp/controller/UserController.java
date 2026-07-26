@@ -5,17 +5,17 @@ import java.util.List;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.saasfinanceiro.finexp.dto.user.UserProfileResponse;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.service.UserService;
 
@@ -50,5 +50,13 @@ public class UserController {
         service.remove(id);
         return ResponseEntity.noContent().build();
     }
-    
+
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileResponse> getCurrentUser() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        UserProfileResponse response = new UserProfileResponse(user.getId(), user.getName(), user.getEmail());
+
+        return ResponseEntity.ok(response);
+    }
 }
