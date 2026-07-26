@@ -3,6 +3,7 @@ package com.saasfinanceiro.finexp.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.saasfinanceiro.finexp.model.User;
@@ -12,8 +13,12 @@ import com.saasfinanceiro.finexp.repository.UserRepository;
 public class UserService {
     @Autowired
     private UserRepository repository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public User insert(User user) {
+        String criptoPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(criptoPassword);
         return repository.save(user);
     }
 
