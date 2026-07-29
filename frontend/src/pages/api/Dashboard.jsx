@@ -114,7 +114,7 @@ const Dashboard = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("app-token");
+    localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");
   };

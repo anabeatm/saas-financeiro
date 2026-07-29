@@ -9,7 +9,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("app-token");
+    const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user") || "null");
     const tokenUser = user?.token;
 
@@ -28,7 +28,7 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem("app-token");
+      localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";
       return Promise.reject("Your session expired. Please, try login again");

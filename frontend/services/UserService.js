@@ -12,6 +12,14 @@ class UserService extends BaseService {
     const response = await api.get("/api/user/me");
     return response.data;
   }
+
+  async changePassword(oldPassword, newPassword) {
+    const response = await api.put("/api/user/password", {
+      oldPassword: oldPassword,
+      newPassword: newPassword,
+    });
+    return response.data;
+  }
 }
 
 export default UserService;

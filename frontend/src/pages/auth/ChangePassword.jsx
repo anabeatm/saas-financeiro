@@ -1,13 +1,13 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import UserService from "../../../services/UserService";
 import AuthLayout from "../../components/AuthLayout";
-import Input from "../../components/Input";
 import Button from "../../components/Button";
-import { useToast } from "../../components/ToastContext";
+import Input from "../../components/Input";
 import PasswordStrength from "../../components/PasswordStrength";
+import { useToast } from "../../components/ToastContext";
 
-const ChangePassword=()=> {
+const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -17,6 +17,7 @@ const ChangePassword=()=> {
     currentPassword.trim() == "" ||
     newPassword.trim() == "" ||
     confirmPassword.trim() == "";
+  const userService = new UserService();
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -37,32 +38,31 @@ const ChangePassword=()=> {
         description: "The password must be at least 6 characters long",
       });
       return;
-      }
-      
-      if (currentPassword === newPassword) {
-        addToast({
-          type: "error",
-          title: "Passwords cannot be the same",
-          description:
-            "A new password cannot be the same as the current password",
-        });
-        return;
-      }
+    }
+
+    if (currentPassword === newPassword) {
+      addToast({
+        type: "error",
+        title: "Passwords cannot be the same",
+        description:
+          "A new password cannot be the same as the current password",
+      });
+      return;
+    }
 
     if (newPassword !== confirmPassword) {
       addToast({
         type: "error",
         title: "Passwords don't match",
-        description: "Make sure you enter the same password in both New Password and Confirm Password fields",
+        description:
+          "Make sure you enter the same password in both New Password and Confirm Password fields",
       });
       return;
     }
 
     try {
-      await axios.post("/auth/profile/password", {
-        currentPassword: currentPassword,
-        newPassword: newPassword,
-      });
+      await userService.changePassword(currentPassword, newPassword);
+
       addToast({
         type: "success",
         title: "Password changed!",
@@ -74,7 +74,7 @@ const ChangePassword=()=> {
       setConfirmPassword("");
 
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/app/dashboard");
       }, 2000);
     } catch (error) {
       if (error.response && error.response.status === 401) {
@@ -141,6 +141,6 @@ const ChangePassword=()=> {
       </form>
     </AuthLayout>
   );
-}
+};
 
 export default ChangePassword;
