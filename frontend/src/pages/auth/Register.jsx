@@ -48,11 +48,11 @@ const Register = () => {
       return;
     }
 
-    if (user.password.length < 6) {
+    if (user.password.length < 8) {
       addToast({
         type: "error",
         title: "Invalid password",
-        description: "The password must be at least 6 characters long",
+        description: "The password must be at least 8 characters long",
       });
       return;
     }

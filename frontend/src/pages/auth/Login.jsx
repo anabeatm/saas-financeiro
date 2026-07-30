@@ -1,7 +1,7 @@
-import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../../../configs/axiosConfig";
 import AuthLayout from "../../components/AuthLayout";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
@@ -11,46 +11,16 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const isBlankField = email.trim() == "" || password.trim() == "";
   const navigate = useNavigate();
   const { addToast } = useToast();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const form = e.target;
-
-    if (isBlankField) {
-      addToast({
-        type: "error",
-        title: "Required fields",
-        description: "Please, fill in all fields to continue",
-      });
-      return;
-    }
-
-    if (!form.email.validity.valid) {
-      addToast({
-        type: "error",
-        title: "Invalid email",
-        description: "Please enter a valid format (e.g., your@email.com)",
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      addToast({
-        type: "error",
-        title: "Invalid password",
-        description: "The password must be at least 6 characters long",
-      });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const response = await axios.post("/auth/login", {
+      const response = await api.post("/auth/login", {
         email: email,
         password: password,
       });
@@ -65,7 +35,13 @@ const Login = () => {
         navigate("/app/dashboard");
       }, 1000);
     } catch (error) {
-      if (error.response && error.response.status === 401) {
+      const errorMessage =
+        error.response?.data?.message ||
+        (typeof error === "string"
+          ? error
+          : "There was a problem connecting. Please try again");
+
+      if (error.response?.status === 401) {
         addToast({
           type: "error",
           title: "Authentication failed",
@@ -74,8 +50,8 @@ const Login = () => {
       } else {
         addToast({
           type: "error",
-          title: "Error logging in",
-          description: "There was a problem connecting. Please try again",
+          title: "Validation Error",
+          description: errorMessage,
         });
       }
     } finally {

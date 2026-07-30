@@ -36,11 +36,11 @@ const ResetPassword = () => {
       return;
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       addToast({
         type: "error",
         title: "Weak password",
-        description: "The password must be at least 6 characters long",
+        description: "The password must be at least 8 characters long",
       });
       return;
     }
