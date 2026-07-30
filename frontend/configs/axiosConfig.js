@@ -47,9 +47,9 @@ api.interceptors.response.use(
       }
     }
     if (error.message === "Network Error") {
-      return Promise.reject("Error connecting server. Verify backend");
+      return Promise.reject("Error connecting server");
     } else {
-      return Promise.reject("An unexpected error occurred. Try again.");
+      return Promise.reject("An unexpected error occurred. Try again");
     }
   },
 );
