@@ -85,7 +85,7 @@ public class AuthController {
         }
 
         ForgotPasswordResponse response = new ForgotPasswordResponse(
-                "If this email address is registered, you will receive instructions soon", debugToken);
+                "If this email address is registered, you will receive instructions in your email", debugToken);
 
         return ResponseEntity.ok(response);
     }
