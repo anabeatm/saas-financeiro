@@ -1,4 +1,4 @@
-package com.saasfinanceiro.finexp.security;
+package com.saasfinanceiro.finexp.service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

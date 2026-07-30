@@ -23,7 +23,7 @@ import com.saasfinanceiro.finexp.model.PasswordResetToken;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.repository.PasswordResetTokenRepository;
 import com.saasfinanceiro.finexp.repository.UserRepository;
-import com.saasfinanceiro.finexp.security.TokenService;
+import com.saasfinanceiro.finexp.service.TokenService;
 import com.saasfinanceiro.finexp.service.UserService;
 
 @RestController

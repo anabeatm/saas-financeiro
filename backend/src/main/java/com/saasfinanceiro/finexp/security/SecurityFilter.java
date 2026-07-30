@@ -17,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.repository.UserRepository;
+import com.saasfinanceiro.finexp.service.TokenService;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
