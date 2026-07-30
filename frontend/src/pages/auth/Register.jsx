@@ -17,45 +17,11 @@ const Register = () => {
     confirmPassword: "",
   });
 
-  const isBlankField =
-    user.name.trim() == "" ||
-    user.email.trim() == "" ||
-    user.password.trim() == "" ||
-    user.confirmPassword.trim() == "";
   const navigate = useNavigate();
   const { addToast } = useToast();
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
-    const form = e.target;
-
-    if (isBlankField) {
-      addToast({
-        type: "error",
-        title: "Required fields",
-        description: "Please, fill in all fields to continue",
-      });
-      return;
-    }
-
-    if (!form.email.validity.valid) {
-      addToast({
-        type: "error",
-        title: "Invalid email",
-        description: "Please enter a valid format (e.g., your@email.com)",
-      });
-      return;
-    }
-
-    if (user.password.length < 8) {
-      addToast({
-        type: "error",
-        title: "Invalid password",
-        description: "The password must be at least 8 characters long",
-      });
-      return;
-    }
 
     {
       /*TODO: mostrar se senhas batem em tempo real */
@@ -84,8 +50,9 @@ const Register = () => {
     } catch (errorMessage) {
       addToast({
         type: "error",
-        title: "Error registering",
-        description: errorMessage,
+        title: "Validation Error",
+        description:
+          typeof errorMessage === "string" ? errorMessage : "Error registering",
       });
     }
   };

@@ -13,32 +13,10 @@ const ChangePassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const isBlankField =
-    currentPassword.trim() == "" ||
-    newPassword.trim() == "" ||
-    confirmPassword.trim() == "";
   const userService = new UserService();
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-
-    if (isBlankField) {
-      addToast({
-        type: "error",
-        title: "Required fields",
-        description: "Please, fill in all fields to continue",
-      });
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      addToast({
-        type: "error",
-        title: "Weak password",
-        description: "The password must be at least 6 characters long",
-      });
-      return;
-    }
 
     if (currentPassword === newPassword) {
       addToast({
@@ -76,20 +54,15 @@ const ChangePassword = () => {
       setTimeout(() => {
         navigate("/app/dashboard");
       }, 2000);
-    } catch (error) {
-      if (error.response && error.response.status === 401) {
-        addToast({
-          type: "error",
-          title: "Incorrect current password",
-          description: "The current password you entered is wrong. Try again.",
-        });
-      } else {
-        addToast({
-          type: "error",
-          title: "Update failed",
-          description: "We couldn't update your password at this time.",
-        });
-      }
+    } catch (errorMessage) {
+      addToast({
+        type: "error",
+        title: "Update failed",
+        description:
+          typeof errorMessage === "string"
+            ? errorMessage
+            : "We couldn't update your password at this time.",
+      });
     }
   };
 

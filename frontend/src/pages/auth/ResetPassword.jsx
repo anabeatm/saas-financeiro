@@ -13,7 +13,6 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const isBlankField = password.trim() == "" || confirmPassword.trim() == "";
 
   const handleReset = async (e) => {
     e.preventDefault();
@@ -23,24 +22,6 @@ const ResetPassword = () => {
         type: "error",
         title: "Invalid link",
         description: "The recovery link is missing or incomplete",
-      });
-      return;
-    }
-
-    if (isBlankField) {
-      addToast({
-        type: "error",
-        title: "Required fields",
-        description: "Please, fill in all fields to continue",
-      });
-      return;
-    }
-
-    if (password.length < 8) {
-      addToast({
-        type: "error",
-        title: "Weak password",
-        description: "The password must be at least 8 characters long",
       });
       return;
     }
@@ -69,7 +50,7 @@ const ResetPassword = () => {
     } catch (errorMessage) {
       addToast({
         type: "error",
-        title: "Reset failed",
+        title: "Validation Error",
         description:
           typeof errorMessage === "string"
             ? errorMessage

@@ -35,25 +35,12 @@ const Login = () => {
         navigate("/app/dashboard");
       }, 1000);
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message ||
-        (typeof error === "string"
-          ? error
-          : "There was a problem connecting. Please try again");
-
-      if (error.response?.status === 401) {
-        addToast({
-          type: "error",
-          title: "Authentication failed",
-          description: "Incorrect email or password",
-        });
-      } else {
-        addToast({
-          type: "error",
-          title: "Validation Error",
-          description: errorMessage,
-        });
-      }
+      addToast({
+        type: "error",
+        title: "Authentication failed",
+        description:
+          typeof error === "string" ? error : "Erro inesperado ao fazer login",
+      });
     } finally {
       setIsLoading(false);
     }

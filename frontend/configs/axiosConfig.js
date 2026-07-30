@@ -27,16 +27,27 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const isLoginUrl =
+      error.config &&
+      error.config.url &&
+      error.config.url.includes("/auth/login");
+
+    if (error.response && error.response.status === 401 && !isLoginUrl) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";
       return Promise.reject("Your session expired. Please, try login again");
     }
-    if (error.response && error.response.data && error.response.data.message) {
-      return Promise.reject(error.response.data.message);
-    } else if (error.message === "Network Error") {
-      return Promise.reject("Error conecting server. Verify backend");
+    if (error.response && error.response.data) {
+      if (error.response.data.message) {
+        return Promise.reject(error.response.data.message);
+      }
+      if (typeof error.response.data === "string") {
+        return Promise.reject(error.response.data);
+      }
+    }
+    if (error.message === "Network Error") {
+      return Promise.reject("Error connecting server. Verify backend");
     } else {
       return Promise.reject("An unexpected error occurred. Try again.");
     }

@@ -1,11 +1,11 @@
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import authService from "../../../services/AuthService";
 import AuthLayout from "../../components/AuthLayout";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { useToast } from "../../components/ToastContext";
-import authService from "../../../services/AuthService";
 
 const Recover = () => {
   const [email, setEmail] = useState("");
@@ -14,26 +14,6 @@ const Recover = () => {
 
   const handleRecover = async (e) => {
     e.preventDefault();
-
-    const form = e.target;
-
-    if (email.trim() == "") {
-      addToast({
-        type: "error",
-        title: "Required field",
-        description: "Please, fill in email field to continue",
-      });
-      return;
-    }
-
-    if (!form.email.validity.valid) {
-      addToast({
-        type: "error",
-        title: "Invalid email address",
-        description: "Please enter a valid email address",
-      });
-      return;
-    }
 
     try {
       const response = await authService.forgotPassword(email);
@@ -59,13 +39,6 @@ const Recover = () => {
           typeof errorMessage === "string"
             ? errorMessage
             : "Please enter a valid email",
-      });
-    } finally {
-      addToast({
-        type: "success",
-        title: "Instructions sent",
-        description:
-          "You will receive a link to reset your password shortly, check your inbox or spam folder",
       });
       setEmail("");
     }
