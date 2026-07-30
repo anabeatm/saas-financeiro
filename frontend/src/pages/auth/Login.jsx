@@ -1,7 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../../../configs/axiosConfig";
+import authService from "../../../services/AuthService";
 import AuthLayout from "../../components/AuthLayout";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
@@ -20,12 +20,10 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post("/auth/login", {
-        email: email,
-        password: password,
-      });
+      const response = await authService.login(email, password);
 
-      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("token", response.token);
+
       addToast({
         type: "success",
         title: "Login successful!",
