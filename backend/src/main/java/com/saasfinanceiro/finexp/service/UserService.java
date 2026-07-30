@@ -3,6 +3,7 @@ package com.saasfinanceiro.finexp.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,9 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public User insert(User user) {
+        if (repository.existsByEmail(user.getEmail())) {
+            throw new DataIntegrityViolationException("This e-mail is already registered");
+        }
         String criptoPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(criptoPassword);
         return repository.save(user);
