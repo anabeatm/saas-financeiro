@@ -8,7 +8,7 @@ public record ChangePasswordRequest(
         String oldPassword,
                     
     @NotBlank(message = "The new password is required")
-    @Size(min=6, message="The new password must be at least 6 characters long")
+    @Size(min=8, message="The new password must be at least 8 characters long")
         String newPassword
 ) {
     

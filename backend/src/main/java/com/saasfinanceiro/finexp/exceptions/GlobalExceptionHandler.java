@@ -1,6 +1,7 @@
 package com.saasfinanceiro.finexp.exceptions;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +36,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         String mensagem = ex.getBindingResult().getFieldErrors().stream()
-                .findFirst()
                 .map(erro -> erro.getDefaultMessage())
-                .orElse("Invalid data");
+                .collect(Collectors.joining(" and ")); 
                 
         return buildResponse(400, "Bad Request", mensagem);
     }

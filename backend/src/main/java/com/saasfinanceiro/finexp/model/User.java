@@ -1,6 +1,7 @@
 package com.saasfinanceiro.finexp.model;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,14 +20,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Name can't be null")
-    @Size(min=10, message = "Enter an full name")
+    @NotBlank(message = "{user.name.notblank}")
+    @Size(min=10, max=100,message = "{user.name.size}")
     private String name;
     
-    @Email(message = "Email is not valid")
+    @NotBlank(message = "{user.email.notblank}")
+    @Email(message = "{user.email.invalid}")
+    @Column(unique = true)
     private String email;
 
-    @Size(min = 8, message = "Password need to be 8 min length")
+    @NotBlank(message = "{user.password.notblank}")
+    @Size(min = 8,max=100, message = "{user.password.size}")
     private String password;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

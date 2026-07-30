@@ -2,6 +2,6 @@ package com.saasfinanceiro.finexp.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record LoginRequest(@NotBlank String email, @NotBlank String password) {
+public record LoginRequest(@NotBlank(message = "{user.email.notblank}") String email, @NotBlank(message = "{user.password.notblank}") String password) {
     
 }
