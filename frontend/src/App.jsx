@@ -5,10 +5,10 @@ import {
 } from "react-router-dom";
 import Dashboard from "./pages/api/Dashboard";
 import ChangePassword from "./pages/auth/ChangePassword";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 import Login from "./pages/auth/Login";
 import Recover from "./pages/auth/Recover";
 import Register from "./pages/auth/Register";
-import ResetPassword from "./pages/auth/ResetPassword";
 import VerifyAccount from "./pages/auth/VerifyAccount";
 
 const ProtectedRoute = ({ children }) => {
@@ -41,7 +41,7 @@ const router = createBrowserRouter([
     element: <Recover />,
   },
 
-  { path: "/reset-password/:token", element: <ResetPassword /> },
+  { path: "/reset-password/:token", element: <ForgotPassword /> },
 
   {
     path: "/app/profile/password",

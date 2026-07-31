@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import authService from "../../../services/AuthService";
@@ -9,11 +9,13 @@ import { useToast } from "../../components/ToastContext";
 
 const Recover = () => {
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { addToast } = useToast();
   const navigate = useNavigate();
 
   const handleRecover = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
       const response = await authService.forgotPassword(email);
@@ -24,11 +26,16 @@ const Recover = () => {
         description: response.message || "Check your inbox or spam folder",
       });
 
+      setEmail("");
+
       if (response.debugToken) {
-        console.log("DEBUG TOKEN:", response.debugToken);
+        console.log(
+          "TOKEN:",
+          `http://localhost:5173/reset-password/${response.debugToken}`,
+        );
         setTimeout(() => {
-          navigate(`/reset-password/${response.debugToken}`);
-        }, 1500);
+          navigate("/login");
+        }, 2000);
       }
       setEmail("");
     } catch (errorMessage) {
@@ -40,7 +47,8 @@ const Recover = () => {
             ? errorMessage
             : "Please enter a valid email",
       });
-      setEmail("");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -56,15 +64,23 @@ const Recover = () => {
           id="email"
           type="email"
           placeholder="example@email.com"
-          required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <Button type="submit">Send</Button>
+
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              Sending... <Loader2 className="h-4 animate-spin" />
+            </>
+          ) : (
+            <>Send</>
+          )}
+        </Button>
+
         <div className="mt-2 flex justify-center gap-2 text-sm text-[#a88d6f] hover:text-[#d6bfa7] hover:underline">
           <Link to="/login" className="flex gap-1 items-center font-semibold">
-            <ArrowLeft />
-            Return to login
+            <ArrowLeft className="h-4 w-4" /> Return to login
           </Link>
         </div>
       </form>
