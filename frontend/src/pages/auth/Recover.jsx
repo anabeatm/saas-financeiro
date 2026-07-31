@@ -31,7 +31,7 @@ const Recover = () => {
       if (response.debugToken) {
         console.log(
           "TOKEN:",
-          `http://localhost:5173/reset-password/${response.debugToken}`,
+          `http://localhost:5173/forgot-password/${response.debugToken}`,
         );
         setTimeout(() => {
           navigate("/login");
