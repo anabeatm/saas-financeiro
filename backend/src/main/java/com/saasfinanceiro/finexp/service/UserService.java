@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
 
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.repository.UserRepository;
@@ -16,14 +17,25 @@ public class UserService {
     private UserRepository repository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EmailService emailService;
 
     public User insert(User user) {
         if (repository.existsByEmail(user.getEmail())) {
             throw new DataIntegrityViolationException("This e-mail is already registered");
         }
+
         String criptoPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(criptoPassword);
-        return repository.save(user);
+        User userDatabase = repository.save(user);
+
+        // emailService.sendEmail(user.getEmail(), "Sucess!", "User successfully registered!");
+        Context context = new Context();
+        context.setVariable("name", user.getName());
+        context.setVariable("link", "http://localhost:5173/login");
+        emailService.sendEmailTemplate(user.getEmail(), "Sucess", "newUser", context);        
+        
+        return userDatabase;
     }
 
     public List<User> listAll() {
