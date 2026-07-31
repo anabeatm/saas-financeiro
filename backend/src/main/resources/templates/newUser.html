@@ -3,18 +3,110 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Registration successful</title>
+    <title>Welcome to FinEXP</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f4f5;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrapper {
+        width: 100%;
+        background-color: #f4f4f5;
+        padding: 40px 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      }
+      .header {
+        background-color: #a88d6f;
+        padding: 30px;
+        text-align: center;
+      }
+      .header h1 {
+        color: #ffffff;
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: 1px;
+      }
+      .content {
+        padding: 40px 30px;
+        color: #4b5563;
+        line-height: 1.6;
+        font-size: 16px;
+      }
+      .content h2 {
+        color: #1f2937;
+        font-size: 20px;
+        margin-top: 0;
+      }
+      .button-container {
+        text-align: center;
+        margin: 35px 0 20px 0;
+      }
+      .button {
+        background-color: #a88d6f;
+        color: #ffffff !important;
+        text-decoration: none;
+        padding: 14px 32px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 16px;
+        display: inline-block;
+      }
+      .footer {
+        background-color: #fafafa;
+        border-top: 1px solid #eeeeee;
+        text-align: center;
+        padding: 20px;
+        font-size: 13px;
+        color: #9ca3af;
+      }
+    </style>
   </head>
   <body>
-    <h1>Your registration was successful!</h1>
-    <p>Hello, <span th:text="${name}"></span> and welcome to FinExp!</p>
-    <p>
-      You're just one step closer to your financial health and a better
-      financial security.
-    </p>
-    <p>
-      <a th:href="${link}"> Click here </a>
-      to validate your registration.
-    </p>
+    <div class="wrapper">
+      <div class="container">
+        <div class="header">
+          <h1>FinEXP</h1>
+        </div>
+        <div class="content">
+          <h2>Registration successful!</h2>
+          <p>Hello, <strong th:text="${name}"></strong>! Welcome to FinEXP.</p>
+          <p>
+            You're just one step closer to taking control of your financial
+            health and ensuring a better, more secure future. We are thrilled to
+            have you with us!
+          </p>
+          <p>
+            To get started, please verify your email address by clicking the
+            button below:
+          </p>
+          <div class="button-container">
+            <a th:href="${link}" class="button">Verify My Account</a>
+          </div>
+          <p style="font-size: 14px; color: #6b7280; margin-top: 30px">
+            If the button doesn't work, copy and paste the following link into
+            your browser:<br />
+            <a
+              th:href="${link}"
+              th:text="${link}"
+              style="color: #a88d6f; word-break: break-all"
+            ></a>
+          </p>
+        </div>
+        <div class="footer">
+          <p>&copy; 2026 FinEXP. All rights reserved.</p>
+          <p>Your finances in the gamification world.</p>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
