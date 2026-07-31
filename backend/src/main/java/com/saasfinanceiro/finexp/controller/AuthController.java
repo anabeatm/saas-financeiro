@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.thymeleaf.context.Context;
 
 import com.saasfinanceiro.finexp.dto.auth.ForgotPasswordRequest;
 import com.saasfinanceiro.finexp.dto.auth.ForgotPasswordResponse;
@@ -26,6 +27,7 @@ import com.saasfinanceiro.finexp.model.VerificationToken;
 import com.saasfinanceiro.finexp.repository.PasswordResetTokenRepository;
 import com.saasfinanceiro.finexp.repository.UserRepository;
 import com.saasfinanceiro.finexp.repository.VerificationTokenRepository;
+import com.saasfinanceiro.finexp.service.EmailService;
 import com.saasfinanceiro.finexp.service.TokenService;
 import com.saasfinanceiro.finexp.service.UserService;
 
@@ -38,15 +40,17 @@ public class AuthController {
     private final UserService userService;
     private final TokenService tokenService;
     private final VerificationTokenRepository verificationTokenRepository;
+    private final EmailService emailService;
 
     public AuthController(UserRepository userRepository, PasswordResetTokenRepository passwordResetTokenRepository,
-            PasswordEncoder passwordEncoder, UserService userService, TokenService tokenService, VerificationTokenRepository verificationTokenRepository) {
+            PasswordEncoder passwordEncoder, UserService userService, TokenService tokenService, VerificationTokenRepository verificationTokenRepository, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
         this.tokenService = tokenService;
         this.verificationTokenRepository = verificationTokenRepository;
+        this.emailService = emailService;
     }
 
     @PostMapping("/login")
@@ -110,6 +114,12 @@ public class AuthController {
 
             passwordResetTokenRepository.save(resetToken);
             debugToken = resetToken.getToken();
+
+            Context context = new Context();
+            context.setVariable("name", user.getName());
+            context.setVariable("link", "http://localhost:5173/reset-password/" + debugToken);
+
+            emailService.sendEmailTemplate(user.getEmail(), "Password Reset Request - FinEXP", "resetPassword", context);
         }
 
         ForgotPasswordResponse response = new ForgotPasswordResponse(
