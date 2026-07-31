@@ -1,6 +1,7 @@
 package com.saasfinanceiro.finexp.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -9,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 
 import com.saasfinanceiro.finexp.model.User;
+import com.saasfinanceiro.finexp.model.VerificationToken;
 import com.saasfinanceiro.finexp.repository.UserRepository;
+import com.saasfinanceiro.finexp.repository.VerificationTokenRepository;
 
 @Service
 public class UserService {
@@ -19,6 +22,8 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private VerificationTokenRepository verificationTokenRepository;
 
     public User insert(User user) {
         if (repository.existsByEmail(user.getEmail())) {
@@ -29,11 +34,15 @@ public class UserService {
         user.setPassword(criptoPassword);
         User userDatabase = repository.save(user);
 
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationToken = new VerificationToken(token, userDatabase);
+        verificationTokenRepository.save(verificationToken);
+
         // emailService.sendEmail(user.getEmail(), "Sucess!", "User successfully registered!");
         Context context = new Context();
         context.setVariable("name", user.getName());
-        context.setVariable("link", "http://localhost:5173/login");
-        emailService.sendEmailTemplate(user.getEmail(), "Sucess", "newUser", context);        
+        context.setVariable("link", "http://localhost:5173/verify-account/" + token);
+        emailService.sendEmailTemplate(user.getEmail(), "Verify your account", "newUser", context);       
         
         return userDatabase;
     }

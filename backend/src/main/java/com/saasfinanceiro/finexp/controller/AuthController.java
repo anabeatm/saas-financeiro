@@ -19,10 +19,13 @@ import com.saasfinanceiro.finexp.dto.auth.ForgotPasswordResponse;
 import com.saasfinanceiro.finexp.dto.auth.LoginRequest;
 import com.saasfinanceiro.finexp.dto.auth.LoginResponse;
 import com.saasfinanceiro.finexp.dto.auth.ResetPasswordRequest;
+import com.saasfinanceiro.finexp.dto.auth.VerifyAccountRequest;
 import com.saasfinanceiro.finexp.model.PasswordResetToken;
 import com.saasfinanceiro.finexp.model.User;
+import com.saasfinanceiro.finexp.model.VerificationToken;
 import com.saasfinanceiro.finexp.repository.PasswordResetTokenRepository;
 import com.saasfinanceiro.finexp.repository.UserRepository;
+import com.saasfinanceiro.finexp.repository.VerificationTokenRepository;
 import com.saasfinanceiro.finexp.service.TokenService;
 import com.saasfinanceiro.finexp.service.UserService;
 
@@ -34,14 +37,16 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
     private final TokenService tokenService;
+    private final VerificationTokenRepository verificationTokenRepository;
 
     public AuthController(UserRepository userRepository, PasswordResetTokenRepository passwordResetTokenRepository,
-            PasswordEncoder passwordEncoder, UserService userService, TokenService tokenService) {
+            PasswordEncoder passwordEncoder, UserService userService, TokenService tokenService, VerificationTokenRepository verificationTokenRepository) {
         this.userRepository = userRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
         this.tokenService = tokenService;
+        this.verificationTokenRepository = verificationTokenRepository;
     }
 
     @PostMapping("/login")
@@ -54,6 +59,10 @@ public class AuthController {
 
         User user = uOptional.get();
 
+        if (!user.isEnabled()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Please verify your email before logging in.");
+        }
+
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect email or password");
         }
@@ -65,6 +74,25 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody @Valid User user) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.insert(user));
+    }
+
+    @PostMapping("/verify-account")
+    public ResponseEntity<?> verifyAccount(@RequestBody VerifyAccountRequest request) {
+        VerificationToken verificationToken = verificationTokenRepository.findByToken(request.token())
+                .orElseThrow(() -> new RuntimeException("Invalid or missing verification token"));
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("This validation link has expired.");
+        }
+        User user = verificationToken.getUser();
+        user.setEnabled(true);
+        userRepository.save(user);
+
+
+        verificationTokenRepository.delete(verificationToken);
+
+        return ResponseEntity.ok().body("{\"message\": \"Account verified successfully!\"}");
     }
     
     @PostMapping("/forgot-password")

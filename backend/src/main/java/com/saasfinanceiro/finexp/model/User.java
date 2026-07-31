@@ -35,4 +35,8 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserPreferences userPreferences;
+
+    @Column(nullable = false)
+    private boolean enabled = false;
+
 }
