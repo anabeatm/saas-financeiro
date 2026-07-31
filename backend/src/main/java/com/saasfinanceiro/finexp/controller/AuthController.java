@@ -117,9 +117,9 @@ public class AuthController {
 
             Context context = new Context();
             context.setVariable("name", user.getName());
-            context.setVariable("link", "http://localhost:5173/reset-password/" + debugToken);
+            context.setVariable("link", "http://localhost:5173/forgot-password/" + debugToken);
 
-            emailService.sendEmailTemplate(user.getEmail(), "Password Reset Request - FinEXP", "resetPassword", context);
+            emailService.sendEmailTemplate(user.getEmail(), "Password Reset Request - FinEXP", "forgotPassword", context);
         }
 
         ForgotPasswordResponse response = new ForgotPasswordResponse(
