@@ -24,6 +24,11 @@ class AuthService {
     });
     return response.data;
   }
+
+  async verifyAccount(token) {
+    const response = await api.post("/auth/verify-account", { token });
+    return response.data;
+  }
 }
 
 export default new AuthService();

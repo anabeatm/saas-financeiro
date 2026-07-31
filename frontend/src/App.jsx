@@ -9,6 +9,7 @@ import Login from "./pages/auth/Login";
 import Recover from "./pages/auth/Recover";
 import Register from "./pages/auth/Register";
 import ResetPassword from "./pages/auth/ResetPassword";
+import VerifyAccount from "./pages/auth/VerifyAccount";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <Register />,
+  },
+  {
+    path: "/verify-account/:token",
+    element: <VerifyAccount />,
   },
   {
     path: "/recover",

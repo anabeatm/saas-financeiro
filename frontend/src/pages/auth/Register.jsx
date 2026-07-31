@@ -40,13 +40,14 @@ const Register = () => {
 
       addToast({
         type: "success",
-        title: "Register successful!",
-        description: "Account created. Please log in to continue",
+        title: "Registration successful!",
+        description:
+          "Please check your inbox to verify your account before logging in.",
       });
 
       setTimeout(() => {
         navigate("/login");
-      }, 1000);
+      }, 2500);
     } catch (errorMessage) {
       addToast({
         type: "error",
