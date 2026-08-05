@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.saasfinanceiro.finexp.dto.category.CategoryRequest;
 import com.saasfinanceiro.finexp.dto.category.CategoryResponse;
+import com.saasfinanceiro.finexp.exceptions.ResourceNotFoundException;
 import com.saasfinanceiro.finexp.model.Category;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.enums.TransactionType;
@@ -52,10 +54,10 @@ public class CategoryService {
 
     public CategoryResponse update(Long id, CategoryRequest request) {
         Category category = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         if (!category.getUser().getId().equals(getAuthenticatedUser().getId())) {
-            throw new RuntimeException("Access Denied");
+            throw new AccessDeniedException("Access Denied");
         }
 
         category.setName(request.name());
@@ -69,10 +71,10 @@ public class CategoryService {
 
     public void delete(Long id) {
         Category category = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         if (!category.getUser().getId().equals(getAuthenticatedUser().getId())) {
-            throw new RuntimeException("Access Denied");
+            throw new AccessDeniedException("Access Denied");
         }
 
         repository.delete(category);

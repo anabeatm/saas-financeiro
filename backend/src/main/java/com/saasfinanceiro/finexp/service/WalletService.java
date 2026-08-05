@@ -6,11 +6,14 @@ import java.util.stream.Collectors;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.saasfinanceiro.finexp.dto.wallet.WalletRequest;
 import com.saasfinanceiro.finexp.dto.wallet.WalletResponse;
+import com.saasfinanceiro.finexp.exceptions.BusinessException;
+import com.saasfinanceiro.finexp.exceptions.ResourceNotFoundException;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.Wallet;
 import com.saasfinanceiro.finexp.model.WalletMember;
@@ -60,10 +63,10 @@ public class WalletService {
 
     public WalletResponse searchId(Long id) {
         Wallet wallet = walletRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
 
         walletMemberRepository.findByWalletAndUser(wallet, getAuthenticatedUser())
-                .orElseThrow(() -> new RuntimeException("Access Denied: You are not a member of this wallet"));
+                .orElseThrow(() -> new AccessDeniedException("Access Denied: You are not a member of this wallet"));
 
         return new WalletResponse(wallet);
     }
@@ -71,13 +74,13 @@ public class WalletService {
     @Transactional
     public WalletResponse update(Long id, WalletRequest request) {
         Wallet wallet = walletRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
 
         WalletMember member = walletMemberRepository.findByWalletAndUser(wallet, getAuthenticatedUser())
-                .orElseThrow(() -> new RuntimeException("Access Denied"));
+                .orElseThrow(() -> new AccessDeniedException("Access Denied"));
 
         if (member.getRole() != WalletRole.OWNER) {
-            throw new RuntimeException("Forbidden: Only the OWNER can edit this wallet");
+            throw new BusinessException("Forbidden: Only the OWNER can edit this wallet");
         }
 
         wallet.setName(request.name());
@@ -90,13 +93,13 @@ public class WalletService {
     @Transactional
     public void delete(Long id) {
         Wallet wallet = walletRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
 
         WalletMember member = walletMemberRepository.findByWalletAndUser(wallet, getAuthenticatedUser())
-                .orElseThrow(() -> new RuntimeException("Access Denied"));
+                .orElseThrow(() -> new AccessDeniedException("Access Denied"));
 
         if (member.getRole() != WalletRole.OWNER) {
-            throw new RuntimeException("Forbidden: Only the OWNER can delete this wallet");
+            throw new BusinessException("Forbidden: Only the OWNER can delete this wallet");
         }
 
         walletRepository.delete(wallet);

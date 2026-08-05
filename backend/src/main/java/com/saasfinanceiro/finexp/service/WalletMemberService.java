@@ -4,12 +4,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.saasfinanceiro.finexp.dto.wallet.AddMemberRequest;
 import com.saasfinanceiro.finexp.dto.wallet.MemberResponse;
 import com.saasfinanceiro.finexp.dto.wallet.UpdateMemberRoleRequest;
+import com.saasfinanceiro.finexp.exceptions.BusinessException;
+import com.saasfinanceiro.finexp.exceptions.ResourceNotFoundException;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.Wallet;
 import com.saasfinanceiro.finexp.model.WalletMember;
@@ -31,23 +34,23 @@ public class WalletMemberService {
 
     private Wallet validateOwnerAccess(Long walletId) {
         Wallet wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
 
         WalletMember member = walletMemberRepository.findByWalletAndUser(wallet, getAuthenticatedUser())
-                .orElseThrow(() -> new RuntimeException("Access Denied"));
+                .orElseThrow(() -> new AccessDeniedException("Access Denied"));
 
         if (member.getRole() != WalletRole.OWNER) {
-            throw new RuntimeException("Forbidden: Only the OWNER can manage members");
+            throw new BusinessException("Forbidden: Only the OWNER can manage members");
         }
         return wallet;
     }
 
     public List<MemberResponse> listMembers(Long walletId) {
         Wallet wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
         
         walletMemberRepository.findByWalletAndUser(wallet, getAuthenticatedUser())
-                .orElseThrow(() -> new RuntimeException("Access Denied"));
+                .orElseThrow(() -> new AccessDeniedException("Access Denied"));
 
         return wallet.getMembers().stream().map(MemberResponse::new).collect(Collectors.toList());
     }
@@ -56,10 +59,10 @@ public class WalletMemberService {
         Wallet wallet = validateOwnerAccess(walletId);
 
         User newMemberUser = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("User email not found")); // 404
+                .orElseThrow(() -> new ResourceNotFoundException("User email not found")); // 404
 
         if (walletMemberRepository.findByWalletAndUser(wallet, newMemberUser).isPresent()) {
-            throw new RuntimeException("User is already a member of this wallet"); // 409
+            throw new BusinessException("User is already a member of this wallet"); // 409
         }
 
         WalletMember newMember = new WalletMember();
@@ -75,13 +78,13 @@ public class WalletMemberService {
         Wallet wallet = validateOwnerAccess(walletId);
 
         User targetUser = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         WalletMember targetMember = walletMemberRepository.findByWalletAndUser(wallet, targetUser)
-                .orElseThrow(() -> new RuntimeException("Member not found in this wallet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found in this wallet"));
 
         if (targetMember.getRole() == WalletRole.OWNER) {
-            throw new RuntimeException("Cannot change the role of the wallet OWNER");
+            throw new BusinessException("Cannot change the role of the wallet OWNER");
         }
 
         targetMember.setRole(request.role());
@@ -94,13 +97,13 @@ public class WalletMemberService {
         Wallet wallet = validateOwnerAccess(walletId);
 
         User targetUser = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         WalletMember targetMember = walletMemberRepository.findByWalletAndUser(wallet, targetUser)
-                .orElseThrow(() -> new RuntimeException("Member not found in this wallet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found in this wallet"));
 
         if (targetMember.getRole() == WalletRole.OWNER) {
-            throw new RuntimeException("Cannot remove the wallet OWNER");
+            throw new BusinessException("Cannot remove the wallet OWNER");
         }
 
         walletMemberRepository.delete(targetMember);

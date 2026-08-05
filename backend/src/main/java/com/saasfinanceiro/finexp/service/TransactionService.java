@@ -5,11 +5,14 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.saasfinanceiro.finexp.dto.transaction.TransactionRequest;
 import com.saasfinanceiro.finexp.dto.transaction.TransactionResponse;
+import com.saasfinanceiro.finexp.exceptions.BusinessException;
+import com.saasfinanceiro.finexp.exceptions.ResourceNotFoundException;
 import com.saasfinanceiro.finexp.model.Category;
 import com.saasfinanceiro.finexp.model.Transaction;
 import com.saasfinanceiro.finexp.model.User;
@@ -35,13 +38,13 @@ public class TransactionService {
 
     private WalletMember validateWalletAccess(Long walletId, boolean requireWriteAccess) {
         Wallet wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
 
         WalletMember member = walletMemberRepository.findByWalletAndUser(wallet, getAuthenticatedUser())
-                .orElseThrow(() -> new RuntimeException("Access Denied: You are not a member of this wallet"));
+                .orElseThrow(() -> new AccessDeniedException("Access Denied: You are not a member of this wallet"));
 
         if (requireWriteAccess && member.getRole() == WalletRole.VIEWER) {
-            throw new RuntimeException("Forbidden: Viewers cannot modify transactions");
+            throw new BusinessException("Forbidden: Viewers cannot modify transactions");
         }
         return member;
     }
@@ -60,7 +63,7 @@ public class TransactionService {
 
         if (request.categoryId() != null) {
             Category category = categoryRepository.findById(request.categoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
             transaction.setCategory(category);
         }
 
@@ -89,10 +92,10 @@ public class TransactionService {
         WalletMember member = validateWalletAccess(walletId, true);
         
         Transaction transaction = transactionRepository.findById(transactionId)
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
 
         if (!transaction.getWallet().getId().equals(walletId)) {
-            throw new RuntimeException("Transaction does not belong to this wallet");
+            throw new BusinessException("Transaction does not belong to this wallet");
         }
 
         Wallet wallet = member.getWallet();
