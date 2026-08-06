@@ -85,10 +85,23 @@ public class AuthController {
         User newUser = new User();
         newUser.setName(request.name());
         newUser.setEmail(request.email());
-
         newUser.setPassword(passwordEncoder.encode(request.password()));
+        newUser.setEnabled(false);
 
         userRepository.save(newUser);
+
+        VerificationToken verificationToken = new VerificationToken();
+        verificationToken.setUser(newUser);
+        verificationToken.setToken(UUID.randomUUID().toString());
+        verificationToken.setExpiryDate(LocalDateTime.now().plusHours(24));
+        
+        verificationTokenRepository.save(verificationToken);
+
+        Context context = new Context();
+        context.setVariable("name", newUser.getName());
+        context.setVariable("link", "http://localhost:5173/verify-account/" + verificationToken.getToken());
+
+        emailService.sendEmailTemplate(newUser.getEmail(),"Welcome to FinEXP - Verify your account","newUser",context);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
