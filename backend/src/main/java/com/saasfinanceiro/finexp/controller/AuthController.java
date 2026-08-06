@@ -31,7 +31,6 @@ import com.saasfinanceiro.finexp.repository.UserRepository;
 import com.saasfinanceiro.finexp.repository.VerificationTokenRepository;
 import com.saasfinanceiro.finexp.service.EmailService;
 import com.saasfinanceiro.finexp.service.TokenService;
-import com.saasfinanceiro.finexp.service.UserService;
 
 @RestController
 @RequestMapping("/auth")
@@ -39,17 +38,15 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserService userService;
     private final TokenService tokenService;
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
 
     public AuthController(UserRepository userRepository, PasswordResetTokenRepository passwordResetTokenRepository,
-            PasswordEncoder passwordEncoder, UserService userService, TokenService tokenService, VerificationTokenRepository verificationTokenRepository, EmailService emailService) {
+            PasswordEncoder passwordEncoder, TokenService tokenService, VerificationTokenRepository verificationTokenRepository, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.passwordEncoder = passwordEncoder;
-        this.userService = userService;
         this.tokenService = tokenService;
         this.verificationTokenRepository = verificationTokenRepository;
         this.emailService = emailService;
