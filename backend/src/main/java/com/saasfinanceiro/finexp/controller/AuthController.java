@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +20,7 @@ import com.saasfinanceiro.finexp.dto.auth.ForgotPasswordRequest;
 import com.saasfinanceiro.finexp.dto.auth.ForgotPasswordResponse;
 import com.saasfinanceiro.finexp.dto.auth.LoginRequest;
 import com.saasfinanceiro.finexp.dto.auth.LoginResponse;
+import com.saasfinanceiro.finexp.dto.auth.RegisterRequestDTO;
 import com.saasfinanceiro.finexp.dto.auth.ResetPasswordRequest;
 import com.saasfinanceiro.finexp.dto.auth.VerifyAccountRequest;
 import com.saasfinanceiro.finexp.model.PasswordResetToken;
@@ -76,8 +78,19 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody @Valid User user) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.insert(user));
+    public ResponseEntity<User> register(@RequestBody @Valid RegisterRequestDTO request) {
+        if (userRepository.findByEmail(request.email()).isPresent()) {
+            throw new DataIntegrityViolationException("Email already in use");
+        }
+        User newUser = new User();
+        newUser.setName(request.name());
+        newUser.setEmail(request.email());
+
+        newUser.setPassword(passwordEncoder.encode(request.password()));
+
+        userRepository.save(newUser);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/verify-account")

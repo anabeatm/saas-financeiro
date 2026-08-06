@@ -44,6 +44,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+        ex.printStackTrace();
+
         return buildResponse(500, "Internal Server Error", "Internal server error");
     }
 
