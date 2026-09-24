@@ -5,7 +5,7 @@ import AuthLayout from "../../components/AuthLayout";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import PasswordStrength from "../../components/PasswordStrength";
-import { useToast } from "../../components/ToastContext";
+import { useToast } from "../../components/useToast";
 
 const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState("");

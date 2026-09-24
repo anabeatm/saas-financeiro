@@ -5,7 +5,7 @@ import authService from "../../../services/AuthService";
 import AuthLayout from "../../components/AuthLayout";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
-import { useToast } from "../../components/ToastContext";
+import { useToast } from "../../components/useToast";
 
 const Login = () => {
   const [email, setEmail] = useState("");

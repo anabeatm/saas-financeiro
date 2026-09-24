@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import authService from "../../../services/AuthService";
 import AuthLayout from "../../components/AuthLayout";
-import { useToast } from "../../components/ToastContext";
+import { useToast } from "../../components/useToast";
 
 const VerifyAccount = () => {
   const { token } = useParams();
