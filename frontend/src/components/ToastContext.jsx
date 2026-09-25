@@ -11,7 +11,7 @@ export function ToastProvider({ children }) {
 
   const addToast = useCallback(
     ({ type = "info", title, description, duration = 4000 }) => {
-      const id = Math.random().toString(36).substring(2, 9); //id aleatório 
+      const id = Math.random().toString(36).substring(2, 9);
 
       setToasts((prev) => [...prev, { id, type, title, description }]);
 
