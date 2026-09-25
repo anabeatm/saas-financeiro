@@ -35,11 +35,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
-        String mensagem = ex.getBindingResult().getFieldErrors().stream()
-                .map(erro -> erro.getDefaultMessage())
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getDefaultMessage())
                 .collect(Collectors.joining(" and ")); 
                 
-        return buildResponse(400, "Bad Request", mensagem);
+        return buildResponse(400, "Bad Request", message);
     }
 
     @ExceptionHandler(Exception.class)
