@@ -1,4 +1,4 @@
-// para login, recuperação de senha
+// Handles login and password recovery requests.
 import api from "../configs/axiosConfig";
 
 class AuthService {

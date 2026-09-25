@@ -1,7 +1,7 @@
 import api from "../configs/axiosConfig";
 import BaseService from "./BaseService";
 
-// para registro e alteração de senha
+// Handles user profile and password requests.
 
 class UserService extends BaseService {
   constructor() {
