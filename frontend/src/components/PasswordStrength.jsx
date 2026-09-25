@@ -11,28 +11,28 @@ export default function PasswordStrength({ password }) {
       case 1:
         return {
           score: 1,
-          label: "Fraca",
+          label: "Weak",
           color: "bg-red-500",
           textColor: "text-red-500",
         };
       case 2:
         return {
           score: 2,
-          label: "Média",
+          label: "Medium",
           color: "bg-yellow-500",
           textColor: "text-yellow-500",
         };
       case 3:
         return {
           score: 3,
-          label: "Forte",
+          label: "Strong",
           color: "bg-green-500",
           textColor: "text-green-500",
         };
       default:
         return {
           score: 0,
-          label: "Muito curta",
+          label: "Too short",
           color: "bg-red-500",
           textColor: "text-red-500",
         };
@@ -44,7 +44,7 @@ export default function PasswordStrength({ password }) {
   return (
     <div className="flex flex-col gap-1 mt-1">
       <div className="flex justify-between items-center text-xs px-1">
-        <span className="text-gray-500">Força da senha:</span>
+        <span className="text-gray-500">Password strength:</span>
         <span className={`font-semibold ${strength.textColor}`}>
           {strength.label}
         </span>
