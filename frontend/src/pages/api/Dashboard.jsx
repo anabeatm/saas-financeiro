@@ -105,7 +105,7 @@ const Dashboard = () => {
         }
         setUserData({ name: userProfile.name, initial: initials });
       } catch (err) {
-        console.error("Erro", err);
+        console.error("Error loading dashboard data", err);
       } finally {
         setLoading(false);
       }
@@ -168,8 +168,8 @@ const Dashboard = () => {
               <span>Wallets</span>
             </a>
 
-            {/* TODO: mudar isso daqui, quero que seja possível alterar o perfil inteiro não só a senha */}
-            {/* TODO: refatorar toda a tela de mudar a senha, não seguiu um layout legal */}
+            {/* TODO: expand profile editing beyond password changes. */}
+            {/* TODO: revisit the change password screen layout. */}
             <a
               href="/app/profile/password"
               className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-500 hover:bg-gray-50 font-medium text-sm transition-colors"
@@ -211,7 +211,7 @@ const Dashboard = () => {
               </p>
             </div>
 
-            {/* TODO: fazer modal de novo lançamento */}
+            {/* TODO: add a new transaction modal. */}
             <button className="flex items-center justify-center gap-2 bg-[#a88d6f] hover:bg-[#91755a] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors shadow-sm cursor-pointer">
               <Plus size={18} />
               <span className="font-semibold">New Transaction</span>
@@ -426,10 +426,10 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Lançamentos Recentes (Ficou embaixo do resumo das caixinhas para organizar o espaço) */}
+              {/* Recent transactions are placed below the goal summary to keep the layout compact. */}
               <div className="mt-6 border-t border-gray-100 pt-4">
                 <h4 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
-                  Recent Releases
+                  Recent Transactions
                 </h4>
                 <div className="flex flex-col gap-2">
                   {transactions.length > 0 ? (
