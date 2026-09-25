@@ -37,7 +37,7 @@ const Login = () => {
         type: "error",
         title: "Authentication failed",
         description:
-          typeof error === "string" ? error : "Erro inesperado ao fazer login",
+          typeof error === "string" ? error : "Unexpected error while signing in",
       });
     } finally {
       setIsLoading(false);
@@ -76,14 +76,14 @@ const Login = () => {
         <Button type="submit" disabled={isLoading}>
           {isLoading ? (
             <>
-              Entering... <Loader2 className="h-4" />
+              Signing in... <Loader2 className="h-4" />
             </>
           ) : (
-            <>Enter</>
+            <>Sign in</>
           )}
         </Button>
         <div className="flex mt-2 text-sm gap-2 justify-center items-center">
-          <p className="text-gray-500">Doesn't have an account?</p>
+          <p className="text-gray-500">Don't have an account?</p>
           <Link
             to="/register"
             className="font-semibold text-[#a88d6f] hover:text-[#d6bfa7] hover:underline"

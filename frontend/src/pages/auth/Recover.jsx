@@ -55,7 +55,7 @@ const Recover = () => {
   return (
     <AuthLayout
       title="Recover your password"
-      subtitle="Inform your email to receive instructions"
+      subtitle="Enter your email to receive instructions"
       showLogo={true}
     >
       <form noValidate onSubmit={handleRecover} className="flex flex-col gap-4">

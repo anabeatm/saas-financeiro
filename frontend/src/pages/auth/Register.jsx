@@ -1,5 +1,4 @@
 import { useState } from "react";
-// import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../../components/AuthLayout";
 import Button from "../../components/Button";
@@ -23,9 +22,6 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    {
-      /*TODO: mostrar se senhas batem em tempo real */
-    }
     if (user.password !== user.confirmPassword) {
       addToast({
         type: "error",
@@ -65,7 +61,7 @@ const Register = () => {
   return (
     <AuthLayout
       title="Create your account"
-      subtitle="Join us and start your jouney"
+      subtitle="Join us and start your journey"
       showLogo={true}
     >
       <form
