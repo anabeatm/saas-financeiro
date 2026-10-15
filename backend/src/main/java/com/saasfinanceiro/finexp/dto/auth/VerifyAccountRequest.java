@@ -1,3 +1,5 @@
 package com.saasfinanceiro.finexp.dto.auth;
 
-public record VerifyAccountRequest(String token) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record VerifyAccountRequest(@NotBlank String token) {}

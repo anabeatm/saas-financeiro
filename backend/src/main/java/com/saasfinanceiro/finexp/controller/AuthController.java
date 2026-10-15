@@ -23,6 +23,7 @@ import com.saasfinanceiro.finexp.dto.auth.LoginResponse;
 import com.saasfinanceiro.finexp.dto.auth.RegisterRequestDTO;
 import com.saasfinanceiro.finexp.dto.auth.ResetPasswordRequest;
 import com.saasfinanceiro.finexp.dto.auth.VerifyAccountRequest;
+import com.saasfinanceiro.finexp.exceptions.BusinessException;
 import com.saasfinanceiro.finexp.model.PasswordResetToken;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.VerificationToken;
@@ -41,6 +42,7 @@ public class AuthController {
     private final TokenService tokenService;
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
+    private final String dummyHash;
 
     public AuthController(UserRepository userRepository, PasswordResetTokenRepository passwordResetTokenRepository,
             PasswordEncoder passwordEncoder, TokenService tokenService, VerificationTokenRepository verificationTokenRepository, EmailService emailService) {
@@ -50,24 +52,26 @@ public class AuthController {
         this.tokenService = tokenService;
         this.verificationTokenRepository = verificationTokenRepository;
         this.emailService = emailService;
+        this.dummyHash = passwordEncoder.encode(UUID.randomUUID().toString());
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
         Optional<User> uOptional = userRepository.findByEmail(request.email());
 
-        if (uOptional.isEmpty()) {
+        // Always run a BCrypt comparison so response time does not reveal whether the email exists.
+        String hashToCompare = uOptional.map(User::getPassword).orElse(dummyHash);
+        boolean passwordMatches = passwordEncoder.matches(request.password(), hashToCompare);
+
+        if (uOptional.isEmpty() || !passwordMatches) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect email or password");
         }
 
         User user = uOptional.get();
 
+        // Only revealed after the password is proven correct, to avoid account enumeration.
         if (!user.isEnabled()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Please verify your email before logging in.");
-        }
-
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect email or password");
         }
 
         String token = tokenService.generateToken(user);
@@ -75,7 +79,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody @Valid RegisterRequestDTO request) {
+    public ResponseEntity<Void> register(@RequestBody @Valid RegisterRequestDTO request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new DataIntegrityViolationException("Email already in use");
         }
@@ -104,9 +108,9 @@ public class AuthController {
     }
 
     @PostMapping("/verify-account")
-    public ResponseEntity<?> verifyAccount(@RequestBody VerifyAccountRequest request) {
+    public ResponseEntity<?> verifyAccount(@RequestBody @Valid VerifyAccountRequest request) {
         VerificationToken verificationToken = verificationTokenRepository.findByToken(request.token())
-                .orElseThrow(() -> new RuntimeException("Invalid or missing verification token"));
+                .orElseThrow(() -> new BusinessException("Invalid or missing verification token"));
 
         if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -152,7 +156,7 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.token())
-                .orElseThrow(() -> new RuntimeException("Invalid or missing token"));
+                .orElseThrow(() -> new BusinessException("Invalid or missing token"));
 
         if (resetToken.isUsed()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This token has already been used");
