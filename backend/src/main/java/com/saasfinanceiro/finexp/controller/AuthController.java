@@ -125,7 +125,6 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
         Optional<User> userOptional = userRepository.findByEmail(request.email());
-        String debugToken = null;
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
@@ -136,17 +135,16 @@ public class AuthController {
             resetToken.setExpiresIn(LocalDateTime.now().plusHours(1));
 
             passwordResetTokenRepository.save(resetToken);
-            debugToken = resetToken.getToken();
 
             Context context = new Context();
             context.setVariable("name", user.getName());
-            context.setVariable("link", "http://localhost:5173/forgot-password/" + debugToken);
+            context.setVariable("link", "http://localhost:5173/forgot-password/" + resetToken.getToken());
 
             emailService.sendEmailTemplate(user.getEmail(), "Password Reset Request - FinEXP", "forgotPassword", context);
         }
 
         ForgotPasswordResponse response = new ForgotPasswordResponse(
-                "If this email address is registered, you will receive instructions in your email", debugToken);
+                "If this email address is registered, you will receive instructions in your email");
 
         return ResponseEntity.ok(response);
     }

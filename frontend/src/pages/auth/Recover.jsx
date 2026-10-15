@@ -28,16 +28,9 @@ const Recover = () => {
 
       setEmail("");
 
-      if (response.debugToken) {
-        console.log(
-          "TOKEN:",
-          `http://localhost:5173/forgot-password/${response.debugToken}`,
-        );
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
-      }
-      setEmail("");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (errorMessage) {
       addToast({
         type: "error",
