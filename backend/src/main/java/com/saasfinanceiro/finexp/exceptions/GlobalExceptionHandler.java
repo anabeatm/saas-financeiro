@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
-        return buildResponse(409, "Conflict", ex.getMessage());
+        return buildResponse(409, "Conflict", "The request conflicts with existing data");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
