@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,15 +44,18 @@ public class AuthController {
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
     private final String dummyHash;
+    private final String frontendUrl;
 
     public AuthController(UserRepository userRepository, PasswordResetTokenRepository passwordResetTokenRepository,
-            PasswordEncoder passwordEncoder, TokenService tokenService, VerificationTokenRepository verificationTokenRepository, EmailService emailService) {
+            PasswordEncoder passwordEncoder, TokenService tokenService, VerificationTokenRepository verificationTokenRepository, EmailService emailService,
+            @Value("${app.frontend-url:http://localhost:5173}") String frontendUrl) {
         this.userRepository = userRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
         this.verificationTokenRepository = verificationTokenRepository;
         this.emailService = emailService;
+        this.frontendUrl = frontendUrl;
         this.dummyHash = passwordEncoder.encode(UUID.randomUUID().toString());
     }
 
@@ -100,7 +104,7 @@ public class AuthController {
 
         Context context = new Context();
         context.setVariable("name", newUser.getName());
-        context.setVariable("link", "http://localhost:5173/verify-account/" + verificationToken.getToken());
+        context.setVariable("link", frontendUrl + "/verify-account/" + verificationToken.getToken());
 
         emailService.sendEmailTemplate(newUser.getEmail(),"Welcome to FinEXP - Verify your account","newUser",context);
 
@@ -142,7 +146,7 @@ public class AuthController {
 
             Context context = new Context();
             context.setVariable("name", user.getName());
-            context.setVariable("link", "http://localhost:5173/forgot-password/" + resetToken.getToken());
+            context.setVariable("link", frontendUrl + "/forgot-password/" + resetToken.getToken());
 
             emailService.sendEmailTemplate(user.getEmail(), "Password Reset Request - FinEXP", "forgotPassword", context);
         }
