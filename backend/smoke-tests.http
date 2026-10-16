@@ -1,0 +1,364 @@
+# Smoke tests for the FinEXP API.
+#
+# Use with the "REST Client" extension for VS Code (humao.rest-client):
+# click "Send Request" above each request, in order, top to bottom.
+#
+# Prerequisites
+#   - MySQL running, backend started (./mvnw spring-boot:run) on port 8080
+#   - application-secrets.properties with jwt.secret (>= 32 chars) and
+#     app.debug-reset-token=true (needed for section 3)
+#   - Change the two e-mails below to addresses you control or any fake ones
+#     (e-mail delivery is only needed for the verification link; see section 1)
+
+@baseUrl = http://localhost:8080
+@emailA = smoke.a@example.com
+@emailB = smoke.b@example.com
+@password = Senha@123
+@newPassword = NovaSenha@456
+
+
+###############################################################################
+# 1. Registration, verification and login
+###############################################################################
+
+### 1.1 Register user A            -> expect 201
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "name": "Smoke User A", "email": "{{emailA}}", "password": "{{password}}" }
+
+### 1.2 Register the same e-mail    -> expect 409 with a generic message
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "name": "Smoke User A", "email": "{{emailA}}", "password": "{{password}}" }
+
+### 1.3 Register with invalid data  -> expect 400
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "name": "", "email": "not-an-email", "password": "123" }
+
+### 1.4 Login before verifying      -> expect 403 (password correct, not verified)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "{{emailA}}", "password": "{{password}}" }
+
+### 1.5 Login with wrong password   -> expect 401 "Incorrect email or password"
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "{{emailA}}", "password": "wrong-password" }
+
+### 1.6 Login with unknown e-mail   -> expect 401, same message as 1.5
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "nobody@example.com", "password": "{{password}}" }
+
+### 1.7 Verify account
+# The token is in the e-mail link, or in the database:
+#   SELECT token FROM verification_token ORDER BY id DESC LIMIT 1;
+# Paste it below.                -> expect 200
+POST {{baseUrl}}/auth/verify-account
+Content-Type: application/json
+
+{ "token": "a254742c-ce27-4272-abc5-400768dc2a66" }
+
+### 1.8 Verify with an invalid token -> expect 422
+POST {{baseUrl}}/auth/verify-account
+Content-Type: application/json
+
+{ "token": "does-not-exist" }
+
+### 1.9 Login user A                -> expect 200 with { "token": ... }
+# @name loginA
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "{{emailA}}", "password": "{{password}}" }
+
+###
+@tokenA = {{loginA.response.body.$.token}}
+
+
+###############################################################################
+# 2. Protected routes and profile
+###############################################################################
+
+### 2.1 No token                    -> expect 401/403
+GET {{baseUrl}}/api/wallets
+
+### 2.2 Garbage token               -> expect 401/403
+GET {{baseUrl}}/api/wallets
+Authorization: Bearer not.a.jwt
+
+### 2.3 Own profile                 -> expect 200 { id, name, email } (no password)
+GET {{baseUrl}}/api/user/me
+Authorization: Bearer {{tokenA}}
+
+### 2.4 Removed endpoints           -> expect 404/405 (not 200)
+GET {{baseUrl}}/api/user
+Authorization: Bearer {{tokenA}}
+
+### 2.5 Removed endpoints           -> expect 404/405 (not 204)
+DELETE {{baseUrl}}/api/user/1
+Authorization: Bearer {{tokenA}}
+
+### 2.6 Update own name            -> expect 200
+PUT {{baseUrl}}/api/user/me
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+{ "name": "Smoke User Renamed" }
+
+### 2.7 Change password, wrong current -> expect 422 "The current password is incorrect"
+PUT {{baseUrl}}/api/user/password
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+{ "oldPassword": "wrong-password", "newPassword": "{{newPassword}}" }
+
+
+###############################################################################
+# 3. Password reset (needs app.debug-reset-token=true)
+###############################################################################
+
+### 3.1 Forgot password             -> expect 200 with message + debugToken
+# @name forgot
+POST {{baseUrl}}/auth/forgot-password
+Content-Type: application/json
+
+{ "email": "{{emailA}}" }
+
+###
+@resetToken = {{forgot.response.body.$.debugToken}}
+
+### 3.2 Forgot password, unknown e-mail -> expect 200, same message, no debugToken
+POST {{baseUrl}}/auth/forgot-password
+Content-Type: application/json
+
+{ "email": "nobody@example.com" }
+
+### 3.3 Reset password              -> expect 200
+POST {{baseUrl}}/auth/reset-password
+Content-Type: application/json
+
+{ "token": "{{resetToken}}", "newPassword": "{{newPassword}}" }
+
+### 3.4 Reuse the same token        -> expect 400 "already been used"
+POST {{baseUrl}}/auth/reset-password
+Content-Type: application/json
+
+{ "token": "{{resetToken}}", "newPassword": "{{newPassword}}" }
+
+### 3.5 Login with the new password -> expect 200
+# @name loginA2
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "{{emailA}}", "password": "{{newPassword}}" }
+
+###
+@tokenA2 = {{loginA2.response.body.$.token}}
+
+
+###############################################################################
+# 4. Categories (use tokenA2 from here on)
+###############################################################################
+
+### 4.1 Create an EXPENSE category  -> expect 201
+# @name catExpense
+POST {{baseUrl}}/api/categories
+Authorization: Bearer {{tokenA2}}
+Content-Type: application/json
+
+{ "name": "Food", "type": "EXPENSE", "color": "#FF5733", "icon": "utensils" }
+
+###
+@catExpenseId = {{catExpense.response.body.$.id}}
+
+### 4.2 Create an INCOME category   -> expect 201
+# @name catIncome
+POST {{baseUrl}}/api/categories
+Authorization: Bearer {{tokenA2}}
+Content-Type: application/json
+
+{ "name": "Salary", "type": "INCOME", "color": "#2ECC71", "icon": "wallet" }
+
+###
+@catIncomeId = {{catIncome.response.body.$.id}}
+
+### 4.3 List, filtered by type      -> expect only Food
+GET {{baseUrl}}/api/categories?type=EXPENSE
+Authorization: Bearer {{tokenA2}}
+
+
+###############################################################################
+# 5. Wallet and transactions: check the balance after EVERY step
+###############################################################################
+
+### 5.1 Create a wallet             -> expect 201, balance 0
+# @name wallet
+POST {{baseUrl}}/api/wallets
+Authorization: Bearer {{tokenA2}}
+Content-Type: application/json
+
+{ "name": "Smoke wallet", "description": "Created by smoke-tests.http" }
+
+###
+@walletId = {{wallet.response.body.$.id}}
+
+### 5.2 Add income 1000             -> expect 201; balance = 1000
+# @name txIncome
+POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
+Authorization: Bearer {{tokenA2}}
+Content-Type: application/json
+
+{ "type": "INCOME", "amount": 1000.00, "description": "Salary", "date": "2025-01-05", "categoryId": {{catIncomeId}} }
+
+###
+@txIncomeId = {{txIncome.response.body.$.id}}
+
+### 5.3 Add expense 150             -> expect 201; balance = 850
+# @name txExpense
+POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
+Authorization: Bearer {{tokenA2}}
+Content-Type: application/json
+
+{ "type": "EXPENSE", "amount": 150.00, "description": "Groceries", "date": "2025-01-10", "categoryId": {{catExpenseId}} }
+
+###
+@txExpenseId = {{txExpense.response.body.$.id}}
+
+### 5.4 Check the balance           -> expect balance 850
+GET {{baseUrl}}/api/wallets/{{walletId}}
+Authorization: Bearer {{tokenA2}}
+
+### 5.5 Edit the expense to 200     -> expect 200; balance = 800
+PUT {{baseUrl}}/api/wallets/{{walletId}}/transactions/{{txExpenseId}}
+Authorization: Bearer {{tokenA2}}
+Content-Type: application/json
+
+{ "type": "EXPENSE", "amount": 200.00, "description": "Groceries", "date": "2025-01-10", "categoryId": {{catExpenseId}} }
+
+### 5.6 Change the expense into income -> expect 200; balance = 1000 + 200 = 1200
+PUT {{baseUrl}}/api/wallets/{{walletId}}/transactions/{{txExpenseId}}
+Authorization: Bearer {{tokenA2}}
+Content-Type: application/json
+
+{ "type": "INCOME", "amount": 200.00, "description": "Refund", "date": "2025-01-10", "categoryId": {{catIncomeId}} }
+
+### 5.7 Wrong category type         -> expect 422 (EXPENSE with an INCOME category)
+POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
+Authorization: Bearer {{tokenA2}}
+Content-Type: application/json
+
+{ "type": "EXPENSE", "amount": 10.00, "date": "2025-01-11", "categoryId": {{catIncomeId}} }
+
+### 5.8 Invalid amount              -> expect 400
+POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
+Authorization: Bearer {{tokenA2}}
+Content-Type: application/json
+
+{ "type": "EXPENSE", "amount": -5, "date": "2025-01-11" }
+
+### 5.9 Delete the first income     -> expect 204; balance = 200
+DELETE {{baseUrl}}/api/wallets/{{walletId}}/transactions/{{txIncomeId}}
+Authorization: Bearer {{tokenA2}}
+
+### 5.10 Check the balance again    -> expect balance 200
+GET {{baseUrl}}/api/wallets/{{walletId}}
+Authorization: Bearer {{tokenA2}}
+
+### 5.11 Paginated list             -> expect 1 item
+GET {{baseUrl}}/api/wallets/{{walletId}}/transactions?page=0&size=20&sort=date,desc
+Authorization: Bearer {{tokenA2}}
+
+### 5.12 Summary                    -> expect totalIncome 200, totalExpense 0
+GET {{baseUrl}}/api/wallets/{{walletId}}/summary?startDate=2025-01-01&endDate=2025-01-31
+Authorization: Bearer {{tokenA2}}
+
+
+###############################################################################
+# 6. Authorization between users (register and verify user B first)
+###############################################################################
+
+### 6.1 Register user B             -> expect 201
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "name": "Smoke User B", "email": "{{emailB}}", "password": "{{password}}" }
+
+### 6.2 Verify user B (paste the token from the database)
+POST {{baseUrl}}/auth/verify-account
+Content-Type: application/json
+
+{ "token": "PASTE-VERIFICATION-TOKEN-B" }
+
+### 6.3 Login user B
+# @name loginB
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "{{emailB}}", "password": "{{password}}" }
+
+###
+@tokenB = {{loginB.response.body.$.token}}
+
+### 6.4 B reads A's wallet          -> expect 403
+GET {{baseUrl}}/api/wallets/{{walletId}}
+Authorization: Bearer {{tokenB}}
+
+### 6.5 B lists A's transactions    -> expect 403
+GET {{baseUrl}}/api/wallets/{{walletId}}/transactions
+Authorization: Bearer {{tokenB}}
+
+### 6.6 B uses A's category in own wallet -> expect 404
+# First create a wallet as B and put its id in @walletBId.
+# @name walletB
+POST {{baseUrl}}/api/wallets
+Authorization: Bearer {{tokenB}}
+Content-Type: application/json
+
+{ "name": "B wallet" }
+
+###
+@walletBId = {{walletB.response.body.$.id}}
+
+###
+POST {{baseUrl}}/api/wallets/{{walletBId}}/transactions
+Authorization: Bearer {{tokenB}}
+Content-Type: application/json
+
+{ "type": "EXPENSE", "amount": 10.00, "date": "2025-01-11", "categoryId": {{catExpenseId}} }
+
+### 6.7 A adds B as VIEWER          -> expect 201
+POST {{baseUrl}}/api/wallets/{{walletId}}/members
+Authorization: Bearer {{tokenA2}}
+Content-Type: application/json
+
+{ "email": "{{emailB}}", "role": "VIEWER" }
+
+### 6.8 B can now read              -> expect 200
+GET {{baseUrl}}/api/wallets/{{walletId}}/transactions
+Authorization: Bearer {{tokenB}}
+
+### 6.9 B (VIEWER) tries to write   -> expect an error (currently 422)
+POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
+Authorization: Bearer {{tokenB}}
+Content-Type: application/json
+
+{ "type": "EXPENSE", "amount": 10.00, "date": "2025-01-11" }
+
+### 6.10 B (VIEWER) tries to delete the wallet -> expect an error (currently 422)
+DELETE {{baseUrl}}/api/wallets/{{walletId}}
+Authorization: Bearer {{tokenB}}
+
+### 6.11 Duplicate member           -> expect 409
+POST {{baseUrl}}/api/wallets/{{walletId}}/members
+Authorization: Bearer {{tokenA2}}
+Content-Type: application/json
+
+{ "email": "{{emailB}}", "role": "EDITOR" }
