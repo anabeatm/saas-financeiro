@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.saasfinanceiro.finexp.dto.transaction.TransactionFilter;
 import com.saasfinanceiro.finexp.dto.transaction.TransactionRequest;
 import com.saasfinanceiro.finexp.dto.transaction.TransactionResponse;
 import com.saasfinanceiro.finexp.service.TransactionService;
@@ -29,9 +30,17 @@ public class TransactionController {
 
     @GetMapping
     public ResponseEntity<Page<TransactionResponse>> listAll(
-            @PathVariable Long walletId, 
+            @PathVariable Long walletId,
+            TransactionFilter filter,
             Pageable pageable) {
-        return ResponseEntity.ok(service.listAll(walletId, pageable));
+        return ResponseEntity.ok(service.listAll(walletId, filter, pageable));
+    }
+
+    @GetMapping("/{transactionId}")
+    public ResponseEntity<TransactionResponse> getById(
+            @PathVariable Long walletId,
+            @PathVariable Long transactionId) {
+        return ResponseEntity.ok(service.getById(walletId, transactionId));
     }
 
     @PostMapping

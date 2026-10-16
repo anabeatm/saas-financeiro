@@ -11,8 +11,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.saasfinanceiro.finexp.dto.transaction.TransactionFilter;
 import com.saasfinanceiro.finexp.dto.transaction.TransactionRequest;
 import com.saasfinanceiro.finexp.dto.transaction.TransactionResponse;
+import com.saasfinanceiro.finexp.exceptions.BadRequestException;
 import com.saasfinanceiro.finexp.exceptions.BusinessException;
 import com.saasfinanceiro.finexp.exceptions.ResourceNotFoundException;
 import com.saasfinanceiro.finexp.model.Category;
@@ -24,6 +26,7 @@ import com.saasfinanceiro.finexp.model.enums.TransactionType;
 import com.saasfinanceiro.finexp.model.enums.WalletRole;
 import com.saasfinanceiro.finexp.repository.CategoryRepository;
 import com.saasfinanceiro.finexp.repository.TransactionRepository;
+import com.saasfinanceiro.finexp.repository.TransactionSpecifications;
 import com.saasfinanceiro.finexp.repository.WalletMemberRepository;
 import com.saasfinanceiro.finexp.repository.WalletRepository;
 
@@ -113,11 +116,21 @@ public class TransactionService {
         return new TransactionResponse(transaction);
     }
 
-    public Page<TransactionResponse> listAll(Long walletId, Pageable pageable) {
+    public Page<TransactionResponse> listAll(Long walletId, TransactionFilter filter, Pageable pageable) {
         validateWalletAccess(walletId, false);
-        
-        Page<Transaction> transactions = transactionRepository.findAllByWalletId(walletId, pageable);
+
+        if (filter.startDate() != null && filter.endDate() != null && filter.startDate().isAfter(filter.endDate())) {
+            throw new BadRequestException("startDate must not be after endDate");
+        }
+
+        Page<Transaction> transactions = transactionRepository
+                .findAll(TransactionSpecifications.matching(walletId, filter), pageable);
         return transactions.map(TransactionResponse::new);
+    }
+
+    public TransactionResponse getById(Long walletId, Long transactionId) {
+        validateWalletAccess(walletId, false);
+        return new TransactionResponse(findInWallet(walletId, transactionId));
     }
 
     @Transactional
