@@ -22,6 +22,7 @@ import com.saasfinanceiro.finexp.dto.auth.ForgotPasswordResponse;
 import com.saasfinanceiro.finexp.dto.auth.LoginRequest;
 import com.saasfinanceiro.finexp.dto.auth.LoginResponse;
 import com.saasfinanceiro.finexp.dto.auth.RegisterRequestDTO;
+import com.saasfinanceiro.finexp.dto.auth.RegisterResponse;
 import com.saasfinanceiro.finexp.dto.auth.ResetPasswordRequest;
 import com.saasfinanceiro.finexp.dto.auth.VerifyAccountRequest;
 import com.saasfinanceiro.finexp.exceptions.BadRequestException;
@@ -82,11 +83,11 @@ public class AuthController {
         }
 
         String token = tokenService.generateToken(user);
-        return ResponseEntity.ok(new LoginResponse(token));
+        return ResponseEntity.ok(new LoginResponse(token, "Bearer", tokenService.getExpiresInSeconds()));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody @Valid RegisterRequestDTO request) {
+    public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterRequestDTO request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new DataIntegrityViolationException("Email already in use");
         }
@@ -96,7 +97,7 @@ public class AuthController {
         newUser.setPassword(passwordEncoder.encode(request.password()));
         newUser.setEnabled(false);
 
-        userRepository.save(newUser);
+        newUser = userRepository.save(newUser);
 
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setUser(newUser);
@@ -111,7 +112,7 @@ public class AuthController {
 
         emailService.sendEmailTemplate(newUser.getEmail(),"Welcome to FinEXP - Verify your account","newUser",context);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponse(newUser));
     }
 
     @PostMapping("/verify-account")

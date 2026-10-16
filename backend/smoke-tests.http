@@ -21,7 +21,7 @@
 # 1. Registration, verification and login
 ###############################################################################
 
-### 1.1 Register user A            -> expect 201
+### 1.1 Register user A            -> expect 201 with { id, name, email, createdAt }
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
@@ -72,7 +72,7 @@ Content-Type: application/json
 
 { "token": "does-not-exist" }
 
-### 1.9 Login user A                -> expect 200 with { "token": ... }
+### 1.9 Login user A                -> expect 200 with { accessToken, tokenType: "Bearer", expiresIn: 86400 }
 # @name loginA
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
@@ -80,7 +80,7 @@ Content-Type: application/json
 { "email": "{{emailA}}", "password": "{{password}}" }
 
 ###
-@tokenA = {{loginA.response.body.$.token}}
+@tokenA = {{loginA.response.body.$.accessToken}}
 
 
 ###############################################################################
@@ -161,7 +161,7 @@ Content-Type: application/json
 { "email": "{{emailA}}", "password": "{{newPassword}}" }
 
 ###
-@tokenA2 = {{loginA2.response.body.$.token}}
+@tokenA2 = {{loginA2.response.body.$.accessToken}}
 
 
 ###############################################################################
@@ -304,7 +304,7 @@ Content-Type: application/json
 { "email": "{{emailB}}", "password": "{{password}}" }
 
 ###
-@tokenB = {{loginB.response.body.$.token}}
+@tokenB = {{loginB.response.body.$.accessToken}}
 
 ### 6.4 B reads A's wallet          -> expect 403
 GET {{baseUrl}}/api/wallets/{{walletId}}
