@@ -1,70 +1,54 @@
 package com.saasfinanceiro.finexp.service;
 
-import java.util.List;
-import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.context.Context;
 
+import com.saasfinanceiro.finexp.dto.user.ChangePasswordRequest;
+import com.saasfinanceiro.finexp.dto.user.UpdateProfileRequest;
+import com.saasfinanceiro.finexp.dto.user.UserProfileResponse;
+import com.saasfinanceiro.finexp.exceptions.BusinessException;
 import com.saasfinanceiro.finexp.model.User;
-import com.saasfinanceiro.finexp.model.VerificationToken;
 import com.saasfinanceiro.finexp.repository.UserRepository;
-import com.saasfinanceiro.finexp.repository.VerificationTokenRepository;
 
+/**
+ * Operations on the authenticated user's own account. There is deliberately no
+ * API to read, change or delete other users.
+ */
 @Service
 public class UserService {
     @Autowired
     private UserRepository repository;
     @Autowired
     private PasswordEncoder passwordEncoder;
-    @Autowired
-    private EmailService emailService;
-    @Autowired
-    private VerificationTokenRepository verificationTokenRepository;
 
-    public User insert(User user) {
-        if (repository.existsByEmail(user.getEmail())) {
-            throw new DataIntegrityViolationException("This e-mail is already registered");
+    private User getAuthenticatedUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    public UserProfileResponse getProfile() {
+        return toResponse(getAuthenticatedUser());
+    }
+
+    public UserProfileResponse updateProfile(UpdateProfileRequest request) {
+        User user = getAuthenticatedUser();
+        user.setName(request.name());
+        return toResponse(repository.save(user));
+    }
+
+    public void changePassword(ChangePasswordRequest request) {
+        User user = getAuthenticatedUser();
+
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
+            throw new BusinessException("The current password is incorrect");
         }
 
-        String criptoPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(criptoPassword);
-        User userDatabase = repository.save(user);
-
-        String token = UUID.randomUUID().toString();
-        VerificationToken verificationToken = new VerificationToken(token, userDatabase);
-        verificationTokenRepository.save(verificationToken);
-
-        // emailService.sendEmail(user.getEmail(), "Sucess!", "User successfully registered!");
-        Context context = new Context();
-        context.setVariable("name", user.getName());
-        context.setVariable("link", "http://localhost:5173/verify-account/" + token);
-        emailService.sendEmailTemplate(user.getEmail(), "Verify your account", "newUser", context);       
-        
-        return userDatabase;
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        repository.save(user);
     }
 
-    public List<User> listAll() {
-        return repository.findAll();
-    }
-
-    public User searchId(Long id) {
-        User user = repository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        return user;
-    }
-
-    public void remove(Long id) {
-        User user = searchId(id);
-        repository.delete(user);
-    }
-
-    public User update(User user) {
-        User sectionUser = searchId(user.getId());
-        sectionUser.setName(user.getName());
-        sectionUser.setEmail(user.getEmail());
-        return repository.save(sectionUser);
+    private UserProfileResponse toResponse(User user) {
+        return new UserProfileResponse(user.getId(), user.getName(), user.getEmail());
     }
 }

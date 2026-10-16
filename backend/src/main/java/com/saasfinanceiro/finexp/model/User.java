@@ -21,7 +21,7 @@ public class User {
     private Long id;
 
     @NotBlank(message = "{user.name.notblank}")
-    @Size(min=10, max=100,message = "{user.name.size}")
+    @Size(min=2, max=100, message = "{user.name.size}")
     private String name;
     
     @NotBlank(message = "{user.email.notblank}")
