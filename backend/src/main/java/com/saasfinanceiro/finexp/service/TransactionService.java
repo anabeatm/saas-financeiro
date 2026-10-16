@@ -1,5 +1,7 @@
 package com.saasfinanceiro.finexp.service;
 
+import java.math.BigDecimal;
+
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,14 +83,32 @@ public class TransactionService {
         }
 
         transaction = transactionRepository.save(transaction);
+        walletRepository.adjustBalance(walletId, effectOf(transaction.getType(), transaction.getAmount()));
 
-        Wallet wallet = member.getWallet();
-        if (transaction.getType().name().equals("INCOME")) {
-            wallet.setBalance(wallet.getBalance().add(transaction.getAmount()));
-        } else {
-            wallet.setBalance(wallet.getBalance().subtract(transaction.getAmount()));
-        }
-        walletRepository.save(wallet);
+        return new TransactionResponse(transaction);
+    }
+
+    @Transactional
+    public TransactionResponse update(Long walletId, Long transactionId, TransactionRequest request) {
+        validateWalletAccess(walletId, true);
+
+        Transaction transaction = findInWallet(walletId, transactionId);
+
+        BigDecimal oldEffect = effectOf(transaction.getType(), transaction.getAmount());
+        BigDecimal newEffect = effectOf(request.type(), request.amount());
+
+        Category category = request.categoryId() != null
+                ? resolveCategory(request.categoryId(), request.type())
+                : null;
+
+        transaction.setType(request.type());
+        transaction.setAmount(request.amount());
+        transaction.setDescription(request.description());
+        transaction.setDate(request.date());
+        transaction.setCategory(category);
+        transaction = transactionRepository.save(transaction);
+
+        walletRepository.adjustBalance(walletId, newEffect.subtract(oldEffect));
 
         return new TransactionResponse(transaction);
     }
@@ -102,23 +122,28 @@ public class TransactionService {
 
     @Transactional
     public void delete(Long walletId, Long transactionId) {
-        WalletMember member = validateWalletAccess(walletId, true);
-        
+        validateWalletAccess(walletId, true);
+
+        Transaction transaction = findInWallet(walletId, transactionId);
+
+        walletRepository.adjustBalance(walletId,
+                effectOf(transaction.getType(), transaction.getAmount()).negate());
+
+        transactionRepository.delete(transaction);
+    }
+
+    private Transaction findInWallet(Long walletId, Long transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
 
         if (!transaction.getWallet().getId().equals(walletId)) {
             throw new BusinessException("Transaction does not belong to this wallet");
         }
+        return transaction;
+    }
 
-        Wallet wallet = member.getWallet();
-        if (transaction.getType().name().equals("INCOME")) {
-            wallet.setBalance(wallet.getBalance().subtract(transaction.getAmount()));
-        } else {
-            wallet.setBalance(wallet.getBalance().add(transaction.getAmount()));
-        }
-        walletRepository.save(wallet);
-
-        transactionRepository.delete(transaction);
+    // Signed impact of a transaction on the wallet balance.
+    private BigDecimal effectOf(TransactionType type, BigDecimal amount) {
+        return type == TransactionType.INCOME ? amount : amount.negate();
     }
 }

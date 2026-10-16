@@ -17,10 +17,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicUpdate;
 
 import lombok.Data;
 
+// Only changed columns are written, so renaming a wallet never overwrites a concurrently updated balance.
 @Entity
+@DynamicUpdate
 @Data
 public class Wallet {
     @Id
