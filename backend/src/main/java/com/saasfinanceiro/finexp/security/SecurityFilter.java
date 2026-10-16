@@ -34,10 +34,10 @@ public class SecurityFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         var token = this.recoverToken(request);
         if (token != null) {
-            var login = tokenService.validateToken(token);
+            var subject = tokenService.validateToken(token);
 
-            if (!login.isEmpty()) {
-                Optional<User> userOptional = userRepository.findByEmail(login);
+            if (!subject.isEmpty()) {
+                Optional<User> userOptional = parseUserId(subject).flatMap(userRepository::findById);
 
                 if (userOptional.isPresent()) {
                     User user = userOptional.get();
@@ -50,6 +50,15 @@ public class SecurityFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private Optional<Long> parseUserId(String subject) {
+        try {
+            return Optional.of(Long.parseLong(subject));
+        } catch (NumberFormatException e) {
+            // Tokens issued before the subject became the user id are simply rejected.
+            return Optional.empty();
+        }
     }
 
     private String recoverToken(HttpServletRequest request) {

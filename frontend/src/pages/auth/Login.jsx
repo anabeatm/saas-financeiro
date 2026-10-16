@@ -22,7 +22,7 @@ const Login = () => {
     try {
       const response = await authService.login(email, password);
 
-      localStorage.setItem("token", response.token);
+      localStorage.setItem("token", response.accessToken);
 
       addToast({
         type: "success",
