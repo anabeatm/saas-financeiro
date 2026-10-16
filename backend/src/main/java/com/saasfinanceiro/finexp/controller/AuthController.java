@@ -45,10 +45,12 @@ public class AuthController {
     private final EmailService emailService;
     private final String dummyHash;
     private final String frontendUrl;
+    private final boolean debugResetToken;
 
     public AuthController(UserRepository userRepository, PasswordResetTokenRepository passwordResetTokenRepository,
             PasswordEncoder passwordEncoder, TokenService tokenService, VerificationTokenRepository verificationTokenRepository, EmailService emailService,
-            @Value("${app.frontend-url:http://localhost:5173}") String frontendUrl) {
+            @Value("${app.frontend-url:http://localhost:5173}") String frontendUrl,
+            @Value("${app.debug-reset-token:false}") boolean debugResetToken) {
         this.userRepository = userRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.passwordEncoder = passwordEncoder;
@@ -56,6 +58,7 @@ public class AuthController {
         this.verificationTokenRepository = verificationTokenRepository;
         this.emailService = emailService;
         this.frontendUrl = frontendUrl;
+        this.debugResetToken = debugResetToken;
         this.dummyHash = passwordEncoder.encode(UUID.randomUUID().toString());
     }
 
@@ -133,6 +136,7 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
         Optional<User> userOptional = userRepository.findByEmail(request.email());
+        String debugToken = null;
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
@@ -143,6 +147,9 @@ public class AuthController {
             resetToken.setExpiresIn(LocalDateTime.now().plusHours(1));
 
             passwordResetTokenRepository.save(resetToken);
+            if (debugResetToken) {
+                debugToken = resetToken.getToken();
+            }
 
             Context context = new Context();
             context.setVariable("name", user.getName());
@@ -152,7 +159,7 @@ public class AuthController {
         }
 
         ForgotPasswordResponse response = new ForgotPasswordResponse(
-                "If this email address is registered, you will receive instructions in your email");
+                "If this email address is registered, you will receive instructions in your email", debugToken);
 
         return ResponseEntity.ok(response);
     }

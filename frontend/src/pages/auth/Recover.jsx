@@ -28,6 +28,14 @@ const Recover = () => {
 
       setEmail("");
 
+      if (response.debugToken) {
+        // Only present when the backend runs with app.debug-reset-token=true.
+        console.info(
+          "Password reset link:",
+          `${window.location.origin}/forgot-password/${response.debugToken}`,
+        );
+      }
+
       setTimeout(() => {
         navigate("/login");
       }, 2000);
