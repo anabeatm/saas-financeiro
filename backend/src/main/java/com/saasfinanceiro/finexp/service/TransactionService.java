@@ -18,6 +18,7 @@ import com.saasfinanceiro.finexp.model.Transaction;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.Wallet;
 import com.saasfinanceiro.finexp.model.WalletMember;
+import com.saasfinanceiro.finexp.model.enums.TransactionType;
 import com.saasfinanceiro.finexp.model.enums.WalletRole;
 import com.saasfinanceiro.finexp.repository.CategoryRepository;
 import com.saasfinanceiro.finexp.repository.TransactionRepository;
@@ -49,6 +50,20 @@ public class TransactionService {
         return member;
     }
 
+    private Category resolveCategory(Long categoryId, TransactionType type) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        // Categories are private to their owner; report others as missing to avoid leaking their existence.
+        if (!category.getUser().getId().equals(getAuthenticatedUser().getId())) {
+            throw new ResourceNotFoundException("Category not found");
+        }
+        if (category.getType() != type) {
+            throw new BusinessException("Category type does not match the transaction type");
+        }
+        return category;
+    }
+
     @Transactional
     public TransactionResponse create(Long walletId, TransactionRequest request) {
         WalletMember member = validateWalletAccess(walletId, true);
@@ -62,9 +77,7 @@ public class TransactionService {
         transaction.setDate(request.date());
 
         if (request.categoryId() != null) {
-            Category category = categoryRepository.findById(request.categoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-            transaction.setCategory(category);
+            transaction.setCategory(resolveCategory(request.categoryId(), request.type()));
         }
 
         transaction = transactionRepository.save(transaction);
