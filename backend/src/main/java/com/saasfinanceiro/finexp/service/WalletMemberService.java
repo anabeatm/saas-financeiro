@@ -12,6 +12,7 @@ import com.saasfinanceiro.finexp.dto.wallet.AddMemberRequest;
 import com.saasfinanceiro.finexp.dto.wallet.MemberResponse;
 import com.saasfinanceiro.finexp.dto.wallet.UpdateMemberRoleRequest;
 import com.saasfinanceiro.finexp.exceptions.BusinessException;
+import com.saasfinanceiro.finexp.exceptions.ConflictException;
 import com.saasfinanceiro.finexp.exceptions.ResourceNotFoundException;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.Wallet;
@@ -40,7 +41,7 @@ public class WalletMemberService {
                 .orElseThrow(() -> new AccessDeniedException("Access Denied"));
 
         if (member.getRole() != WalletRole.OWNER) {
-            throw new BusinessException("Forbidden: Only the OWNER can manage members");
+            throw new AccessDeniedException("Only the OWNER can manage members");
         }
         return wallet;
     }
@@ -62,7 +63,7 @@ public class WalletMemberService {
                 .orElseThrow(() -> new ResourceNotFoundException("User email not found")); // 404
 
         if (walletMemberRepository.findByWalletAndUser(wallet, newMemberUser).isPresent()) {
-            throw new BusinessException("User is already a member of this wallet"); // 409
+            throw new ConflictException("User is already a member of this wallet");
         }
 
         WalletMember newMember = new WalletMember();

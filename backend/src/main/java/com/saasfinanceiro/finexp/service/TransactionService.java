@@ -47,7 +47,7 @@ public class TransactionService {
                 .orElseThrow(() -> new AccessDeniedException("Access Denied: You are not a member of this wallet"));
 
         if (requireWriteAccess && member.getRole() == WalletRole.VIEWER) {
-            throw new BusinessException("Forbidden: Viewers cannot modify transactions");
+            throw new AccessDeniedException("Viewers cannot modify transactions");
         }
         return member;
     }
@@ -137,7 +137,7 @@ public class TransactionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
 
         if (!transaction.getWallet().getId().equals(walletId)) {
-            throw new BusinessException("Transaction does not belong to this wallet");
+            throw new ResourceNotFoundException("Transaction not found");
         }
         return transaction;
     }

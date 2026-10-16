@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.saasfinanceiro.finexp.dto.wallet.WalletRequest;
 import com.saasfinanceiro.finexp.dto.wallet.WalletResponse;
-import com.saasfinanceiro.finexp.exceptions.BusinessException;
 import com.saasfinanceiro.finexp.exceptions.ResourceNotFoundException;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.Wallet;
@@ -80,7 +79,7 @@ public class WalletService {
                 .orElseThrow(() -> new AccessDeniedException("Access Denied"));
 
         if (member.getRole() != WalletRole.OWNER) {
-            throw new BusinessException("Forbidden: Only the OWNER can edit this wallet");
+            throw new AccessDeniedException("Only the OWNER can edit this wallet");
         }
 
         wallet.setName(request.name());
@@ -99,7 +98,7 @@ public class WalletService {
                 .orElseThrow(() -> new AccessDeniedException("Access Denied"));
 
         if (member.getRole() != WalletRole.OWNER) {
-            throw new BusinessException("Forbidden: Only the OWNER can delete this wallet");
+            throw new AccessDeniedException("Only the OWNER can delete this wallet");
         }
 
         walletRepository.delete(wallet);
