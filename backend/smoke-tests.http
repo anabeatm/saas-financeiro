@@ -167,7 +167,6 @@ Content-Type: application/json
 ###############################################################################
 # 4. Categories (use tokenA2 from here on)
 ###############################################################################
-
 ### 4.1 Create an EXPENSE category  -> expect 201
 # @name catExpense
 POST {{baseUrl}}/api/categories
