@@ -11,5 +11,7 @@ import com.saasfinanceiro.finexp.model.Transaction;
 public interface TransactionRepository
         extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
 
+    boolean existsByCategoryId(Long categoryId);
+
     List<Transaction> findAllByWalletIdAndDateBetween(Long walletId, LocalDate startDate, LocalDate endDate);
 }

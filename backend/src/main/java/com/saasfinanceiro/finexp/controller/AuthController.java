@@ -32,6 +32,7 @@ import com.saasfinanceiro.finexp.model.VerificationToken;
 import com.saasfinanceiro.finexp.repository.PasswordResetTokenRepository;
 import com.saasfinanceiro.finexp.repository.UserRepository;
 import com.saasfinanceiro.finexp.repository.VerificationTokenRepository;
+import com.saasfinanceiro.finexp.service.CategoryService;
 import com.saasfinanceiro.finexp.service.EmailService;
 import com.saasfinanceiro.finexp.service.TokenService;
 
@@ -44,12 +45,14 @@ public class AuthController {
     private final TokenService tokenService;
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
+    private final CategoryService categoryService;
     private final String dummyHash;
     private final String frontendUrl;
     private final boolean debugResetToken;
 
     public AuthController(UserRepository userRepository, PasswordResetTokenRepository passwordResetTokenRepository,
             PasswordEncoder passwordEncoder, TokenService tokenService, VerificationTokenRepository verificationTokenRepository, EmailService emailService,
+            CategoryService categoryService,
             @Value("${app.frontend-url:http://localhost:5173}") String frontendUrl,
             @Value("${app.debug-reset-token:false}") boolean debugResetToken) {
         this.userRepository = userRepository;
@@ -58,6 +61,7 @@ public class AuthController {
         this.tokenService = tokenService;
         this.verificationTokenRepository = verificationTokenRepository;
         this.emailService = emailService;
+        this.categoryService = categoryService;
         this.frontendUrl = frontendUrl;
         this.debugResetToken = debugResetToken;
         this.dummyHash = passwordEncoder.encode(UUID.randomUUID().toString());
@@ -98,6 +102,7 @@ public class AuthController {
         newUser.setEnabled(false);
 
         newUser = userRepository.save(newUser);
+        categoryService.createDefaultCategories(newUser);
 
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setUser(newUser);
