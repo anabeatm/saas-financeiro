@@ -1,5 +1,6 @@
 package com.saasfinanceiro.finexp.dto.wallet;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.saasfinanceiro.finexp.model.Wallet;
@@ -8,6 +9,7 @@ public record WalletResponse(
     Long id,
     String name,
     String description,
+    BigDecimal balance,
     LocalDateTime createdAt,
     Long ownerId
 ) {
@@ -15,7 +17,8 @@ public record WalletResponse(
         this(
             wallet.getId(), 
             wallet.getName(), 
-            wallet.getDescription(), 
+            wallet.getDescription(),
+            wallet.getBalance(),
             wallet.getCreatedAt(),
             wallet.getOwner().getId()
         );
