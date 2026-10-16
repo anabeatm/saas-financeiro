@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.saasfinanceiro.finexp.dto.dashboard.CategorySummaryDTO;
 import com.saasfinanceiro.finexp.dto.dashboard.DashboardSummaryResponse;
 import com.saasfinanceiro.finexp.dto.dashboard.MonthSummaryDTO;
+import com.saasfinanceiro.finexp.exceptions.ResourceNotFoundException;
 import com.saasfinanceiro.finexp.model.Transaction;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.Wallet;
@@ -40,10 +42,10 @@ public class DashboardService {
     public DashboardSummaryResponse getSummary(Long walletId, LocalDate startDate, LocalDate endDate) {
 
         Wallet wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
 
         walletMemberRepository.findByWalletAndUser(wallet, getAuthenticatedUser())
-                .orElseThrow(() -> new RuntimeException("Access Denied: You are not a member of this wallet"));
+                .orElseThrow(() -> new AccessDeniedException("Access Denied: You are not a member of this wallet"));
         List<Transaction> transactions = transactionRepository.findAllByWalletIdAndDateBetween(walletId, startDate, endDate);
 
         BigDecimal totalIncome = transactions.stream()
