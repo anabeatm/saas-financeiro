@@ -16,6 +16,14 @@ class TransactionService {
     return response.data;
   }
 
+  async update(walletId, transactionId, transaction) {
+    const response = await api.put(
+      `/api/wallets/${walletId}/transactions/${transactionId}`,
+      transaction,
+    );
+    return response.data;
+  }
+
   async remove(walletId, transactionId) {
     await api.delete(`/api/wallets/${walletId}/transactions/${transactionId}`);
   }
