@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 
 import com.saasfinanceiro.finexp.model.enums.TransactionType;
 
@@ -19,6 +20,7 @@ public record TransactionRequest(
     String description,
     
     @NotNull(message = "Date is required")
+    @PastOrPresent(message = "Date cannot be in the future")
     LocalDate date,
     
     Long categoryId

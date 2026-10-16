@@ -11,8 +11,8 @@
 #     (e-mail delivery is only needed for the verification link; see section 1)
 
 @baseUrl = http://localhost:8080
-@emailA = smoke.a@example.com
-@emailB = smoke.b@example.com
+@emailA = smoke.c@example.com
+@emailB = smoke.d@example.com
 @password = Senha@123
 @newPassword = NovaSenha@456
 
@@ -64,7 +64,7 @@ Content-Type: application/json
 POST {{baseUrl}}/auth/verify-account
 Content-Type: application/json
 
-{ "token": "a254742c-ce27-4272-abc5-400768dc2a66" }
+{ "token": "ba6c64f4-996c-4e30-a5bc-c1c91a03f44c" }
 
 ### 1.8 Verify with an invalid token -> expect 400
 POST {{baseUrl}}/auth/verify-account
@@ -278,6 +278,38 @@ Authorization: Bearer {{tokenA2}}
 ### 5.12 Summary                    -> expect totalIncome 200, totalExpense 0
 GET {{baseUrl}}/api/wallets/{{walletId}}/summary?startDate=2025-01-01&endDate=2025-01-31
 Authorization: Bearer {{tokenA2}}
+
+
+### 5.13 Filter by type             -> expect the 1 remaining INCOME; EXPENSE returns an empty page
+GET {{baseUrl}}/api/wallets/{{walletId}}/transactions?type=INCOME
+Authorization: Bearer {{tokenA2}}
+
+###
+GET {{baseUrl}}/api/wallets/{{walletId}}/transactions?type=EXPENSE
+Authorization: Bearer {{tokenA2}}
+
+### 5.14 Filter by category and period -> expect 1 item in range, 0 out of range
+GET {{baseUrl}}/api/wallets/{{walletId}}/transactions?categoryId={{catIncomeId}}&startDate=2025-01-01&endDate=2025-01-31
+Authorization: Bearer {{tokenA2}}
+
+###
+GET {{baseUrl}}/api/wallets/{{walletId}}/transactions?startDate=2025-02-01&endDate=2025-02-28
+Authorization: Bearer {{tokenA2}}
+
+### 5.15 Inverted period            -> expect 400
+GET {{baseUrl}}/api/wallets/{{walletId}}/transactions?startDate=2025-02-01&endDate=2025-01-01
+Authorization: Bearer {{tokenA2}}
+
+### 5.16 Get one transaction by id  -> expect 200 (the converted income)
+GET {{baseUrl}}/api/wallets/{{walletId}}/transactions/{{txExpenseId}}
+Authorization: Bearer {{tokenA2}}
+
+### 5.17 Future date               -> expect 400 "Date cannot be in the future"
+POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
+Authorization: Bearer {{tokenA2}}
+Content-Type: application/json
+
+{ "type": "EXPENSE", "amount": 10.00, "date": "2099-01-01" }
 
 
 ###############################################################################
