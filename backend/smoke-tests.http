@@ -66,7 +66,7 @@ Content-Type: application/json
 
 { "token": "a254742c-ce27-4272-abc5-400768dc2a66" }
 
-### 1.8 Verify with an invalid token -> expect 422
+### 1.8 Verify with an invalid token -> expect 400
 POST {{baseUrl}}/auth/verify-account
 Content-Type: application/json
 
@@ -295,7 +295,7 @@ Content-Type: application/json
 POST {{baseUrl}}/auth/verify-account
 Content-Type: application/json
 
-{ "token": "PASTE-VERIFICATION-TOKEN-B" }
+{ "token": "08eed0aa-b43f-422b-8a4a-5c17c271a6e7" }
 
 ### 6.3 Login user B
 # @name loginB
@@ -345,14 +345,14 @@ Content-Type: application/json
 GET {{baseUrl}}/api/wallets/{{walletId}}/transactions
 Authorization: Bearer {{tokenB}}
 
-### 6.9 B (VIEWER) tries to write   -> expect an error (currently 422)
+### 6.9 B (VIEWER) tries to write   -> expect 403
 POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
 Authorization: Bearer {{tokenB}}
 Content-Type: application/json
 
 { "type": "EXPENSE", "amount": 10.00, "date": "2025-01-11" }
 
-### 6.10 B (VIEWER) tries to delete the wallet -> expect an error (currently 422)
+### 6.10 B (VIEWER) tries to delete the wallet -> expect 403
 DELETE {{baseUrl}}/api/wallets/{{walletId}}
 Authorization: Bearer {{tokenB}}
 

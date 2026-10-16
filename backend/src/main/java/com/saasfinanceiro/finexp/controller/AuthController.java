@@ -24,7 +24,7 @@ import com.saasfinanceiro.finexp.dto.auth.LoginResponse;
 import com.saasfinanceiro.finexp.dto.auth.RegisterRequestDTO;
 import com.saasfinanceiro.finexp.dto.auth.ResetPasswordRequest;
 import com.saasfinanceiro.finexp.dto.auth.VerifyAccountRequest;
-import com.saasfinanceiro.finexp.exceptions.BusinessException;
+import com.saasfinanceiro.finexp.exceptions.BadRequestException;
 import com.saasfinanceiro.finexp.model.PasswordResetToken;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.VerificationToken;
@@ -117,11 +117,10 @@ public class AuthController {
     @PostMapping("/verify-account")
     public ResponseEntity<?> verifyAccount(@RequestBody @Valid VerifyAccountRequest request) {
         VerificationToken verificationToken = verificationTokenRepository.findByToken(request.token())
-                .orElseThrow(() -> new BusinessException("Invalid or missing verification token"));
+                .orElseThrow(() -> new BadRequestException("Invalid or missing verification token"));
 
         if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("This validation link has expired.");
+            throw new BadRequestException("This validation link has expired.");
         }
         User user = verificationToken.getUser();
         user.setEnabled(true);
@@ -167,14 +166,13 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.token())
-                .orElseThrow(() -> new BusinessException("Invalid or missing token"));
+                .orElseThrow(() -> new BadRequestException("Invalid or missing token"));
 
         if (resetToken.isUsed()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This token has already been used");
+            throw new BadRequestException("This token has already been used");
         }
         if (resetToken.getExpiresIn().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("This token has expired. Please request a new one");
+            throw new BadRequestException("This token has expired. Please request a new one");
         }
 
         User user = resetToken.getUser();

@@ -28,9 +28,19 @@ public class GlobalExceptionHandler {
         return buildResponse(422, "Unprocessable Entity", ex.getMessage());
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(ConflictException ex) {
+        return buildResponse(409, "Conflict", ex.getMessage());
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
+        return buildResponse(400, "Bad Request", ex.getMessage());
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
-        return buildResponse(403, "Forbidden", "Access to this resource is denied");
+        return buildResponse(403, "Forbidden", ex.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
