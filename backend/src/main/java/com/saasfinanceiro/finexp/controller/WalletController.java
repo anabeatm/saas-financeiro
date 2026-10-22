@@ -21,7 +21,7 @@ import com.saasfinanceiro.finexp.dto.wallet.WalletResponse;
 import com.saasfinanceiro.finexp.service.WalletService;
 
 @RestController
-@RequestMapping("/api/wallets")
+@RequestMapping("/api/v1/wallets")
 public class WalletController {
 
     @Autowired

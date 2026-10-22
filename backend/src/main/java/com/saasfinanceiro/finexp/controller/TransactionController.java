@@ -22,7 +22,7 @@ import com.saasfinanceiro.finexp.dto.transaction.TransactionResponse;
 import com.saasfinanceiro.finexp.service.TransactionService;
 
 @RestController
-@RequestMapping("/api/wallets/{walletId}/transactions")
+@RequestMapping("/api/v1/wallets/{walletId}/transactions")
 public class TransactionController {
 
     @Autowired

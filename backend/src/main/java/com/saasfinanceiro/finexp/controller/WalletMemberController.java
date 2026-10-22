@@ -22,7 +22,7 @@ import com.saasfinanceiro.finexp.dto.wallet.UpdateMemberRoleRequest;
 import com.saasfinanceiro.finexp.service.WalletMemberService;
 
 @RestController
-@RequestMapping("/api/wallets/{walletId}/members")
+@RequestMapping("/api/v1/wallets/{walletId}/members")
 public class WalletMemberController {
 
     @Autowired

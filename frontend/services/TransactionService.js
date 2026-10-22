@@ -2,7 +2,7 @@ import api from "../configs/axiosConfig";
 
 class TransactionService {
   async list(walletId, params = {}) {
-    const response = await api.get(`/api/wallets/${walletId}/transactions`, {
+    const response = await api.get(`/api/v1/wallets/${walletId}/transactions`, {
       params,
     });
     return response.data;
@@ -10,7 +10,7 @@ class TransactionService {
 
   async create(walletId, transaction) {
     const response = await api.post(
-      `/api/wallets/${walletId}/transactions`,
+      `/api/v1/wallets/${walletId}/transactions`,
       transaction,
     );
     return response.data;
@@ -18,14 +18,14 @@ class TransactionService {
 
   async update(walletId, transactionId, transaction) {
     const response = await api.put(
-      `/api/wallets/${walletId}/transactions/${transactionId}`,
+      `/api/v1/wallets/${walletId}/transactions/${transactionId}`,
       transaction,
     );
     return response.data;
   }
 
   async remove(walletId, transactionId) {
-    await api.delete(`/api/wallets/${walletId}/transactions/${transactionId}`);
+    await api.delete(`/api/v1/wallets/${walletId}/transactions/${transactionId}`);
   }
 }
 

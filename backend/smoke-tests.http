@@ -88,33 +88,33 @@ Content-Type: application/json
 ###############################################################################
 
 ### 2.1 No token                    -> expect 401
-GET {{baseUrl}}/api/wallets
+GET {{baseUrl}}/api/v1/wallets
 
 ### 2.2 Garbage token               -> expect 401
-GET {{baseUrl}}/api/wallets
+GET {{baseUrl}}/api/v1/wallets
 Authorization: Bearer not.a.jwt
 
 ### 2.3 Own profile                 -> expect 200 { id, name, email } (no password)
-GET {{baseUrl}}/api/user/me
+GET {{baseUrl}}/api/v1/users/me
 Authorization: Bearer {{tokenA}}
 
 ### 2.4 Removed endpoints           -> expect 404/405 (not 200)
-GET {{baseUrl}}/api/user
+GET {{baseUrl}}/api/v1/users
 Authorization: Bearer {{tokenA}}
 
 ### 2.5 Removed endpoints           -> expect 404/405 (not 204)
-DELETE {{baseUrl}}/api/user/1
+DELETE {{baseUrl}}/api/v1/users/1
 Authorization: Bearer {{tokenA}}
 
 ### 2.6 Update own name            -> expect 200
-PUT {{baseUrl}}/api/user/me
+PUT {{baseUrl}}/api/v1/users/me
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
 { "name": "Smoke User Renamed" }
 
 ### 2.7 Change password, wrong current -> expect 422 "The current password is incorrect"
-PUT {{baseUrl}}/api/user/password
+PATCH {{baseUrl}}/api/v1/users/me/password
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
@@ -128,7 +128,11 @@ GET {{baseUrl}}/actuator/health
 GET {{baseUrl}}/actuator/env
 
 ### 2.10 Protected route without token  -> expect 401 in the JSON error format
+GET {{baseUrl}}/api/v1/wallets
+
+### 2.11 Old unversioned prefix with a valid token -> expect 404
 GET {{baseUrl}}/api/wallets
+Authorization: Bearer {{tokenA}}
 
 
 ###############################################################################
@@ -179,7 +183,7 @@ Content-Type: application/json
 ###############################################################################
 ### 4.1 Create an EXPENSE category  -> expect 201
 # @name catExpense
-POST {{baseUrl}}/api/categories
+POST {{baseUrl}}/api/v1/categories
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
@@ -190,7 +194,7 @@ Content-Type: application/json
 
 ### 4.2 Create an INCOME category   -> expect 201
 # @name catIncome
-POST {{baseUrl}}/api/categories
+POST {{baseUrl}}/api/v1/categories
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
@@ -200,7 +204,7 @@ Content-Type: application/json
 @catIncomeId = {{catIncome.response.body.$.id}}
 
 ### 4.3 List, filtered by type      -> expect only Food
-GET {{baseUrl}}/api/categories?type=EXPENSE
+GET {{baseUrl}}/api/v1/categories?type=EXPENSE
 Authorization: Bearer {{tokenA}}
 
 
@@ -210,7 +214,7 @@ Authorization: Bearer {{tokenA}}
 
 ### 5.1 Create a wallet             -> expect 201, balance 0
 # @name wallet
-POST {{baseUrl}}/api/wallets
+POST {{baseUrl}}/api/v1/wallets
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
@@ -221,7 +225,7 @@ Content-Type: application/json
 
 ### 5.2 Add income 1000             -> expect 201; balance = 1000
 # @name txIncome
-POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
+POST {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
@@ -232,7 +236,7 @@ Content-Type: application/json
 
 ### 5.3 Add expense 150             -> expect 201; balance = 850
 # @name txExpense
-POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
+POST {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
@@ -242,80 +246,80 @@ Content-Type: application/json
 @txExpenseId = {{txExpense.response.body.$.id}}
 
 ### 5.4 Check the balance           -> expect balance 850
-GET {{baseUrl}}/api/wallets/{{walletId}}
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}
 Authorization: Bearer {{tokenA}}
 
 ### 5.5 Edit the expense to 200     -> expect 200; balance = 800
-PUT {{baseUrl}}/api/wallets/{{walletId}}/transactions/{{txExpenseId}}
+PUT {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions/{{txExpenseId}}
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
 { "type": "EXPENSE", "amount": 200.00, "description": "Groceries", "date": "2025-01-10", "categoryId": {{catExpenseId}} }
 
 ### 5.6 Change the expense into income -> expect 200; balance = 1000 + 200 = 1200
-PUT {{baseUrl}}/api/wallets/{{walletId}}/transactions/{{txExpenseId}}
+PUT {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions/{{txExpenseId}}
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
 { "type": "INCOME", "amount": 200.00, "description": "Refund", "date": "2025-01-10", "categoryId": {{catIncomeId}} }
 
 ### 5.7 Wrong category type         -> expect 422 (EXPENSE with an INCOME category)
-POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
+POST {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
 { "type": "EXPENSE", "amount": 10.00, "date": "2025-01-11", "categoryId": {{catIncomeId}} }
 
 ### 5.8 Invalid amount              -> expect 400
-POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
+POST {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
 { "type": "EXPENSE", "amount": -5, "date": "2025-01-11" }
 
 ### 5.9 Delete the first income     -> expect 204; balance = 200
-DELETE {{baseUrl}}/api/wallets/{{walletId}}/transactions/{{txIncomeId}}
+DELETE {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions/{{txIncomeId}}
 Authorization: Bearer {{tokenA}}
 
 ### 5.10 Check the balance again    -> expect balance 200
-GET {{baseUrl}}/api/wallets/{{walletId}}
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}
 Authorization: Bearer {{tokenA}}
 
 ### 5.11 Paginated list             -> expect 1 item
-GET {{baseUrl}}/api/wallets/{{walletId}}/transactions?page=0&size=20&sort=date,desc
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions?page=0&size=20&sort=date,desc
 Authorization: Bearer {{tokenA}}
 
 ### 5.12 Summary                    -> expect totalIncome 200, totalExpense 0
-GET {{baseUrl}}/api/wallets/{{walletId}}/summary?startDate=2025-01-01&endDate=2025-01-31
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}/summary?startDate=2025-01-01&endDate=2025-01-31
 Authorization: Bearer {{tokenA}}
 
 
 ### 5.13 Filter by type             -> expect the 1 remaining INCOME; EXPENSE returns an empty page
-GET {{baseUrl}}/api/wallets/{{walletId}}/transactions?type=INCOME
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions?type=INCOME
 Authorization: Bearer {{tokenA}}
 
 ###
-GET {{baseUrl}}/api/wallets/{{walletId}}/transactions?type=EXPENSE
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions?type=EXPENSE
 Authorization: Bearer {{tokenA}}
 
 ### 5.14 Filter by category and period -> expect 1 item in range, 0 out of range
-GET {{baseUrl}}/api/wallets/{{walletId}}/transactions?categoryId={{catIncomeId}}&startDate=2025-01-01&endDate=2025-01-31
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions?categoryId={{catIncomeId}}&startDate=2025-01-01&endDate=2025-01-31
 Authorization: Bearer {{tokenA}}
 
 ###
-GET {{baseUrl}}/api/wallets/{{walletId}}/transactions?startDate=2025-02-01&endDate=2025-02-28
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions?startDate=2025-02-01&endDate=2025-02-28
 Authorization: Bearer {{tokenA}}
 
 ### 5.15 Inverted period            -> expect 400
-GET {{baseUrl}}/api/wallets/{{walletId}}/transactions?startDate=2025-02-01&endDate=2025-01-01
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions?startDate=2025-02-01&endDate=2025-01-01
 Authorization: Bearer {{tokenA}}
 
 ### 5.16 Get one transaction by id  -> expect 200 (the converted income)
-GET {{baseUrl}}/api/wallets/{{walletId}}/transactions/{{txExpenseId}}
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions/{{txExpenseId}}
 Authorization: Bearer {{tokenA}}
 
 ### 5.17 Future date               -> expect 400 "Date cannot be in the future"
-POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
+POST {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
@@ -323,12 +327,12 @@ Content-Type: application/json
 
 
 ### 5.18 Delete a category with transactions -> expect 422 "linked transactions"
-DELETE {{baseUrl}}/api/categories/{{catIncomeId}}
+DELETE {{baseUrl}}/api/v1/categories/{{catIncomeId}}
 Authorization: Bearer {{tokenA}}
 
 ### 5.19 Delete an unused category  -> create (201), then delete (204)
 # @name catTemp
-POST {{baseUrl}}/api/categories
+POST {{baseUrl}}/api/v1/categories
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
@@ -338,7 +342,7 @@ Content-Type: application/json
 @catTempId = {{catTemp.response.body.$.id}}
 
 ###
-DELETE {{baseUrl}}/api/categories/{{catTempId}}
+DELETE {{baseUrl}}/api/v1/categories/{{catTempId}}
 Authorization: Bearer {{tokenA}}
 
 
@@ -369,17 +373,17 @@ Content-Type: application/json
 @tokenB = {{loginB.response.body.$.accessToken}}
 
 ### 6.4 B reads A's wallet          -> expect 403
-GET {{baseUrl}}/api/wallets/{{walletId}}
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}
 Authorization: Bearer {{tokenB}}
 
 ### 6.5 B lists A's transactions    -> expect 403
-GET {{baseUrl}}/api/wallets/{{walletId}}/transactions
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions
 Authorization: Bearer {{tokenB}}
 
 ### 6.6 B uses A's category in own wallet -> expect 404
 # First create a wallet as B and put its id in @walletBId.
 # @name walletB
-POST {{baseUrl}}/api/wallets
+POST {{baseUrl}}/api/v1/wallets
 Authorization: Bearer {{tokenB}}
 Content-Type: application/json
 
@@ -389,36 +393,36 @@ Content-Type: application/json
 @walletBId = {{walletB.response.body.$.id}}
 
 ###
-POST {{baseUrl}}/api/wallets/{{walletBId}}/transactions
+POST {{baseUrl}}/api/v1/wallets/{{walletBId}}/transactions
 Authorization: Bearer {{tokenB}}
 Content-Type: application/json
 
 { "type": "EXPENSE", "amount": 10.00, "date": "2025-01-11", "categoryId": {{catExpenseId}} }
 
 ### 6.7 A adds B as VIEWER          -> expect 201
-POST {{baseUrl}}/api/wallets/{{walletId}}/members
+POST {{baseUrl}}/api/v1/wallets/{{walletId}}/members
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
 { "email": "{{emailB}}", "role": "VIEWER" }
 
 ### 6.8 B can now read              -> expect 200
-GET {{baseUrl}}/api/wallets/{{walletId}}/transactions
+GET {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions
 Authorization: Bearer {{tokenB}}
 
 ### 6.9 B (VIEWER) tries to write   -> expect 403
-POST {{baseUrl}}/api/wallets/{{walletId}}/transactions
+POST {{baseUrl}}/api/v1/wallets/{{walletId}}/transactions
 Authorization: Bearer {{tokenB}}
 Content-Type: application/json
 
 { "type": "EXPENSE", "amount": 10.00, "date": "2025-01-11" }
 
 ### 6.10 B (VIEWER) tries to delete the wallet -> expect 403
-DELETE {{baseUrl}}/api/wallets/{{walletId}}
+DELETE {{baseUrl}}/api/v1/wallets/{{walletId}}
 Authorization: Bearer {{tokenB}}
 
 ### 6.11 Duplicate member           -> expect 409
-POST {{baseUrl}}/api/wallets/{{walletId}}/members
+POST {{baseUrl}}/api/v1/wallets/{{walletId}}/members
 Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
@@ -426,6 +430,6 @@ Content-Type: application/json
 
 ### 6.12 Default categories on a new account -> expect 7 (Salary, Other income, Food, Transport, Housing, Health, Leisure)
 # Only for accounts registered after this feature; older accounts start empty.
-GET {{baseUrl}}/api/categories
+GET {{baseUrl}}/api/v1/categories
 Authorization: Bearer {{tokenB}}
 

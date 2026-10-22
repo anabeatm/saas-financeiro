@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +18,7 @@ import com.saasfinanceiro.finexp.dto.user.UserProfileResponse;
 import com.saasfinanceiro.finexp.service.UserService;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     @Autowired
@@ -33,7 +34,7 @@ public class UserController {
         return ResponseEntity.ok(service.updateProfile(request));
     }
 
-    @PutMapping("/password")
+    @PatchMapping("/me/password")
     public ResponseEntity<MessageResponse> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         service.changePassword(request);
         return ResponseEntity.ok(new MessageResponse("Password changed successfully"));

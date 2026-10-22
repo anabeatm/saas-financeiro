@@ -15,7 +15,7 @@ import com.saasfinanceiro.finexp.dto.dashboard.DashboardSummaryResponse;
 import com.saasfinanceiro.finexp.service.DashboardService;
 
 @RestController
-@RequestMapping("/api/wallets")
+@RequestMapping("/api/v1/wallets")
 public class DashboardController {
 
     @Autowired

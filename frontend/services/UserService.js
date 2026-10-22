@@ -5,16 +5,16 @@ import BaseService from "./BaseService";
 
 class UserService extends BaseService {
   constructor() {
-    super("/api/user");
+    super("/api/v1/users");
   }
 
   async getMe() {
-    const response = await api.get("/api/user/me");
+    const response = await api.get("/api/v1/users/me");
     return response.data;
   }
 
   async changePassword(oldPassword, newPassword) {
-    const response = await api.put("/api/user/password", {
+    const response = await api.patch("/api/v1/users/me/password", {
       oldPassword: oldPassword,
       newPassword: newPassword,
     });

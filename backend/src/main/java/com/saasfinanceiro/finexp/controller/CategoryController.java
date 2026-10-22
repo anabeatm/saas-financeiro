@@ -23,7 +23,7 @@ import com.saasfinanceiro.finexp.model.enums.TransactionType;
 import com.saasfinanceiro.finexp.service.CategoryService;
 
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api/v1/categories")
 public class CategoryController {
 
     @Autowired
