@@ -7,7 +7,6 @@ import java.util.UUID;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +25,7 @@ import com.saasfinanceiro.finexp.dto.auth.RegisterResponse;
 import com.saasfinanceiro.finexp.dto.auth.ResetPasswordRequest;
 import com.saasfinanceiro.finexp.dto.auth.VerifyAccountRequest;
 import com.saasfinanceiro.finexp.exceptions.BadRequestException;
+import com.saasfinanceiro.finexp.exceptions.ConflictException;
 import com.saasfinanceiro.finexp.model.PasswordResetToken;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.VerificationToken;
@@ -93,7 +93,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterRequestDTO request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
-            throw new DataIntegrityViolationException("Email already in use");
+            throw new ConflictException("This e-mail is already registered");
         }
         User newUser = new User();
         newUser.setName(request.name());

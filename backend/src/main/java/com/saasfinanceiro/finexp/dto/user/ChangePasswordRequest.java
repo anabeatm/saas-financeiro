@@ -8,7 +8,7 @@ public record ChangePasswordRequest(
         String oldPassword,
                     
     @NotBlank(message = "{user.password.notblank}")
-    @Size(min=8, message = "{user.password.size}")
+    @Size(min = 8, max = 100, message = "{user.password.size}")
         String newPassword
 ) {
     
