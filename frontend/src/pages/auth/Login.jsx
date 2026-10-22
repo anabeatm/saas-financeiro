@@ -6,16 +6,30 @@ import AuthLayout from "../../components/AuthLayout";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { useToast } from "../../components/useToast";
+import { validateEmail, validateLoginPassword } from "../../utils/validators";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { addToast } = useToast();
 
+  const validators = { email: validateEmail, password: validateLoginPassword };
+
+  const validateField = (field, value) =>
+    setErrors((prev) => ({ ...prev, [field]: validators[field](value) }));
+
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    const nextErrors = {
+      email: validateEmail(email),
+      password: validateLoginPassword(password),
+    };
+    setErrors(nextErrors);
+    if (nextErrors.email || nextErrors.password) return;
 
     setIsLoading(true);
 
@@ -54,7 +68,12 @@ const Login = () => {
           placeholder="example@email.com"
           required
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          error={errors.email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (errors.email) validateField("email", e.target.value);
+          }}
+          onBlur={(e) => validateField("email", e.target.value)}
         />
         <div className="flex flex-col gap-1">
           <Input
@@ -64,7 +83,12 @@ const Login = () => {
             placeholder="••••••••"
             required
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            error={errors.password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) validateField("password", e.target.value);
+            }}
+            onBlur={(e) => validateField("password", e.target.value)}
           />
           <Link
             to="/recover"
