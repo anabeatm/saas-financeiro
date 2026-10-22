@@ -17,3 +17,10 @@ export const getInitials = (name) => {
   if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
+
+// Today as yyyy-MM-dd in the user's local timezone (what <input type="date"> uses).
+export const todayISO = () => {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+};
