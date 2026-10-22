@@ -3,6 +3,7 @@ import {
   Navigate,
   RouterProvider,
 } from "react-router-dom";
+import AppLayout from "./components/AppLayout";
 import Dashboard from "./pages/api/Dashboard";
 import ChangePassword from "./pages/auth/ChangePassword";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -11,6 +12,7 @@ import Recover from "./pages/auth/Recover";
 import Register from "./pages/auth/Register";
 import VerifyAccount from "./pages/auth/VerifyAccount";
 
+// Only authenticated users can see the app area.
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -19,6 +21,24 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// Login/registration pages send an already authenticated user to the dashboard.
+const PublicRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    return <Navigate to="/app/dashboard" replace />;
+  }
+  return children;
+};
+
+const changePasswordRoute = (path) => ({
+  path,
+  element: (
+    <ProtectedRoute>
+      <ChangePassword />
+    </ProtectedRoute>
+  ),
+});
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -26,11 +46,19 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <Login />,
+    element: (
+      <PublicRoute>
+        <Login />
+      </PublicRoute>
+    ),
   },
   {
     path: "/register",
-    element: <Register />,
+    element: (
+      <PublicRoute>
+        <Register />
+      </PublicRoute>
+    ),
   },
   {
     path: "/verify-account/:token",
@@ -38,27 +66,29 @@ const router = createBrowserRouter([
   },
   {
     path: "/recover",
-    element: <Recover />,
+    element: (
+      <PublicRoute>
+        <Recover />
+      </PublicRoute>
+    ),
   },
 
   { path: "/forgot-password/:token", element: <ForgotPassword /> },
 
-  {
-    path: "/app/profile/password",
-    element: (
-      <ProtectedRoute>
-        <ChangePassword />
-      </ProtectedRoute>
-    ),
-  },
+  // Portuguese aliases for the routes named in the assignment.
+  { path: "/recuperar-senha", element: <Navigate to="/recover" replace /> },
+  { path: "/redefinir-senha/:token", element: <ForgotPassword /> },
+
+  changePasswordRoute("/app/profile/password"),
+  changePasswordRoute("/app/perfil/senha"),
 
   {
-    path: "/app/dashboard",
     element: (
       <ProtectedRoute>
-        <Dashboard />
+        <AppLayout />
       </ProtectedRoute>
     ),
+    children: [{ path: "/app/dashboard", element: <Dashboard /> }],
   },
 ]);
 
