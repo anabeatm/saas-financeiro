@@ -11,8 +11,8 @@
 #     (e-mail delivery is only needed for the verification link; see section 1)
 
 @baseUrl = http://localhost:8080
-@emailA = smoke.c@example.com
-@emailB = smoke.d@example.com
+@emailA = smoke.e@example.com
+@emailB = smoke.f@example.com
 @password = Senha@123
 @newPassword = NovaSenha@456
 
@@ -64,7 +64,7 @@ Content-Type: application/json
 POST {{baseUrl}}/auth/verify-account
 Content-Type: application/json
 
-{ "token": "ba6c64f4-996c-4e30-a5bc-c1c91a03f44c" }
+{ "token": "c5c51a7d-11b2-4bed-b898-779fef6e25e0" }
 
 ### 1.8 Verify with an invalid token -> expect 400
 POST {{baseUrl}}/auth/verify-account
@@ -87,10 +87,10 @@ Content-Type: application/json
 # 2. Protected routes and profile
 ###############################################################################
 
-### 2.1 No token                    -> expect 401/403
+### 2.1 No token                    -> expect 401
 GET {{baseUrl}}/api/wallets
 
-### 2.2 Garbage token               -> expect 401/403
+### 2.2 Garbage token               -> expect 401
 GET {{baseUrl}}/api/wallets
 Authorization: Bearer not.a.jwt
 
@@ -119,6 +119,16 @@ Authorization: Bearer {{tokenA}}
 Content-Type: application/json
 
 { "oldPassword": "wrong-password", "newPassword": "{{newPassword}}" }
+
+
+### 2.8 Public health check        -> expect 200 {"status":"UP"} without a token
+GET {{baseUrl}}/actuator/health
+
+### 2.9 Other actuator endpoints are not exposed -> expect 401/404
+GET {{baseUrl}}/actuator/env
+
+### 2.10 Protected route without token  -> expect 401 in the JSON error format
+GET {{baseUrl}}/api/wallets
 
 
 ###############################################################################
@@ -346,7 +356,7 @@ Content-Type: application/json
 POST {{baseUrl}}/auth/verify-account
 Content-Type: application/json
 
-{ "token": "08eed0aa-b43f-422b-8a4a-5c17c271a6e7" }
+{ "token": "462409b8-4ba9-4c06-8fc0-a03ffa22195e" }
 
 ### 6.3 Login user B
 # @name loginB

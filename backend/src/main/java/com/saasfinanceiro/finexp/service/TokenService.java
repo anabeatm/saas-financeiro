@@ -2,7 +2,6 @@ package com.saasfinanceiro.finexp.service;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 import jakarta.annotation.PostConstruct;
 
@@ -18,10 +17,13 @@ import com.saasfinanceiro.finexp.model.User;
 @Service
 public class TokenService {
     private static final int MIN_SECRET_LENGTH = 32;
-    private static final long EXPIRATION_HOURS = 24;
 
     @Value("${jwt.secret}")
     private String secret;
+
+    // Token lifetime in milliseconds (JWT_EXPIRATION); defaults to 24 hours.
+    @Value("${jwt.expiration:86400000}")
+    private long expirationMillis;
 
     @PostConstruct
     void validateSecret() {
@@ -57,11 +59,11 @@ public class TokenService {
     }
     
     public long getExpiresInSeconds() {
-        return Duration.ofHours(EXPIRATION_HOURS).toSeconds();
+        return Duration.ofMillis(expirationMillis).toSeconds();
     }
 
     private Instant genExpirationDate() {
-        return Instant.now().plus(EXPIRATION_HOURS, ChronoUnit.HOURS);
+        return Instant.now().plusMillis(expirationMillis);
     }
     
 }
