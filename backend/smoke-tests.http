@@ -27,7 +27,7 @@ Content-Type: application/json
 
 { "name": "Smoke User A", "email": "{{emailA}}", "password": "{{password}}" }
 
-### 1.2 Register the same e-mail    -> expect 409 with a generic message
+### 1.2 Register the same e-mail    -> expect 409 "This e-mail is already registered"
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
