@@ -25,6 +25,13 @@ class WalletService extends BaseService {
     await api.delete(`/api/v1/wallets/${id}`);
   }
 
+  async getSummary(id, startDate, endDate) {
+    const response = await api.get(`/api/v1/wallets/${id}/summary`, {
+      params: { startDate, endDate },
+    });
+    return response.data;
+  }
+
   async list() {
     const response = await api.get("/api/v1/wallets");
     return response.data;
