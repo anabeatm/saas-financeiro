@@ -35,3 +35,5 @@ export const validatePastOrPresentDate = (value, today) => {
   if (value > today) return "Date cannot be in the future";
   return "";
 };
+
+export const validateCategoryName = (value) => validateName(value, 80);

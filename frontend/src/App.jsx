@@ -4,6 +4,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
+import Categories from "./pages/api/Categories";
 import Dashboard from "./pages/api/Dashboard";
 import Transactions from "./pages/api/Transactions";
 import Wallets from "./pages/api/Wallets";
@@ -93,6 +94,7 @@ const router = createBrowserRouter([
     children: [
       { path: "/app/dashboard", element: <Dashboard /> },
       { path: "/app/transactions", element: <Transactions /> },
+      { path: "/app/categories", element: <Categories /> },
       { path: "/app/wallets", element: <Wallets /> },
     ],
   },
