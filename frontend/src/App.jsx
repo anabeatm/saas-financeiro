@@ -5,6 +5,8 @@ import {
 } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
 import Dashboard from "./pages/api/Dashboard";
+import Transactions from "./pages/api/Transactions";
+import Wallets from "./pages/api/Wallets";
 import ChangePassword from "./pages/auth/ChangePassword";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Login from "./pages/auth/Login";
@@ -88,7 +90,11 @@ const router = createBrowserRouter([
         <AppLayout />
       </ProtectedRoute>
     ),
-    children: [{ path: "/app/dashboard", element: <Dashboard /> }],
+    children: [
+      { path: "/app/dashboard", element: <Dashboard /> },
+      { path: "/app/transactions", element: <Transactions /> },
+      { path: "/app/wallets", element: <Wallets /> },
+    ],
   },
 ]);
 

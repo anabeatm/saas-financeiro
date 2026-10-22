@@ -10,6 +10,7 @@ import { Link, useOutletContext } from "react-router-dom";
 import TransactionService from "../../../services/TransactionService";
 import WalletService from "../../../services/WalletService";
 import { formatCurrency, formatDate } from "../../utils/format";
+import { pickWalletId, saveSelectedWallet } from "../../utils/selectedWallet";
 
 import {
   Area,
@@ -115,7 +116,7 @@ const Dashboard = () => {
       .list()
       .then((list) => {
         setWallets(list);
-        setWalletId(list.length > 0 ? list[0].id : null);
+        setWalletId(pickWalletId(list));
         if (list.length === 0) setLoading(false);
       })
       .catch((err) => {
@@ -207,6 +208,7 @@ const Dashboard = () => {
               onChange={(e) => {
                 setLoading(true);
                 setWalletId(Number(e.target.value));
+                saveSelectedWallet(Number(e.target.value));
               }}
               className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
             >
@@ -218,11 +220,13 @@ const Dashboard = () => {
             </select>
           )}
 
-          {/* TODO: add a new transaction modal. */}
-          <button className="flex items-center justify-center gap-2 bg-[#a88d6f] hover:bg-[#91755a] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors shadow-sm cursor-pointer">
+          <Link
+            to="/app/transactions"
+            className="flex items-center justify-center gap-2 bg-[#a88d6f] hover:bg-[#91755a] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors shadow-sm"
+          >
             <Plus size={18} />
             <span className="font-semibold">New Transaction</span>
-          </button>
+          </Link>
         </div>
       </div>
 
