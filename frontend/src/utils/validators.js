@@ -37,3 +37,14 @@ export const validatePastOrPresentDate = (value, today) => {
 };
 
 export const validateCategoryName = (value) => validateName(value, 80);
+
+// Matches the backend rule for names: 2 to 100 characters.
+export const validateFullName = (value) => {
+  const name = value.trim();
+  if (!name) return "Required field";
+  if (name.length < 2) return "Minimum of 2 characters";
+  if (name.length > 100) return "Maximum of 100 characters";
+  return "";
+};
+
+export const validateRequired = (value) => (value ? "" : "Required field");

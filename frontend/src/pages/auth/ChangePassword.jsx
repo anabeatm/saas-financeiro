@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserService from "../../../services/UserService";
@@ -6,40 +7,50 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import PasswordStrength from "../../components/PasswordStrength";
 import { useToast } from "../../components/useToast";
+import {
+  validateNewPassword,
+  validatePasswordConfirmation,
+} from "../../utils/password";
+import { validateRequired } from "../../utils/validators";
 
 const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const userService = new UserService();
+
+  const setError = (field, message) =>
+    setErrors((prev) => ({ ...prev, [field]: message }));
+
+  // The new password must be valid and different from the current one.
+  const checkNewPassword = (value, current = currentPassword) => {
+    const error = validateNewPassword(value);
+    if (error) return error;
+    return value === current
+      ? "The new password must be different from the current one"
+      : "";
+  };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
 
-    if (currentPassword === newPassword) {
-      addToast({
-        type: "error",
-        title: "Passwords cannot be the same",
-        description:
-          "A new password cannot be the same as the current password",
-      });
-      return;
-    }
+    const nextErrors = {
+      currentPassword: validateRequired(currentPassword),
+      newPassword: checkNewPassword(newPassword),
+      confirmPassword: validatePasswordConfirmation(
+        newPassword,
+        confirmPassword,
+      ),
+    };
+    setErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) return;
 
-    if (newPassword !== confirmPassword) {
-      addToast({
-        type: "error",
-        title: "Passwords don't match",
-        description:
-          "Make sure you enter the same password in both New Password and Confirm Password fields",
-      });
-      return;
-    }
-
+    setIsLoading(true);
     try {
-      await userService.changePassword(currentPassword, newPassword);
+      await new UserService().changePassword(currentPassword, newPassword);
 
       addToast({
         type: "success",
@@ -55,14 +66,19 @@ const ChangePassword = () => {
         navigate("/app/dashboard");
       }, 2000);
     } catch (errorMessage) {
-      addToast({
-        type: "error",
-        title: "Update failed",
-        description:
-          typeof errorMessage === "string"
-            ? errorMessage
-            : "We couldn't update your password at this time.",
-      });
+      const message =
+        typeof errorMessage === "string"
+          ? errorMessage
+          : "We couldn't update your password at this time.";
+
+      // A wrong current password is reported on that field.
+      if (/current password/i.test(message)) {
+        setError("currentPassword", message);
+      } else {
+        addToast({ type: "error", title: "Update failed", description: message });
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -84,7 +100,14 @@ const ChangePassword = () => {
           placeholder="••••••••"
           required
           value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
+          error={errors.currentPassword}
+          onChange={(e) => {
+            setCurrentPassword(e.target.value);
+            if (errors.currentPassword) {
+              setError("currentPassword", validateRequired(e.target.value));
+            }
+          }}
+          onBlur={(e) => setError("currentPassword", validateRequired(e.target.value))}
         />
 
         <div className="flex flex-col gap-1">
@@ -95,7 +118,20 @@ const ChangePassword = () => {
             placeholder="••••••••"
             required
             value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
+            error={errors.newPassword}
+            onChange={(e) => {
+              setNewPassword(e.target.value);
+              if (errors.newPassword) {
+                setError("newPassword", checkNewPassword(e.target.value));
+              }
+              if (errors.confirmPassword) {
+                setError(
+                  "confirmPassword",
+                  validatePasswordConfirmation(e.target.value, confirmPassword),
+                );
+              }
+            }}
+            onBlur={(e) => setError("newPassword", checkNewPassword(e.target.value))}
           />
           <PasswordStrength password={newPassword} />
         </div>
@@ -107,10 +143,33 @@ const ChangePassword = () => {
           placeholder="••••••••"
           required
           value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          error={errors.confirmPassword}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            if (errors.confirmPassword) {
+              setError(
+                "confirmPassword",
+                validatePasswordConfirmation(newPassword, e.target.value),
+              );
+            }
+          }}
+          onBlur={(e) =>
+            setError(
+              "confirmPassword",
+              validatePasswordConfirmation(newPassword, e.target.value),
+            )
+          }
         />
 
-        <Button type="submit">Update password</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              Updating... <Loader2 className="h-4 animate-spin" />
+            </>
+          ) : (
+            <>Update password</>
+          )}
+        </Button>
       </form>
     </AuthLayout>
   );

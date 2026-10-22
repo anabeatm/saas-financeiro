@@ -1,45 +1,28 @@
+import { getPasswordScore } from "../utils/password";
+
+const LEVELS = [
+  { score: 0, label: "Too short", color: "bg-red-500", textColor: "text-red-500" },
+  { score: 1, label: "Weak", color: "bg-red-500", textColor: "text-red-500" },
+  {
+    score: 2,
+    label: "Medium",
+    color: "bg-yellow-500",
+    textColor: "text-yellow-500",
+  },
+  {
+    score: 3,
+    label: "Strong",
+    color: "bg-green-500",
+    textColor: "text-green-500",
+  },
+];
+
+const describeStrength = (score) => LEVELS[score];
+
 export default function PasswordStrength({ password }) {
   if (!password || password.length === 0) return null;
 
-  const evaluatePasswordStrength = (pass) => {
-    let score = 0;
-    if (pass.length >= 6) score += 1;
-    if (pass.match(/(?=.*[a-z])(?=.*[A-Z])/)) score += 1;
-    if (pass.match(/(?=.*\d)(?=.*[^A-Za-z0-9])/)) score += 1;
-
-    switch (score) {
-      case 1:
-        return {
-          score: 1,
-          label: "Weak",
-          color: "bg-red-500",
-          textColor: "text-red-500",
-        };
-      case 2:
-        return {
-          score: 2,
-          label: "Medium",
-          color: "bg-yellow-500",
-          textColor: "text-yellow-500",
-        };
-      case 3:
-        return {
-          score: 3,
-          label: "Strong",
-          color: "bg-green-500",
-          textColor: "text-green-500",
-        };
-      default:
-        return {
-          score: 0,
-          label: "Too short",
-          color: "bg-red-500",
-          textColor: "text-red-500",
-        };
-    }
-  };
-
-  const strength = evaluatePasswordStrength(password);
+  const strength = describeStrength(getPasswordScore(password));
 
   return (
     <div className="flex flex-col gap-1 mt-1">

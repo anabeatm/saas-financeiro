@@ -1,40 +1,53 @@
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import authService from "../../../services/AuthService";
 import AuthLayout from "../../components/AuthLayout";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import PasswordStrength from "../../components/PasswordStrength";
 import { useToast } from "../../components/useToast";
+import {
+  validateNewPassword,
+  validatePasswordConfirmation,
+} from "../../utils/password";
 
+// Second step of the password recovery: the token comes from the link sent by e-mail.
 const ResetPassword = () => {
   const { token } = useParams();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [tokenError, setTokenError] = useState("");
   const navigate = useNavigate();
   const { addToast } = useToast();
+
+  const checkPassword = (value) =>
+    setErrors((prev) => ({ ...prev, password: validateNewPassword(value) }));
+
+  const checkConfirmation = (pass, confirmation) =>
+    setErrors((prev) => ({
+      ...prev,
+      confirmPassword: validatePasswordConfirmation(pass, confirmation),
+    }));
 
   const handleReset = async (e) => {
     e.preventDefault();
 
     if (!token) {
-      addToast({
-        type: "error",
-        title: "Invalid link",
-        description: "The recovery link is missing or incomplete",
-      });
+      setTokenError("The recovery link is missing or incomplete.");
       return;
     }
 
-    if (password !== confirmPassword) {
-      addToast({
-        type: "error",
-        title: "Passwords don't match.",
-        description: "Make sure you enter the same password in both fields",
-      });
-      return;
-    }
+    const nextErrors = {
+      password: validateNewPassword(password),
+      confirmPassword: validatePasswordConfirmation(password, confirmPassword),
+    };
+    setErrors(nextErrors);
+    if (nextErrors.password || nextErrors.confirmPassword) return;
 
+    setIsLoading(true);
     try {
       await authService.resetPassword(token, password);
       addToast({
@@ -48,14 +61,14 @@ const ResetPassword = () => {
         navigate("/login");
       }, 2000);
     } catch (errorMessage) {
-      addToast({
-        type: "error",
-        title: "Validation Error",
-        description:
-          typeof errorMessage === "string"
-            ? errorMessage
-            : "The recovery link is invalid or has expired.",
-      });
+      // Invalid, expired or already used token.
+      setTokenError(
+        typeof errorMessage === "string"
+          ? errorMessage
+          : "The recovery link is invalid or has expired.",
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -66,6 +79,18 @@ const ResetPassword = () => {
       showLogo={true}
     >
       <form noValidate onSubmit={handleReset} className="flex flex-col gap-4">
+        {(tokenError || !token) && (
+          <div
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {tokenError || "The recovery link is missing or incomplete."}{" "}
+            <Link to="/recover" className="font-semibold underline">
+              Request a new link
+            </Link>
+          </div>
+        )}
+
         <div className="flex flex-col gap-1">
           <Input
             label="New Password"
@@ -74,7 +99,15 @@ const ResetPassword = () => {
             placeholder="••••••••"
             required
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            error={errors.password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) checkPassword(e.target.value);
+              if (errors.confirmPassword) {
+                checkConfirmation(e.target.value, confirmPassword);
+              }
+            }}
+            onBlur={(e) => checkPassword(e.target.value)}
           />
           <PasswordStrength password={password} />
         </div>
@@ -86,10 +119,25 @@ const ResetPassword = () => {
           placeholder="••••••••"
           required
           value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          error={errors.confirmPassword}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            if (errors.confirmPassword) {
+              checkConfirmation(password, e.target.value);
+            }
+          }}
+          onBlur={(e) => checkConfirmation(password, e.target.value)}
         />
 
-        <Button type="submit">Save new password</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              Saving... <Loader2 className="h-4 animate-spin" />
+            </>
+          ) : (
+            <>Save new password</>
+          )}
+        </Button>
       </form>
     </AuthLayout>
   );
