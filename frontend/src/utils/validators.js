@@ -14,3 +14,24 @@ export const validateLoginPassword = (value) => {
   if (value.length < 6) return "Minimum of 6 characters";
   return "";
 };
+
+export const validateName = (value, max = 50) => {
+  const name = value.trim();
+  if (!name) return "Required field";
+  if (name.length > max) return `Maximum of ${max} characters`;
+  return "";
+};
+
+export const validateAmount = (value) => {
+  if (value === "" || value === null || value === undefined) return "Required field";
+  const amount = Number(value);
+  if (Number.isNaN(amount) || amount <= 0) return "Must be greater than zero";
+  return "";
+};
+
+// `today` is yyyy-MM-dd; the API does not accept dates in the future.
+export const validatePastOrPresentDate = (value, today) => {
+  if (!value) return "Required field";
+  if (value > today) return "Date cannot be in the future";
+  return "";
+};
