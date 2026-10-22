@@ -1,5 +1,6 @@
 package com.saasfinanceiro.finexp.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,6 @@ import com.saasfinanceiro.finexp.model.WalletMember;
 public interface WalletMemberRepository extends JpaRepository<WalletMember, Long> {
     
     Optional<WalletMember> findByWalletAndUser(Wallet wallet, User user);
+
+    List<WalletMember> findAllByUser(User user);
 }

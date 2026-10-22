@@ -1,6 +1,7 @@
 package com.saasfinanceiro.finexp.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
@@ -49,25 +50,29 @@ public class WalletService {
         member.setRole(WalletRole.OWNER);
         walletMemberRepository.save(member);
 
-        return new WalletResponse(wallet);
+        return new WalletResponse(wallet, WalletRole.OWNER);
     }
 
     public List<WalletResponse> listAll() {
         User currentUser = getAuthenticatedUser();
 
         List<Wallet> wallets = walletRepository.findAllWalletsByMember(currentUser);
-        
-        return wallets.stream().map(WalletResponse::new).collect(Collectors.toList());
+        Map<Long, WalletRole> roles = walletMemberRepository.findAllByUser(currentUser).stream()
+                .collect(Collectors.toMap(m -> m.getWallet().getId(), WalletMember::getRole));
+
+        return wallets.stream()
+                .map(wallet -> new WalletResponse(wallet, roles.get(wallet.getId())))
+                .collect(Collectors.toList());
     }
 
     public WalletResponse searchId(Long id) {
         Wallet wallet = walletRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
 
-        walletMemberRepository.findByWalletAndUser(wallet, getAuthenticatedUser())
+        WalletMember member = walletMemberRepository.findByWalletAndUser(wallet, getAuthenticatedUser())
                 .orElseThrow(() -> new AccessDeniedException("Access Denied: You are not a member of this wallet"));
 
-        return new WalletResponse(wallet);
+        return new WalletResponse(wallet, member.getRole());
     }
 
     @Transactional
@@ -86,7 +91,7 @@ public class WalletService {
         wallet.setDescription(request.description());
         wallet = walletRepository.save(wallet);
 
-        return new WalletResponse(wallet);
+        return new WalletResponse(wallet, member.getRole());
     }
 
     @Transactional

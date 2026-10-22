@@ -69,6 +69,13 @@ public class TransactionService {
         return category;
     }
 
+    private Category keepCategory(Category category, TransactionType type) {
+        if (category.getType() != type) {
+            throw new BusinessException("Category type does not match the transaction type");
+        }
+        return category;
+    }
+
     @Transactional
     public TransactionResponse create(Long walletId, TransactionRequest request) {
         WalletMember member = validateWalletAccess(walletId, true);
@@ -100,9 +107,15 @@ public class TransactionService {
         BigDecimal oldEffect = effectOf(transaction.getType(), transaction.getAmount());
         BigDecimal newEffect = effectOf(request.type(), request.amount());
 
-        Category category = request.categoryId() != null
-                ? resolveCategory(request.categoryId(), request.type())
-                : null;
+        Category category = null;
+        if (request.categoryId() != null) {
+            Category current = transaction.getCategory();
+            boolean unchanged = current != null && current.getId().equals(request.categoryId());
+            // Keeping the category a transaction already has is always allowed, even when another
+            // wallet member owns it; a different category must belong to the caller.
+            category = unchanged ? keepCategory(current, request.type())
+                    : resolveCategory(request.categoryId(), request.type());
+        }
 
         transaction.setType(request.type());
         transaction.setAmount(request.amount());
