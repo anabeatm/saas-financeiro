@@ -118,7 +118,7 @@ Rotas de autenticação em `/auth/*` e demais recursos em `/api/v1/*`. Todas, ex
 | Recurso | Rotas |
 |---|---|
 | Auth | `POST /auth/register`, `/auth/verify-account`, `/auth/login`, `/auth/forgot-password`, `/auth/reset-password` |
-| Usuário | `GET` e `PUT /api/v1/users/me`, `PATCH /api/v1/users/me/password` |
+| Usuário | `GET` e `PUT /api/v1/users/me`, `PUT` e `DELETE /api/v1/users/me/avatar`, `PATCH /api/v1/users/me/password` |
 | Categorias | `GET`, `POST /api/v1/categories`; `PUT`, `DELETE /api/v1/categories/{id}` |
 | Carteiras | `GET`, `POST /api/v1/wallets`; `GET`, `PUT`, `DELETE /api/v1/wallets/{id}` |
 | Membros | `GET`, `POST /api/v1/wallets/{id}/members`; `PATCH`, `DELETE .../members/{userId}` |
