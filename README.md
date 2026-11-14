@@ -18,6 +18,7 @@ Aplicação web para controlar receitas e despesas e **compartilhar carteiras** 
 | Categorias | Privadas de cada usuário; categorias padrão criadas no cadastro; cor e ícone |
 | Dashboard | Saldo, receitas e despesas do mês, gráfico dos últimos 6 meses e lançamentos recentes |
 | Relatórios | Extrato da carteira por período: saldo inicial e final, saldo após cada lançamento, totais e participação por categoria; exportação em CSV e impressão/PDF |
+| Tempo real | Quando um membro lança, edita ou exclui uma transação, ou altera a carteira e seus membros, as telas dos demais membros se atualizam sozinhas e mostram um aviso (Server-Sent Events) |
 
 ### Papéis em uma carteira
 
@@ -107,10 +108,6 @@ Com o backend rodando: **http://localhost:8080/swagger-ui.html** (OpenAPI em `/v
 
 `GET /actuator/health` responde sem autenticação (verificação de saúde).
 
-### Testando a API manualmente
-
-[`backend/smoke-tests.http`](backend/smoke-tests.http) é um roteiro para a extensão _REST Client_ do VS Code. Ele cobre cadastro, login, recuperação de senha, categorias, carteiras, saldo, filtros e autorização entre usuários, com o resultado esperado em cada passo.
-
 ## API em resumo
 
 Rotas de autenticação em `/auth/*` e demais recursos em `/api/v1/*`. Todas, exceto as de autenticação e `/actuator/health`, exigem `Authorization: Bearer <accessToken>`.
@@ -125,6 +122,7 @@ Rotas de autenticação em `/auth/*` e demais recursos em `/api/v1/*`. Todas, ex
 | Transações | `GET`, `POST /api/v1/wallets/{id}/transactions`; `GET`, `PUT`, `DELETE .../transactions/{transactionId}` |
 | Resumo | `GET /api/v1/wallets/{id}/summary?startDate=&endDate=` |
 | Relatórios | `GET /api/v1/wallets/{id}/reports/statement?startDate=&endDate=` (JSON) e `.../reports/statement/csv` (download) |
+| Tempo real | `GET /api/v1/events/stream` (`text/event-stream`): eventos `wallet-event` das carteiras de que o usuário é membro |
 
 Os erros seguem sempre o formato `{ timestamp, status, error, message }`: 400 (validação), 401 (sem autenticação), 403 (sem permissão), 404, 409 (conflito), 422 (regra de negócio).
 
@@ -137,8 +135,9 @@ Os erros seguem sempre o formato `{ timestamp, status, error, message }`: 400 (v
 - **Segurança.** Senhas com BCrypt; login sem enumeração de contas (mesma mensagem e tempo de resposta parecido para e-mail inexistente e senha errada); segredos fora do repositório; CORS restrito; erros internos nunca expõem detalhes de SQL.
 - **Token de redefinição de senha.** Só vai por e-mail. A resposta de `forgot-password` o inclui apenas se `app.debug-reset-token=true`, para testes sem e-mail real.
 - **Relatório de extrato.** O saldo inicial é calculado a partir das transações anteriores ao período (não do saldo atual), então o extrato de qualquer período fecha com o saldo daquela data. O período máximo é de um ano, para manter o relatório leve. O CSV traz só a tabela de lançamentos (data, tipo, descrição, categoria, autor, valor e saldo), pronta para planilha; os totais e a divisão por categoria ficam na tela e no PDF. Usa `;` e vírgula decimal (padrão das planilhas no Brasil), tem BOM UTF-8 para acentos e neutraliza textos que começam com `= + - @` (proteção contra _CSV injection_). O PDF é gerado pela impressão do navegador, sem dependência extra no backend.
+- **Tempo real com Server-Sent Events.** As atualizações só vão do servidor para o navegador, então SSE basta e é mais simples que WebSocket (HTTP comum, sem protocolo extra). Os services publicam um evento a cada alteração, e ele só é enviado **depois do commit** (`@TransactionalEventListener`), para ninguém ser avisado de algo que foi desfeito. Cada evento vai apenas para os membros da carteira. O navegador lê o stream com `fetch`, mantendo o JWT no cabeçalho `Authorization` (o `EventSource` nativo obrigaria a colocá-lo na URL), e reconecta sozinho com espera crescente. Um _heartbeat_ a cada 25 s mantém a conexão aberta atrás de proxies como o do Render, e cada usuário pode ter no máximo 5 conexões abertas.
 - **Validação nos dois lados.** O frontend valida antes de enviar (e-mail, tamanho e força da senha, valores), e o backend repete as regras com Bean Validation.
 
 ## Próximos passos
 
-Itens ainda planejados para a entrega final: atualização em tempo real (SSE), integração com IA, PWA, limite de requisições (rate limiting) e cabeçalhos de segurança, testes automatizados e deploy.
+Itens ainda planejados para a entrega final: integração com IA, PWA, limite de requisições (rate limiting) e cabeçalhos de segurança, testes automatizados e deploy.
