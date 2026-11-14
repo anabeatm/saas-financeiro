@@ -7,8 +7,11 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
+import CategoryService from "../../../services/CategoryService";
 import TransactionService from "../../../services/TransactionService";
 import WalletService from "../../../services/WalletService";
+import TransactionFormModal from "../../components/transactions/TransactionFormModal";
+import { useToast } from "../../components/useToast";
 import { formatCurrency, formatDate } from "../../utils/format";
 import { pickWalletId, saveSelectedWallet } from "../../utils/selectedWallet";
 
@@ -99,6 +102,7 @@ const buildPeriod = () => {
 
 const Dashboard = () => {
   const { user } = useOutletContext();
+  const { addToast } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -108,6 +112,9 @@ const Dashboard = () => {
   const [chartData, setChartData] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [goalsSummary] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [showTransactionForm, setShowTransactionForm] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   // setGoalsSummary
 
   // Wallets the user belongs to; the first one is selected by default.
@@ -124,6 +131,11 @@ const Dashboard = () => {
         setError("Could not load your wallets.");
         setLoading(false);
       });
+
+    new CategoryService()
+      .list()
+      .then(setCategories)
+      .catch((err) => console.error("Error loading categories", err));
   }, []);
 
   // Summary, chart and recent transactions of the selected wallet.
@@ -170,9 +182,42 @@ const Dashboard = () => {
     return () => {
       cancelled = true;
     };
-  }, [walletId]);
+  }, [walletId, reloadKey]);
 
   const currentWallet = wallets.find((w) => w.id === walletId);
+  const canWrite =
+    currentWallet?.role === "OWNER" || currentWallet?.role === "EDITOR";
+
+  const openTransactionForm = () => {
+    if (!currentWallet) {
+      addToast({
+        type: "error",
+        title: "No wallet selected",
+        description: "Create a wallet before adding transactions.",
+      });
+      return;
+    }
+    if (!canWrite) {
+      addToast({
+        type: "error",
+        title: "You can't add transactions here",
+        description: `You have view-only access to "${currentWallet.name}". Ask the owner for editor access or choose another wallet.`,
+      });
+      return;
+    }
+    setShowTransactionForm(true);
+  };
+
+  const handleTransactionSaved = () => {
+    setShowTransactionForm(false);
+    // Refresh summary, chart, recent transactions and the wallet balance.
+    new WalletService()
+      .list()
+      .then(setWallets)
+      .catch((err) => console.error("Error reloading wallets", err));
+    setReloadKey((k) => k + 1);
+  };
+
   const hasChartData = chartData.some((d) => d.Revenues > 0 || d.Expenses > 0);
 
   if (loading) {
@@ -220,13 +265,14 @@ const Dashboard = () => {
             </select>
           )}
 
-          <Link
-            to="/app/transactions"
-            className="flex items-center justify-center gap-2 bg-[#a88d6f] hover:bg-[#91755a] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors shadow-sm"
+          <button
+            type="button"
+            onClick={openTransactionForm}
+            className="flex cursor-pointer items-center justify-center gap-2 bg-[#a88d6f] hover:bg-[#91755a] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors shadow-sm"
           >
             <Plus size={18} />
             <span className="font-semibold">New Transaction</span>
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -485,6 +531,16 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {showTransactionForm && (
+        <TransactionFormModal
+          walletId={walletId}
+          transaction={null}
+          categories={categories}
+          onClose={() => setShowTransactionForm(false)}
+          onSaved={handleTransactionSaved}
+        />
+      )}
     </div>
   );
 };
