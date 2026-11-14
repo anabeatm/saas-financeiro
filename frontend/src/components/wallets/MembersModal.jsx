@@ -7,6 +7,7 @@ import { validateEmail } from "../../utils/validators";
 import ConfirmDialog from "../ConfirmDialog";
 import Input from "../Input";
 import Modal from "../Modal";
+import { useWalletEvents } from "../../realtime/useRealtime";
 import { useToast } from "../useToast";
 
 const ROLE_LABELS = {
@@ -49,6 +50,10 @@ export default function MembersModal({ wallet, isOwner, onClose }) {
   useEffect(() => {
     loadMembers();
   }, [loadMembers]);
+
+  useWalletEvents((event) => {
+    if (event.walletId === wallet.id && event.type.startsWith("MEMBER_")) loadMembers();
+  });
 
   const handleAdd = async (e) => {
     e.preventDefault();

@@ -16,6 +16,7 @@ import WalletService from "../../../services/WalletService";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import TransactionFormModal from "../../components/transactions/TransactionFormModal";
 import { useToast } from "../../components/useToast";
+import { useWalletEvents } from "../../realtime/useRealtime";
 import { getErrorMessage } from "../../utils/errors";
 import { formatCurrency, formatDate } from "../../utils/format";
 import { pickWalletId, saveSelectedWallet } from "../../utils/selectedWallet";
@@ -35,6 +36,7 @@ const Transactions = () => {
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [pageNumber, setPageNumber] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
+  const [walletsKey, setWalletsKey] = useState(0);
 
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,20 +50,25 @@ const Transactions = () => {
   const periodInvalid =
     filters.startDate && filters.endDate && filters.startDate > filters.endDate;
 
-  // Wallets and categories, loaded once.
+  // Wallets (reloaded when they change in real time); the selected one is kept while it exists.
   useEffect(() => {
     new WalletService()
       .list()
       .then((list) => {
         setWallets(list);
-        setWalletId(pickWalletId(list));
+        setWalletId((current) =>
+          list.some((w) => w.id === current) ? current : pickWalletId(list),
+        );
         if (list.length === 0) setLoading(false);
       })
       .catch((err) => {
         setError(getErrorMessage(err, "Could not load your wallets."));
         setLoading(false);
       });
+  }, [walletsKey]);
 
+  // Categories, loaded once.
+  useEffect(() => {
     new CategoryService()
       .list()
       .then(setCategories)
@@ -97,6 +104,12 @@ const Transactions = () => {
       cancelled = true;
     };
   }, [walletId, filters, pageNumber, reloadKey, periodInvalid]);
+
+  // Changes made by other members (or in another tab) show up without reloading the page.
+  useWalletEvents((event) => {
+    if (!event.type.startsWith("TRANSACTION_")) setWalletsKey((k) => k + 1);
+    if (event.walletId === walletId) setReloadKey((k) => k + 1);
+  });
 
   const currentWallet = wallets.find((w) => w.id === walletId);
   const canWrite =

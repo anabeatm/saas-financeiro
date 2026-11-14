@@ -11,6 +11,8 @@ import {
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import UserService from "../../services/UserService";
+import LiveIndicator from "../realtime/LiveIndicator";
+import RealtimeProvider from "../realtime/RealtimeProvider";
 import Avatar from "./Avatar";
 
 const NAV_ITEMS = [
@@ -43,12 +45,16 @@ export default function AppLayout() {
   };
 
   return (
+    <RealtimeProvider userId={user?.id}>
     <div className="flex h-screen bg-gray-50 overflow-hidden print:block print:h-auto print:overflow-visible print:bg-white">
       <aside className="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col justify-between shrink-0 print:hidden">
         <div className="p-6">
-          <div className="flex items-center gap-2 font-bold text-xl text-[#a88d6f] mb-8">
-            <CoinsIcon className="h-6 w-6" />
-            <span>FinEXP</span>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-2 font-bold text-xl text-[#a88d6f]">
+              <CoinsIcon className="h-6 w-6" />
+              <span>FinEXP</span>
+            </div>
+            <LiveIndicator />
           </div>
           <nav className="flex flex-col gap-1">
             {NAV_ITEMS.map((item) => {
@@ -99,6 +105,7 @@ export default function AppLayout() {
           <div className="flex items-center gap-2 font-bold text-lg text-[#a88d6f]">
             <CoinsIcon className="h-5 w-5" />
             <span>FinEXP</span>
+            <LiveIndicator compact />
           </div>
           <div className="flex items-center gap-3">
             <NavLink
@@ -144,5 +151,6 @@ export default function AppLayout() {
         </nav>
       </div>
     </div>
+    </RealtimeProvider>
   );
 }

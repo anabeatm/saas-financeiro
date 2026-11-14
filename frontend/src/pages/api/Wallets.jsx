@@ -6,6 +6,7 @@ import ConfirmDialog from "../../components/ConfirmDialog";
 import MembersModal from "../../components/wallets/MembersModal";
 import WalletFormModal from "../../components/wallets/WalletFormModal";
 import { useToast } from "../../components/useToast";
+import { useWalletEvents } from "../../realtime/useRealtime";
 import { getErrorMessage } from "../../utils/errors";
 import { formatCurrency } from "../../utils/format";
 
@@ -39,6 +40,16 @@ const Wallets = () => {
   useEffect(() => {
     loadWallets();
   }, [loadWallets]);
+
+  // Balances, names, roles and memberships change in real time. If the wallet whose members are
+  // open was deleted, or you were removed from it, the dialog is closed.
+  useWalletEvents((event) => {
+    loadWallets();
+    const lostAccess =
+      event.type === "WALLET_DELETED" ||
+      (event.type === "MEMBER_REMOVED" && event.affectedUserId === user?.id);
+    if (lostAccess && membersWallet?.id === event.walletId) setMembersWallet(null);
+  });
 
   const handleDelete = async () => {
     setDeleting(true);

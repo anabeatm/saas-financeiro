@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import ReportService from "../../../services/ReportService";
 import WalletService from "../../../services/WalletService";
 import { useToast } from "../../components/useToast";
+import { useWalletEvents } from "../../realtime/useRealtime";
 import { getErrorMessage } from "../../utils/errors";
 import { formatCurrency, formatDate, todayISO } from "../../utils/format";
 import { pickWalletId, saveSelectedWallet } from "../../utils/selectedWallet";
@@ -123,6 +124,8 @@ const Reports = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [downloading, setDownloading] = useState(false);
+  const [walletsKey, setWalletsKey] = useState(0);
+  const [reportKey, setReportKey] = useState(0);
 
   const invalidPeriod = periodError(period);
 
@@ -131,14 +134,22 @@ const Reports = () => {
       .list()
       .then((list) => {
         setWallets(list);
-        setWalletId(pickWalletId(list));
+        setWalletId((current) =>
+          list.some((w) => w.id === current) ? current : pickWalletId(list),
+        );
         if (list.length === 0) setLoading(false);
       })
       .catch((err) => {
         setError(getErrorMessage(err, "Could not load your wallets."));
         setLoading(false);
       });
-  }, []);
+  }, [walletsKey]);
+
+  // The report on screen is regenerated when its wallet changes in real time.
+  useWalletEvents((event) => {
+    if (!event.type.startsWith("TRANSACTION_")) setWalletsKey((k) => k + 1);
+    if (event.walletId === walletId) setReportKey((k) => k + 1);
+  });
 
   useEffect(() => {
     if (walletId === null || invalidPeriod) return;
@@ -163,7 +174,7 @@ const Reports = () => {
     return () => {
       cancelled = true;
     };
-  }, [walletId, period, invalidPeriod]);
+  }, [walletId, period, invalidPeriod, reportKey]);
 
   const changePreset = (value) => {
     setPreset(value);

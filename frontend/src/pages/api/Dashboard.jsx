@@ -12,6 +12,7 @@ import TransactionService from "../../../services/TransactionService";
 import WalletService from "../../../services/WalletService";
 import TransactionFormModal from "../../components/transactions/TransactionFormModal";
 import { useToast } from "../../components/useToast";
+import { useWalletEvents } from "../../realtime/useRealtime";
 import { formatCurrency, formatDate } from "../../utils/format";
 import { pickWalletId, saveSelectedWallet } from "../../utils/selectedWallet";
 
@@ -115,15 +116,19 @@ const Dashboard = () => {
   const [categories, setCategories] = useState([]);
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [walletsKey, setWalletsKey] = useState(0);
   // setGoalsSummary
 
-  // Wallets the user belongs to; the first one is selected by default.
+  // Wallets the user belongs to (reloaded when they change in real time). The selected wallet is
+  // kept while it still exists; otherwise the remembered or first one is used.
   useEffect(() => {
     new WalletService()
       .list()
       .then((list) => {
         setWallets(list);
-        setWalletId(pickWalletId(list));
+        setWalletId((current) =>
+          list.some((w) => w.id === current) ? current : pickWalletId(list),
+        );
         if (list.length === 0) setLoading(false);
       })
       .catch((err) => {
@@ -131,7 +136,9 @@ const Dashboard = () => {
         setError("Could not load your wallets.");
         setLoading(false);
       });
+  }, [walletsKey]);
 
+  useEffect(() => {
     new CategoryService()
       .list()
       .then(setCategories)
@@ -184,6 +191,13 @@ const Dashboard = () => {
     };
   }, [walletId, reloadKey]);
 
+  // Another member (or another tab) changed a wallet: refresh balances, and the charts and recent
+  // transactions when it is the wallet on screen.
+  useWalletEvents((event) => {
+    setWalletsKey((k) => k + 1);
+    if (event.walletId === walletId) setReloadKey((k) => k + 1);
+  });
+
   const currentWallet = wallets.find((w) => w.id === walletId);
   const canWrite =
     currentWallet?.role === "OWNER" || currentWallet?.role === "EDITOR";
@@ -211,10 +225,7 @@ const Dashboard = () => {
   const handleTransactionSaved = () => {
     setShowTransactionForm(false);
     // Refresh summary, chart, recent transactions and the wallet balance.
-    new WalletService()
-      .list()
-      .then(setWallets)
-      .catch((err) => console.error("Error reloading wallets", err));
+    setWalletsKey((k) => k + 1);
     setReloadKey((k) => k + 1);
   };
 
