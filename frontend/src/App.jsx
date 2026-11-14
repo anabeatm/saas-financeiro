@@ -8,8 +8,8 @@ import Categories from "./pages/api/Categories";
 import Dashboard from "./pages/api/Dashboard";
 import Transactions from "./pages/api/Transactions";
 import Reports from "./pages/api/Reports";
+import Profile from "./pages/api/Profile";
 import Wallets from "./pages/api/Wallets";
-import ChangePassword from "./pages/auth/ChangePassword";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Login from "./pages/auth/Login";
 import Recover from "./pages/auth/Recover";
@@ -33,15 +33,6 @@ const PublicRoute = ({ children }) => {
   }
   return children;
 };
-
-const changePasswordRoute = (path) => ({
-  path,
-  element: (
-    <ProtectedRoute>
-      <ChangePassword />
-    </ProtectedRoute>
-  ),
-});
 
 const router = createBrowserRouter([
   {
@@ -83,8 +74,12 @@ const router = createBrowserRouter([
   { path: "/recuperar-senha", element: <Navigate to="/recover" replace /> },
   { path: "/redefinir-senha/:token", element: <ForgotPassword /> },
 
-  changePasswordRoute("/app/profile/password"),
-  changePasswordRoute("/app/perfil/senha"),
+  // Portuguese aliases for the profile/password routes named in the assignment.
+  { path: "/app/perfil", element: <Navigate to="/app/profile" replace /> },
+  {
+    path: "/app/perfil/senha",
+    element: <Navigate to="/app/profile/password" replace />,
+  },
 
   {
     element: (
@@ -98,6 +93,8 @@ const router = createBrowserRouter([
       { path: "/app/categories", element: <Categories /> },
       { path: "/app/wallets", element: <Wallets /> },
       { path: "/app/reports", element: <Reports /> },
+      { path: "/app/profile", element: <Profile /> },
+      { path: "/app/profile/password", element: <Profile /> },
     ],
   },
 ]);

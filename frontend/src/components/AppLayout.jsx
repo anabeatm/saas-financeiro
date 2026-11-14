@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import UserService from "../../services/UserService";
-import { getInitials } from "../utils/format";
+import Avatar from "./Avatar";
 
 const NAV_ITEMS = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { to: "/app/categories", label: "Categories", icon: Tags },
   { to: "/app/wallets", label: "Wallets", icon: Wallet },
   { to: "/app/reports", label: "Reports", icon: FileText },
-  { to: "/app/profile/password", label: "Password", icon: Settings },
+  { to: "/app/profile", label: "Profile", icon: Settings },
 ];
 
 // Shell of the authenticated area: sidebar on desktop, top bar + bottom
@@ -41,8 +41,6 @@ export default function AppLayout() {
     localStorage.removeItem("user");
     navigate("/login");
   };
-
-  const initial = getInitials(user?.name);
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden print:block print:h-auto print:overflow-visible print:bg-white">
@@ -75,14 +73,16 @@ export default function AppLayout() {
           </nav>
         </div>
         <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-gray-50/50">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <div className="h-9 w-9 rounded-full bg-[#a88d6f] text-white flex items-center justify-center font-semibold text-sm shrink-0">
-              {initial}
-            </div>
+          <NavLink
+            to="/app/profile"
+            title="Profile settings"
+            className="flex items-center gap-3 overflow-hidden rounded-lg hover:opacity-80"
+          >
+            <Avatar user={user} size="md" />
             <p className="text-sm font-semibold text-gray-700 truncate">
               {user?.name}
             </p>
-          </div>
+          </NavLink>
           <button
             onClick={handleLogout}
             className="text-gray-400 hover:text-red-500 p-1.5 cursor-pointer"
@@ -101,9 +101,13 @@ export default function AppLayout() {
             <span>FinEXP</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-[#a88d6f] text-white flex items-center justify-center font-semibold text-xs">
-              {initial}
-            </div>
+            <NavLink
+              to="/app/profile"
+              title="Profile settings"
+              aria-label="Profile settings"
+            >
+              <Avatar user={user} size="sm" />
+            </NavLink>
             <button
               onClick={handleLogout}
               className="text-gray-400 hover:text-red-500 cursor-pointer"
@@ -116,7 +120,7 @@ export default function AppLayout() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-6 md:p-8 pb-24 md:pb-8 print:overflow-visible print:p-0">
-          <Outlet context={{ user }} />
+          <Outlet context={{ user, setUser }} />
         </main>
 
         <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 flex py-2 z-10 print:hidden">
