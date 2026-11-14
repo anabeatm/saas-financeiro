@@ -19,7 +19,7 @@ O banco `finexp` é criado automaticamente (`createDatabaseIfNotExist=true`) e a
 
 ## Testar
 
-- Testes automatizados: `./mvnw test` (por enquanto só verifica se o contexto da aplicação sobe; os testes de integração ainda serão escritos)
+- Testes automatizados: `./mvnw test`. Há testes unitários do relatório (`ReportServiceTest`, `StatementCsvExporterTest`), que rodam sem banco; o `FinExpApplicationTests` sobe o contexto completo e precisa do MySQL.
 - Roteiro manual de ponta a ponta: [`smoke-tests.http`](smoke-tests.http) (extensão _REST Client_ do VS Code). Cada passo traz o resultado esperado.
 
 Para os passos de recuperação de senha sem e-mail real, ative `app.debug-reset-token=true` no arquivo de segredos.
