@@ -38,6 +38,11 @@ public class User {
     @Size(min = 8,max=100, message = "{user.password.size}")
     private String password;
 
+    // Profile picture as a data URL (e.g. "data:image/jpeg;base64,..."). The
+    // frontend resizes it before upload, so it stays small.
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String avatar;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserPreferences userPreferences;
 

@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.saasfinanceiro.finexp.dto.user.ChangePasswordRequest;
+import com.saasfinanceiro.finexp.dto.user.UpdateAvatarRequest;
 import com.saasfinanceiro.finexp.dto.user.UpdateProfileRequest;
 import com.saasfinanceiro.finexp.dto.user.UserProfileResponse;
 import com.saasfinanceiro.finexp.exceptions.BusinessException;
@@ -37,6 +38,18 @@ public class UserService {
         return toResponse(repository.save(user));
     }
 
+    public UserProfileResponse updateAvatar(UpdateAvatarRequest request) {
+        User user = getAuthenticatedUser();
+        user.setAvatar(request.avatar());
+        return toResponse(repository.save(user));
+    }
+
+    public UserProfileResponse removeAvatar() {
+        User user = getAuthenticatedUser();
+        user.setAvatar(null);
+        return toResponse(repository.save(user));
+    }
+
     public void changePassword(ChangePasswordRequest request) {
         User user = getAuthenticatedUser();
 
@@ -49,6 +62,6 @@ public class UserService {
     }
 
     private UserProfileResponse toResponse(User user) {
-        return new UserProfileResponse(user.getId(), user.getName(), user.getEmail());
+        return new UserProfileResponse(user.getId(), user.getName(), user.getEmail(), user.getAvatar());
     }
 }

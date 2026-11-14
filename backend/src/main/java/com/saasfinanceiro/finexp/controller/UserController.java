@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.saasfinanceiro.finexp.dto.user.ChangePasswordRequest;
 import com.saasfinanceiro.finexp.dto.user.MessageResponse;
+import com.saasfinanceiro.finexp.dto.user.UpdateAvatarRequest;
 import com.saasfinanceiro.finexp.dto.user.UpdateProfileRequest;
 import com.saasfinanceiro.finexp.dto.user.UserProfileResponse;
 import com.saasfinanceiro.finexp.service.UserService;
@@ -32,6 +34,16 @@ public class UserController {
     @PutMapping("/me")
     public ResponseEntity<UserProfileResponse> updateCurrentUser(@RequestBody @Valid UpdateProfileRequest request) {
         return ResponseEntity.ok(service.updateProfile(request));
+    }
+
+    @PutMapping("/me/avatar")
+    public ResponseEntity<UserProfileResponse> updateAvatar(@RequestBody @Valid UpdateAvatarRequest request) {
+        return ResponseEntity.ok(service.updateAvatar(request));
+    }
+
+    @DeleteMapping("/me/avatar")
+    public ResponseEntity<UserProfileResponse> removeAvatar() {
+        return ResponseEntity.ok(service.removeAvatar());
     }
 
     @PatchMapping("/me/password")
