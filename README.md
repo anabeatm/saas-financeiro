@@ -17,12 +17,13 @@ Aplicação web para controlar receitas e despesas e **compartilhar carteiras** 
 | Transações | Criar, editar e excluir; filtros por tipo, categoria e período; paginação |
 | Categorias | Privadas de cada usuário; categorias padrão criadas no cadastro; cor e ícone |
 | Dashboard | Saldo, receitas e despesas do mês, gráfico dos últimos 6 meses e lançamentos recentes |
+| Relatórios | Extrato da carteira por período: saldo inicial e final, saldo após cada lançamento, totais e participação por categoria; exportação em CSV e impressão/PDF |
 
 ### Papéis em uma carteira
 
 | Ação | Dono | Editor | Visualizador |
 |---|:-:|:-:|:-:|
-| Ver carteira e transações | ✅ | ✅ | ✅ |
+| Ver carteira, transações e relatórios | ✅ | ✅ | ✅ |
 | Criar, editar e excluir transações | ✅ | ✅ | ❌ |
 | Editar ou excluir a carteira | ✅ | ❌ | ❌ |
 | Convidar, alterar papel e remover membros | ✅ | ❌ | ❌ |
@@ -123,6 +124,7 @@ Rotas de autenticação em `/auth/*` e demais recursos em `/api/v1/*`. Todas, ex
 | Membros | `GET`, `POST /api/v1/wallets/{id}/members`; `PATCH`, `DELETE .../members/{userId}` |
 | Transações | `GET`, `POST /api/v1/wallets/{id}/transactions`; `GET`, `PUT`, `DELETE .../transactions/{transactionId}` |
 | Resumo | `GET /api/v1/wallets/{id}/summary?startDate=&endDate=` |
+| Relatórios | `GET /api/v1/wallets/{id}/reports/statement?startDate=&endDate=` (JSON) e `.../reports/statement/csv` (download) |
 
 Os erros seguem sempre o formato `{ timestamp, status, error, message }`: 400 (validação), 401 (sem autenticação), 403 (sem permissão), 404, 409 (conflito), 422 (regra de negócio).
 
@@ -134,8 +136,9 @@ Os erros seguem sempre o formato `{ timestamp, status, error, message }`: 400 (v
 - **Categorias privadas.** Cada usuário só vê e usa as próprias categorias. Numa carteira compartilhada, a transação de outro membro mantém a categoria dele ao ser editada.
 - **Segurança.** Senhas com BCrypt; login sem enumeração de contas (mesma mensagem e tempo de resposta parecido para e-mail inexistente e senha errada); segredos fora do repositório; CORS restrito; erros internos nunca expõem detalhes de SQL.
 - **Token de redefinição de senha.** Só vai por e-mail. A resposta de `forgot-password` o inclui apenas se `app.debug-reset-token=true`, para testes sem e-mail real.
+- **Relatório de extrato.** O saldo inicial é calculado a partir das transações anteriores ao período (não do saldo atual), então o extrato de qualquer período fecha com o saldo daquela data. O período máximo é de um ano, para manter o relatório leve. O CSV traz só a tabela de lançamentos (data, tipo, descrição, categoria, autor, valor e saldo), pronta para planilha; os totais e a divisão por categoria ficam na tela e no PDF. Usa `;` e vírgula decimal (padrão das planilhas no Brasil), tem BOM UTF-8 para acentos e neutraliza textos que começam com `= + - @` (proteção contra _CSV injection_). O PDF é gerado pela impressão do navegador, sem dependência extra no backend.
 - **Validação nos dois lados.** O frontend valida antes de enviar (e-mail, tamanho e força da senha, valores), e o backend repete as regras com Bean Validation.
 
 ## Próximos passos
 
-Itens ainda planejados para a entrega final: relatórios, atualização em tempo real (SSE), integração com IA, PWA, limite de requisições (rate limiting) e cabeçalhos de segurança, testes automatizados e deploy.
+Itens ainda planejados para a entrega final: atualização em tempo real (SSE), integração com IA, PWA, limite de requisições (rate limiting) e cabeçalhos de segurança, testes automatizados e deploy.
