@@ -46,6 +46,7 @@ src/
 ├── pages/       telas: auth/ (públicas) e api/ (área logada)
 ├── components/  Input, Button, Modal, ConfirmDialog, AppLayout, PasswordStrength, ...
 │   ├── wallets/ · transactions/ · categories/   modais de cada recurso
+├── realtime/    conexão SSE, provider, useWalletEvents, indicador "Live" e textos das notificações
 └── utils/       validators, password (regras de senha), format, errors, selectedWallet
 ```
 

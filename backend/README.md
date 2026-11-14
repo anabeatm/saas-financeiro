@@ -19,8 +19,7 @@ O banco `finexp` é criado automaticamente (`createDatabaseIfNotExist=true`) e a
 
 ## Testar
 
-- Testes automatizados: `./mvnw test`. Há testes unitários do relatório (`ReportServiceTest`, `StatementCsvExporterTest`), que rodam sem banco; o `FinExpApplicationTests` sobe o contexto completo e precisa do MySQL.
-- Roteiro manual de ponta a ponta: [`smoke-tests.http`](smoke-tests.http) (extensão _REST Client_ do VS Code). Cada passo traz o resultado esperado.
+- Testes automatizados: `./mvnw test`. Os testes unitários do relatório (`ReportServiceTest`, `StatementCsvExporterTest`) e do tempo real (`WalletEventPublisherTest`, `SseConnectionRegistryTest`) rodam sem banco; o `FinExpApplicationTests` sobe o contexto completo e precisa do MySQL.
 
 Para os passos de recuperação de senha sem e-mail real, ative `app.debug-reset-token=true` no arquivo de segredos.
 
@@ -36,6 +35,7 @@ Para os passos de recuperação de senha sem e-mail real, ative `app.debug-reset
 | `security` | `SecurityFilter` (valida o JWT a cada requisição) e `SecurityConfig` |
 | `exceptions` | `ResourceNotFoundException`, `BusinessException`, `ConflictException`, `BadRequestException` e o `GlobalExceptionHandler` |
 | `config` | Configuração do Swagger |
+| `realtime` | Tempo real (SSE): conexões abertas por usuário, publicação dos eventos de carteira e envio após o commit |
 
 ## Modelo de dados
 
