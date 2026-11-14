@@ -32,7 +32,8 @@ O backend precisa estar no ar (`VITE_API_BASE_URL`). O CORS do backend aceita `h
 | `/app/categories` | Categorias | Autenticado |
 | `/app/wallets` | Carteiras e membros | Autenticado |
 | `/app/reports` | Extrato por período, CSV e impressão/PDF | Autenticado |
-| `/app/profile/password` | Alterar senha (também em `/app/perfil/senha`) | Autenticado |
+| `/app/profile` | Configurações de perfil: nome, foto e senha (também em `/app/perfil`) | Autenticado |
+| `/app/profile/password` | Mesma tela, aberta na seção de senha (também em `/app/perfil/senha`) | Autenticado |
 
 `/recuperar-senha` redireciona para `/recover`. As rotas em português existem por serem as citadas no enunciado da atividade.
 
