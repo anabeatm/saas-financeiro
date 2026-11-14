@@ -24,6 +24,8 @@ import com.saasfinanceiro.finexp.model.Wallet;
 import com.saasfinanceiro.finexp.model.WalletMember;
 import com.saasfinanceiro.finexp.model.enums.TransactionType;
 import com.saasfinanceiro.finexp.model.enums.WalletRole;
+import com.saasfinanceiro.finexp.realtime.WalletEventPublisher;
+import com.saasfinanceiro.finexp.realtime.WalletEventType;
 import com.saasfinanceiro.finexp.repository.CategoryRepository;
 import com.saasfinanceiro.finexp.repository.TransactionRepository;
 import com.saasfinanceiro.finexp.repository.TransactionSpecifications;
@@ -37,6 +39,7 @@ public class TransactionService {
     @Autowired private WalletRepository walletRepository;
     @Autowired private WalletMemberRepository walletMemberRepository;
     @Autowired private CategoryRepository categoryRepository;
+    @Autowired private WalletEventPublisher walletEventPublisher;
 
     private User getAuthenticatedUser() {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -95,6 +98,8 @@ public class TransactionService {
         transaction = transactionRepository.save(transaction);
         walletRepository.adjustBalance(walletId, effectOf(transaction.getType(), transaction.getAmount()));
 
+        walletEventPublisher.transactionChanged(WalletEventType.TRANSACTION_CREATED, member.getWallet(),
+                transaction, getAuthenticatedUser());
         return new TransactionResponse(transaction);
     }
 
@@ -126,6 +131,8 @@ public class TransactionService {
 
         walletRepository.adjustBalance(walletId, newEffect.subtract(oldEffect));
 
+        walletEventPublisher.transactionChanged(WalletEventType.TRANSACTION_UPDATED, transaction.getWallet(),
+                transaction, getAuthenticatedUser());
         return new TransactionResponse(transaction);
     }
 
@@ -156,6 +163,9 @@ public class TransactionService {
                 effectOf(transaction.getType(), transaction.getAmount()).negate());
 
         transactionRepository.delete(transaction);
+
+        walletEventPublisher.transactionChanged(WalletEventType.TRANSACTION_DELETED, transaction.getWallet(),
+                transaction, getAuthenticatedUser());
     }
 
     private Transaction findInWallet(Long walletId, Long transactionId) {

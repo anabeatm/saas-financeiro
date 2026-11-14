@@ -18,6 +18,8 @@ import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.Wallet;
 import com.saasfinanceiro.finexp.model.WalletMember;
 import com.saasfinanceiro.finexp.model.enums.WalletRole;
+import com.saasfinanceiro.finexp.realtime.WalletEventPublisher;
+import com.saasfinanceiro.finexp.realtime.WalletEventType;
 import com.saasfinanceiro.finexp.repository.UserRepository;
 import com.saasfinanceiro.finexp.repository.WalletMemberRepository;
 import com.saasfinanceiro.finexp.repository.WalletRepository;
@@ -28,6 +30,7 @@ public class WalletMemberService {
     @Autowired private WalletMemberRepository walletMemberRepository;
     @Autowired private WalletRepository walletRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private WalletEventPublisher walletEventPublisher;
 
     private User getAuthenticatedUser() {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -72,6 +75,8 @@ public class WalletMemberService {
         newMember.setRole(request.role());
 
         newMember = walletMemberRepository.save(newMember);
+        walletEventPublisher.memberChanged(WalletEventType.MEMBER_ADDED, wallet, newMemberUser,
+                getAuthenticatedUser());
         return new MemberResponse(newMember);
     }
 
@@ -90,7 +95,9 @@ public class WalletMemberService {
 
         targetMember.setRole(request.role());
         targetMember = walletMemberRepository.save(targetMember);
-        
+
+        walletEventPublisher.memberChanged(WalletEventType.MEMBER_ROLE_CHANGED, wallet, targetUser,
+                getAuthenticatedUser());
         return new MemberResponse(targetMember);
     }
 
@@ -107,6 +114,9 @@ public class WalletMemberService {
             throw new BusinessException("Cannot remove the wallet OWNER");
         }
 
+        // Published before the delete, so the removed member is still among the recipients.
+        walletEventPublisher.memberChanged(WalletEventType.MEMBER_REMOVED, wallet, targetUser,
+                getAuthenticatedUser());
         walletMemberRepository.delete(targetMember);
     }
 }

@@ -18,6 +18,8 @@ import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.Wallet;
 import com.saasfinanceiro.finexp.model.WalletMember;
 import com.saasfinanceiro.finexp.model.enums.WalletRole;
+import com.saasfinanceiro.finexp.realtime.WalletEventPublisher;
+import com.saasfinanceiro.finexp.realtime.WalletEventType;
 import com.saasfinanceiro.finexp.repository.WalletMemberRepository;
 import com.saasfinanceiro.finexp.repository.WalletRepository;
 
@@ -29,6 +31,9 @@ public class WalletService {
 
     @Autowired
     private WalletMemberRepository walletMemberRepository;
+
+    @Autowired
+    private WalletEventPublisher walletEventPublisher;
 
     private User getAuthenticatedUser() {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -91,6 +96,7 @@ public class WalletService {
         wallet.setDescription(request.description());
         wallet = walletRepository.save(wallet);
 
+        walletEventPublisher.walletChanged(WalletEventType.WALLET_UPDATED, wallet, member.getUser());
         return new WalletResponse(wallet, member.getRole());
     }
 
@@ -106,6 +112,8 @@ public class WalletService {
             throw new AccessDeniedException("Only the OWNER can delete this wallet");
         }
 
+        // Published before the delete: the members (recipients) are resolved now.
+        walletEventPublisher.walletChanged(WalletEventType.WALLET_DELETED, wallet, member.getUser());
         walletRepository.delete(wallet);
     }
 }
