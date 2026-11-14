@@ -1,6 +1,7 @@
 import {
   CoinsIcon,
   CreditCard,
+  FileText,
   LayoutDashboard,
   LogOut,
   Settings,
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { to: "/app/transactions", label: "Transactions", icon: CreditCard },
   { to: "/app/categories", label: "Categories", icon: Tags },
   { to: "/app/wallets", label: "Wallets", icon: Wallet },
+  { to: "/app/reports", label: "Reports", icon: FileText },
   { to: "/app/profile/password", label: "Password", icon: Settings },
 ];
 
@@ -43,8 +45,8 @@ export default function AppLayout() {
   const initial = getInitials(user?.name);
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
-      <aside className="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col justify-between shrink-0">
+    <div className="flex h-screen bg-gray-50 overflow-hidden print:block print:h-auto print:overflow-visible print:bg-white">
+      <aside className="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col justify-between shrink-0 print:hidden">
         <div className="p-6">
           <div className="flex items-center gap-2 font-bold text-xl text-[#a88d6f] mb-8">
             <CoinsIcon className="h-6 w-6" />
@@ -92,8 +94,8 @@ export default function AppLayout() {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="md:hidden flex items-center justify-between bg-white border-b border-gray-200 px-4 py-3 shrink-0">
+      <div className="flex-1 flex flex-col min-w-0 print:block">
+        <header className="md:hidden flex items-center justify-between bg-white border-b border-gray-200 px-4 py-3 shrink-0 print:hidden">
           <div className="flex items-center gap-2 font-bold text-lg text-[#a88d6f]">
             <CoinsIcon className="h-5 w-5" />
             <span>FinEXP</span>
@@ -113,11 +115,11 @@ export default function AppLayout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 pb-24 md:pb-8">
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 pb-24 md:pb-8 print:overflow-visible print:p-0">
           <Outlet context={{ user }} />
         </main>
 
-        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 flex justify-around py-2 z-10">
+        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 flex py-2 z-10 print:hidden">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
@@ -125,13 +127,13 @@ export default function AppLayout() {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex flex-col items-center gap-0.5 px-2 py-1 text-[11px] font-medium ${
+                  `flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 py-1 text-[10px] font-medium ${
                     isActive ? "text-[#a88d6f]" : "text-gray-400"
                   }`
                 }
               >
                 <Icon size={20} />
-                <span>{item.label}</span>
+                <span className="max-w-full truncate">{item.label}</span>
               </NavLink>
             );
           })}

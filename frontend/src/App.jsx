@@ -7,6 +7,7 @@ import AppLayout from "./components/AppLayout";
 import Categories from "./pages/api/Categories";
 import Dashboard from "./pages/api/Dashboard";
 import Transactions from "./pages/api/Transactions";
+import Reports from "./pages/api/Reports";
 import Wallets from "./pages/api/Wallets";
 import ChangePassword from "./pages/auth/ChangePassword";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -96,6 +97,7 @@ const router = createBrowserRouter([
       { path: "/app/transactions", element: <Transactions /> },
       { path: "/app/categories", element: <Categories /> },
       { path: "/app/wallets", element: <Wallets /> },
+      { path: "/app/reports", element: <Reports /> },
     ],
   },
 ]);
