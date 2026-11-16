@@ -3,9 +3,9 @@
 Aplicação web para controlar receitas e despesas e **compartilhar carteiras** com outras pessoas, cada uma com um papel (dono, editor ou visualizador). Projeto da disciplina de Programação para Web.
 
 - **Frontend:** React 19 + Vite + Tailwind CSS, Recharts para os gráficos.
-- **Backend:** Spring Boot, Spring Security com JWT, Spring Data JPA/Hibernate, MySQL, Swagger (springdoc).
+- **Backend:** Spring Boot, Spring Security com JWT, Spring Data JPA/Hibernate, Swagger (springdoc). Banco MySQL no desenvolvimento e PostgreSQL em produção.
 
-> **Deploy:** _link a ser adicionado quando o sistema for publicado._
+> **Deploy:** _link a ser adicionado quando o sistema for publicado._ Frontend na Vercel, API no Render (Docker) e banco PostgreSQL na Aiven; passo a passo em [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Funcionalidades
 
@@ -59,7 +59,7 @@ saas-financeiro/
 
 - Java 17 ou superior
 - Node.js 20.19 ou superior
-- MySQL 8 em execução (o banco `finexp` é criado automaticamente se o usuário tiver permissão)
+- MySQL 8 em execução (o banco `finexp` é criado automaticamente se o usuário tiver permissão). A aplicação também roda com PostgreSQL, usado em produção: basta trocar o `DB_URL`.
 - Uma conta SMTP para o envio de e-mails (por exemplo, Gmail com _senha de app_)
 
 ### 1. Backend
@@ -90,13 +90,17 @@ Cada valor pode vir do arquivo `application-secrets.properties` ou de uma variá
 
 | Variável (ambiente) | Propriedade | Descrição | Padrão |
 |---|---|---|---|
-| `DB_URL` | `spring.datasource.url` | URL JDBC do MySQL | `jdbc:mysql://localhost:3306/finexp?createDatabaseIfNotExist=true&serverTimezone=UTC` |
+| `DB_URL` | `spring.datasource.url` | URL JDBC do banco (MySQL ou PostgreSQL; o driver é escolhido pela URL) | `jdbc:mysql://localhost:3306/finexp?createDatabaseIfNotExist=true&serverTimezone=UTC` |
 | `DB_USERNAME` | `spring.datasource.username` | Usuário do banco | `root` |
 | `DB_PASSWORD` | `spring.datasource.password` | Senha do banco | vazio |
 | `JWT_SECRET` | `jwt.secret` | Chave de assinatura do JWT, **mínimo de 32 caracteres** (a aplicação não sobe sem ela) | — |
 | `JWT_EXPIRATION` | `jwt.expiration` | Validade do token em milissegundos | `86400000` (24 h) |
-| `SPRING_MAIL_USERNAME` | `spring.mail.username` | Usuário SMTP | — |
-| `SPRING_MAIL_PASSWORD` | `spring.mail.password` | Senha SMTP (senha de app) | — |
+| `DB_POOL_SIZE` | `spring.datasource.hikari.maximum-pool-size` | Conexões simultâneas com o banco | `5` |
+| `PORT` | `server.port` | Porta HTTP (definida automaticamente pelo Render) | `8080` |
+| `MAIL_USERNAME` | `spring.mail.username` | Usuário SMTP (desenvolvimento, Gmail) | — |
+| `SPRING_MAIL_PASSWORD` | `spring.mail.password` | Senha SMTP (senha de app do Gmail) | — |
+| `BREVO_API_KEY` | `app.mail.brevo-api-key` | Chave da API do Brevo. Quando definida, os e-mails saem pela API (produção) em vez de SMTP | vazio |
+| `MAIL_FROM` | `app.mail.from` | Remetente dos e-mails (precisa estar verificado no Brevo) | o `MAIL_USERNAME` |
 | `APP_FRONTEND_URL` | `app.frontend-url` | URL pública do frontend, usada nos links dos e-mails | `http://localhost:5173` |
 | `APP_CORS_ALLOWED_ORIGINS` | `app.cors.allowed-origins` | Origens permitidas no CORS, separadas por vírgula | `http://localhost:5173,http://localhost:3000` |
 | `APP_DEBUG_RESET_TOKEN` | `app.debug-reset-token` | **Somente testes**: devolve o token de redefinição de senha na resposta | `false` |
@@ -135,9 +139,10 @@ Os erros seguem sempre o formato `{ timestamp, status, error, message }`: 400 (v
 - **Segurança.** Senhas com BCrypt; login sem enumeração de contas (mesma mensagem e tempo de resposta parecido para e-mail inexistente e senha errada); segredos fora do repositório; CORS restrito; erros internos nunca expõem detalhes de SQL.
 - **Token de redefinição de senha.** Só vai por e-mail. A resposta de `forgot-password` o inclui apenas se `app.debug-reset-token=true`, para testes sem e-mail real.
 - **Relatório de extrato.** O saldo inicial é calculado a partir das transações anteriores ao período (não do saldo atual), então o extrato de qualquer período fecha com o saldo daquela data. O período máximo é de um ano, para manter o relatório leve. O CSV traz só a tabela de lançamentos (data, tipo, descrição, categoria, autor, valor e saldo), pronta para planilha; os totais e a divisão por categoria ficam na tela e no PDF. Usa `;` e vírgula decimal (padrão das planilhas no Brasil), tem BOM UTF-8 para acentos e neutraliza textos que começam com `= + - @` (proteção contra _CSV injection_). O PDF é gerado pela impressão do navegador, sem dependência extra no backend.
-- **Tempo real com Server-Sent Events.** As atualizações só vão do servidor para o navegador, então SSE basta e é mais simples que WebSocket (HTTP comum, sem protocolo extra). Os services publicam um evento a cada alteração, e ele só é enviado **depois do commit** (`@TransactionalEventListener`), para ninguém ser avisado de algo que foi desfeito. Cada evento vai apenas para os membros da carteira. O navegador lê o stream com `fetch`, mantendo o JWT no cabeçalho `Authorization` (o `EventSource` nativo obrigaria a colocá-lo na URL), e reconecta sozinho com espera crescente. Um _heartbeat_ a cada 25 s mantém a conexão aberta atrás de proxies como o do Render, e cada usuário pode ter no máximo 5 conexões abertas.
+- **Tempo real com Server-Sent Events.** As atualizações só vão do servidor para o navegador, então SSE basta e é mais simples que WebSocket (HTTP comum, sem protocolo extra). Os services publicam um evento a cada alteração, e ele só é enviado **depois do commit** (`@TransactionalEventListener`), para ninguém ser avisado de algo que foi desfeito. Cada evento vai apenas para os membros da carteira. O navegador lê o stream com `fetch`, mantendo o JWT no cabeçalho `Authorization` (o `EventSource` nativo obrigaria a colocá-lo na URL), e reconecta sozinho: tenta de novo a cada poucos segundos (no máximo 5 s) e na hora em que o usuário volta para a aba ou a internet volta. Um _heartbeat_ a cada 25 s mantém a conexão aberta atrás de proxies como o do Render, e cada usuário pode ter no máximo 5 conexões abertas.
+- **Pronto para deploy.** O backend tem um `Dockerfile` (o Render executa Java por Docker), lê toda a configuração de variáveis de ambiente e funciona com MySQL ou PostgreSQL sem mudar código. Como o plano gratuito do Render bloqueia SMTP, em produção os e-mails saem pela API HTTPS do Brevo; localmente continuam pelo Gmail. O _health check_ (`/actuator/health`) não depende do servidor de e-mail.
 - **Validação nos dois lados.** O frontend valida antes de enviar (e-mail, tamanho e força da senha, valores), e o backend repete as regras com Bean Validation.
 
 ## Próximos passos
 
-Itens ainda planejados para a entrega final: integração com IA, PWA, limite de requisições (rate limiting) e cabeçalhos de segurança, testes automatizados e deploy.
+Itens ainda planejados para a entrega final: integração com IA, PWA, limite de requisições (rate limiting) e cabeçalhos de segurança, testes automatizados e a publicação (deploy).

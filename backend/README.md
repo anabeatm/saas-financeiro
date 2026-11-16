@@ -1,13 +1,13 @@
 # FinEXP — Backend
 
-API REST em **Spring Boot** (Java 17), com Spring Security + JWT, Spring Data JPA/Hibernate e MySQL.
+API REST em **Spring Boot** (Java 17), com Spring Security + JWT e Spring Data JPA/Hibernate. Usa MySQL no desenvolvimento e PostgreSQL em produção (o driver é escolhido pelo `DB_URL`).
 A visão geral do projeto, as variáveis de ambiente e as decisões de projeto estão no [README da raiz](../README.md).
 
 ## Executar
 
 ```bash
 cp src/main/resources/application-secrets-example.properties src/main/resources/application-secrets.properties
-# preencha: spring.datasource.password, spring.mail.password, jwt.secret (>= 32 caracteres)
+# preencha: spring.datasource.password, spring.mail.username, spring.mail.password, jwt.secret (>= 32 caracteres)
 ./mvnw spring-boot:run
 ```
 
@@ -17,9 +17,18 @@ cp src/main/resources/application-secrets-example.properties src/main/resources/
 
 O banco `finexp` é criado automaticamente (`createDatabaseIfNotExist=true`) e as tabelas são geradas pelo Hibernate (`ddl-auto=update`).
 
+### Com Docker (como em produção)
+
+```bash
+docker build -t finexp-api .
+docker run -p 8080:8080 -e DB_URL=... -e DB_USERNAME=... -e DB_PASSWORD=... -e JWT_SECRET=... finexp-api
+```
+
+O passo a passo da publicação (Aiven, Brevo, Render e Vercel) está em [`docs/DEPLOY.md`](../docs/DEPLOY.md).
+
 ## Testar
 
-- Testes automatizados: `./mvnw test`. Os testes unitários do relatório (`ReportServiceTest`, `StatementCsvExporterTest`) e do tempo real (`WalletEventPublisherTest`, `SseConnectionRegistryTest`) rodam sem banco; o `FinExpApplicationTests` sobe o contexto completo e precisa do MySQL.
+- Testes automatizados: `./mvnw test`. Os testes unitários do relatório (`ReportServiceTest`, `StatementCsvExporterTest`) do tempo real (`WalletEventPublisherTest`, `SseConnectionRegistryTest`) e do envio de e-mail (`EmailServiceTest`) rodam sem banco; o `FinExpApplicationTests` sobe o contexto completo e precisa do MySQL.
 
 Para os passos de recuperação de senha sem e-mail real, ative `app.debug-reset-token=true` no arquivo de segredos.
 
