@@ -9,16 +9,22 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import lombok.Data;
 
+// "user" is a reserved word in PostgreSQL; the backticks make Hibernate quote the table name
+// in whichever database is used (the table keeps the same name in MySQL).
 @Entity
+@Table(name = "`user`")
 @Data
 public class User {
     @Id
@@ -40,7 +46,8 @@ public class User {
 
     // Profile picture as a data URL (e.g. "data:image/jpeg;base64,..."). The
     // frontend resizes it before upload, so it stays small.
-    @Column(columnDefinition = "MEDIUMTEXT")
+    // Large text column in any database (LONGTEXT in MySQL, TEXT in PostgreSQL).
+    @JdbcTypeCode(SqlTypes.LONG32VARCHAR)
     private String avatar;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
