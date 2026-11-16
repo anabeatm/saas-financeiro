@@ -1,16 +1,8 @@
 import api from "../../configs/axiosConfig";
 
-// Wait before each reconnection attempt; the last value repeats.
-const RETRY_DELAYS_MS = [1000, 2000, 5000, 10000, 30000];
-
-const wait = (ms, signal) =>
-  new Promise((resolve) => {
-    const timer = setTimeout(resolve, ms);
-    signal.addEventListener("abort", () => {
-      clearTimeout(timer);
-      resolve();
-    });
-  });
+// Wait before each reconnection attempt; the last value repeats. Kept short so the app comes
+// back quickly after a restart of the server (a failed attempt is a single cheap request).
+const RETRY_DELAYS_MS = [1000, 2000, 3000, 5000];
 
 // Splits a Server-Sent Events stream into messages ({ event, data }) and calls onMessage for each one.
 async function readMessages(body, onMessage) {
@@ -52,6 +44,37 @@ async function readMessages(body, onMessage) {
 export function connectEventStream({ onEvent, onStatus }) {
   const controller = new AbortController();
   let attempt = 0;
+  let wakeUp = null;
+
+  // Waits before the next attempt. Coming back to the tab or getting back online retries at once.
+  const waitBeforeRetry = (ms) =>
+    new Promise((resolve) => {
+      const done = () => {
+        clearTimeout(timer);
+        wakeUp = null;
+        resolve();
+      };
+      const timer = setTimeout(done, ms);
+      wakeUp = done;
+    });
+
+  const retryNow = () => {
+    if (document.visibilityState === "visible") wakeUp?.();
+  };
+  window.addEventListener("online", retryNow);
+  window.addEventListener("focus", retryNow);
+  document.addEventListener("visibilitychange", retryNow);
+
+  controller.signal.addEventListener(
+    "abort",
+    () => {
+      window.removeEventListener("online", retryNow);
+      window.removeEventListener("focus", retryNow);
+      document.removeEventListener("visibilitychange", retryNow);
+      wakeUp?.();
+    },
+    { once: true },
+  );
 
   const run = async () => {
     while (!controller.signal.aborted) {
@@ -91,7 +114,7 @@ export function connectEventStream({ onEvent, onStatus }) {
       }
 
       onStatus("connecting");
-      await wait(RETRY_DELAYS_MS[Math.min(attempt, RETRY_DELAYS_MS.length - 1)], controller.signal);
+      await waitBeforeRetry(RETRY_DELAYS_MS[Math.min(attempt, RETRY_DELAYS_MS.length - 1)]);
       attempt += 1;
     }
   };
