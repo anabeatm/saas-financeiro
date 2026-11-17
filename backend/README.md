@@ -28,7 +28,7 @@ O passo a passo da publicação (Aiven, Brevo, Render e Vercel) está em [`docs/
 
 ## Testar
 
-- Testes automatizados: `./mvnw test`. Os testes unitários do relatório (`ReportServiceTest`, `StatementCsvExporterTest`) do tempo real (`WalletEventPublisherTest`, `SseConnectionRegistryTest`) e do envio de e-mail (`EmailServiceTest`) rodam sem banco; o `FinExpApplicationTests` sobe o contexto completo e precisa do MySQL.
+- Testes automatizados: `./mvnw test`. Os testes unitários do relatório (`ReportServiceTest`, `StatementCsvExporterTest`) do tempo real (`WalletEventPublisherTest`, `SseConnectionRegistryTest`), do envio de e-mail (`EmailServiceTest`) e da segurança (`RateLimitFilterTest`, `LoginAttemptServiceTest`) rodam sem banco; o `FinExpApplicationTests` sobe o contexto completo e precisa do MySQL.
 
 Para os passos de recuperação de senha sem e-mail real, ative `app.debug-reset-token=true` no arquivo de segredos.
 
@@ -41,7 +41,7 @@ Para os passos de recuperação de senha sem e-mail real, ative `app.debug-reset
 | `repository` | Interfaces Spring Data JPA (inclui filtros por Specification) |
 | `model` | Entidades JPA |
 | `dto` | Objetos de entrada e saída; nenhuma entidade é devolvida pela API |
-| `security` | `SecurityFilter` (valida o JWT a cada requisição) e `SecurityConfig` |
+| `security` | `SecurityFilter` (valida o JWT a cada requisição), `SecurityConfig` (rotas, CORS, cabeçalhos de segurança), `RateLimitFilter` (limite por IP nas rotas de autenticação) e `LoginAttemptService` (bloqueio por senhas erradas) |
 | `exceptions` | `ResourceNotFoundException`, `BusinessException`, `ConflictException`, `BadRequestException` e o `GlobalExceptionHandler` |
 | `config` | Configuração do Swagger |
 | `realtime` | Tempo real (SSE): conexões abertas por usuário, publicação dos eventos de carteira e envio após o commit |

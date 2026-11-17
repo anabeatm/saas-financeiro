@@ -136,13 +136,32 @@ Os erros seguem sempre o formato `{ timestamp, status, error, message }`: 400 (v
 - **Spring Boot 4.0.6**, a versão mais recente na criação do projeto (a especificação cita a série 3.x).
 - **Saldo da carteira atômico.** Cada lançamento altera o saldo com um `UPDATE ... SET balance = balance + :delta` no banco, evitando perda de atualização quando dois membros lançam ao mesmo tempo.
 - **Categorias privadas.** Cada usuário só vê e usa as próprias categorias. Numa carteira compartilhada, a transação de outro membro mantém a categoria dele ao ser editada.
-- **Segurança.** Senhas com BCrypt; login sem enumeração de contas (mesma mensagem e tempo de resposta parecido para e-mail inexistente e senha errada); segredos fora do repositório; CORS restrito; erros internos nunca expõem detalhes de SQL.
+- **Segurança.** Detalhada na seção [Segurança (OWASP Top 10)](#segurança-owasp-top-10).
 - **Token de redefinição de senha.** Só vai por e-mail. A resposta de `forgot-password` o inclui apenas se `app.debug-reset-token=true`, para testes sem e-mail real.
 - **Relatório de extrato.** O saldo inicial é calculado a partir das transações anteriores ao período (não do saldo atual), então o extrato de qualquer período fecha com o saldo daquela data. O período máximo é de um ano, para manter o relatório leve. O CSV traz só a tabela de lançamentos (data, tipo, descrição, categoria, autor, valor e saldo), pronta para planilha; os totais e a divisão por categoria ficam na tela e no PDF. Usa `;` e vírgula decimal (padrão das planilhas no Brasil), tem BOM UTF-8 para acentos e neutraliza textos que começam com `= + - @` (proteção contra _CSV injection_). O PDF é gerado pela impressão do navegador, sem dependência extra no backend.
 - **Tempo real com Server-Sent Events.** As atualizações só vão do servidor para o navegador, então SSE basta e é mais simples que WebSocket (HTTP comum, sem protocolo extra). Os services publicam um evento a cada alteração, e ele só é enviado **depois do commit** (`@TransactionalEventListener`), para ninguém ser avisado de algo que foi desfeito. Cada evento vai apenas para os membros da carteira. O navegador lê o stream com `fetch`, mantendo o JWT no cabeçalho `Authorization` (o `EventSource` nativo obrigaria a colocá-lo na URL), e reconecta sozinho: tenta de novo a cada poucos segundos (no máximo 5 s) e na hora em que o usuário volta para a aba ou a internet volta. Um _heartbeat_ a cada 25 s mantém a conexão aberta atrás de proxies como o do Render, e cada usuário pode ter no máximo 5 conexões abertas.
 - **Pronto para deploy.** O backend tem um `Dockerfile` (o Render executa Java por Docker), lê toda a configuração de variáveis de ambiente e funciona com MySQL ou PostgreSQL sem mudar código. Como o plano gratuito do Render bloqueia SMTP, em produção os e-mails saem pela API HTTPS do Brevo; localmente continuam pelo Gmail. O _health check_ (`/actuator/health`) não depende do servidor de e-mail.
 - **Validação nos dois lados.** O frontend valida antes de enviar (e-mail, tamanho e força da senha, valores), e o backend repete as regras com Bean Validation.
 
+## Segurança (OWASP Top 10)
+
+Riscos considerados mais relevantes para um sistema financeiro compartilhado e como são tratados:
+
+| Risco (OWASP) | Proteção |
+|---|---|
+| **A01 Quebra de controle de acesso** | Toda regra de acesso é verificada no service: só membros veem uma carteira, só dono/editor alteram transações, só o dono gerencia a carteira e os membros, categorias são privadas. Recursos de outros usuários respondem 403/404. Os eventos em tempo real só vão para os membros da carteira. |
+| **A02 Falhas de criptografia** | Senhas com BCrypt; JWT assinado com HMAC-SHA256 e segredo de no mínimo 32 caracteres (a API não sobe sem ele); HTTPS obrigatório no navegador via `Strict-Transport-Security` em produção. |
+| **A03 Injeção** | Acesso ao banco só por JPA, consultas parametrizadas e Specifications (sem SQL montado com texto do usuário). No frontend, o React escapa todo conteúdo exibido. O CSV do relatório neutraliza fórmulas (_CSV injection_). |
+| **A04 Design inseguro** | Validação de entrada nos DTOs (tamanhos, formatos, valores positivos, datas, cor `#RRGGBB`, nome de ícone) e repetida no frontend; tokens de verificação e de redefinição de senha aleatórios, com validade e uso único. |
+| **A05 Configuração insegura** | Cabeçalhos de segurança na API (`Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS) e no frontend (`vercel.json`, com uma CSP que só permite recursos do próprio site e a API); CORS restrito às origens configuradas; só o `/actuator/health` exposto; erros devolvem mensagens genéricas, com os detalhes apenas no log do servidor. |
+| **A07 Falhas de identificação e autenticação** | **Limite de requisições por IP** nas rotas públicas de autenticação (login: 10/min; cadastro: 5/h; recuperação de senha: 5 a cada 15 min), com resposta 429 e `Retry-After`. **Bloqueio por conta**: 5 senhas erradas para o mesmo e-mail bloqueiam o login dele por 15 min. Login sem enumeração de contas (mesma mensagem e tempo parecido para e-mail inexistente e senha errada). |
+| **A09 Falhas de log e monitoramento** | Tentativas bloqueadas e limites excedidos ficam registrados no log, com o e-mail mascarado (`a***@dominio.com`). |
+| **Segredos** | Nenhuma credencial no repositório: tudo vem de variáveis de ambiente ou do `application-secrets.properties`, que está no `.gitignore` e fora da imagem Docker. |
+
+**CSRF:** não se aplica. A API não usa cookies de sessão; o token vai no cabeçalho `Authorization`, que um site malicioso não consegue enviar em nome do usuário. Por isso a proteção CSRF do Spring está desligada.
+
+**Limites conhecidos:** os contadores de limite e de bloqueio ficam em memória, o que funciona com uma instância da API (caso do deploy). Com várias instâncias, precisariam de um armazenamento compartilhado, como o Redis. O token fica no `localStorage`; a CSP restrita reduz o risco de ele ser lido por um script injetado (XSS).
+
 ## Próximos passos
 
-Itens ainda planejados para a entrega final: integração com IA, PWA, limite de requisições (rate limiting) e cabeçalhos de segurança, testes automatizados e a publicação (deploy).
+Itens ainda planejados para a entrega final: integração com IA, PWA, testes automatizados e a publicação (deploy).
