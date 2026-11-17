@@ -42,7 +42,7 @@ public class SecurityConfig {
     private final List<String> allowedOrigins;
 
     public SecurityConfig(SecurityFilter securityFilter, RateLimitFilter rateLimitFilter,
-            @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000}") List<String> allowedOrigins) {
+            @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173,http://localhost:3000}") List<String> allowedOrigins) {
         this.securityFilter = securityFilter;
         this.rateLimitFilter = rateLimitFilter;
         this.allowedOrigins = allowedOrigins;
