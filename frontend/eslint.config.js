@@ -26,4 +26,9 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    // Runs as a service worker, not in a page
+    files: ['src/pwa/service-worker.js'],
+    languageOptions: { globals: globals.serviceworker },
+  },
 ])
