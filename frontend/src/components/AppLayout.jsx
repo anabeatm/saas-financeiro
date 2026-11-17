@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import UserService from "../../services/UserService";
+import InstallAppButton from "../pwa/InstallAppButton";
 import LiveIndicator from "../realtime/LiveIndicator";
 import RealtimeProvider from "../realtime/RealtimeProvider";
 import Avatar from "./Avatar";
@@ -77,6 +78,9 @@ export default function AppLayout() {
               );
             })}
           </nav>
+          <div className="mt-4 border-t border-gray-100 pt-4">
+            <InstallAppButton />
+          </div>
         </div>
         <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-gray-50/50">
           <NavLink
@@ -108,6 +112,7 @@ export default function AppLayout() {
             <LiveIndicator compact />
           </div>
           <div className="flex items-center gap-3">
+            <InstallAppButton compact />
             <NavLink
               to="/app/profile"
               title="Profile settings"
