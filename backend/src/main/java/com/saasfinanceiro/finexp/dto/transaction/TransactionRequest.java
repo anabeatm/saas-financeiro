@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 
 import com.saasfinanceiro.finexp.model.enums.TransactionType;
 
@@ -17,6 +18,7 @@ public record TransactionRequest(
     @DecimalMin(value = "0.01", message = "Amount must be greater than zero")
     BigDecimal amount,
     
+    @Size(max = 255, message = "Description cannot exceed 255 characters")
     String description,
     
     @NotNull(message = "Date is required")

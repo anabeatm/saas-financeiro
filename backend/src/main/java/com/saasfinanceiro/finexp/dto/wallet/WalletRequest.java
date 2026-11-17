@@ -8,5 +8,6 @@ public record WalletRequest(
     @Size(max = 50, message = "Name cannot exceed 50 characters")
     String name,
     
+    @Size(max = 255, message = "Description cannot exceed 255 characters")
     String description
 ) {}
