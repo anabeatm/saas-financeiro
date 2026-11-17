@@ -19,6 +19,7 @@ Aplicação web para controlar receitas e despesas e **compartilhar carteiras** 
 | Dashboard | Saldo, receitas e despesas do mês, gráfico dos últimos 6 meses e lançamentos recentes |
 | Relatórios | Extrato da carteira por período: saldo inicial e final, saldo após cada lançamento, totais e participação por categoria; exportação em CSV e impressão/PDF |
 | Tempo real | Quando um membro lança, edita ou exclui uma transação, ou altera a carteira e seus membros, as telas dos demais membros se atualizam sozinhas e mostram um aviso (Server-Sent Events) |
+| PWA | Instalável no celular e no computador (botão "Install app" no menu); abre e navega sem internet, com aviso de modo offline |
 
 ### Papéis em uma carteira
 
@@ -102,7 +103,7 @@ Cada valor pode vir do arquivo `application-secrets.properties` ou de uma variá
 | `BREVO_API_KEY` | `app.mail.brevo-api-key` | Chave da API do Brevo. Quando definida, os e-mails saem pela API (produção) em vez de SMTP | vazio |
 | `MAIL_FROM` | `app.mail.from` | Remetente dos e-mails (precisa estar verificado no Brevo) | o `MAIL_USERNAME` |
 | `APP_FRONTEND_URL` | `app.frontend-url` | URL pública do frontend, usada nos links dos e-mails | `http://localhost:5173` |
-| `APP_CORS_ALLOWED_ORIGINS` | `app.cors.allowed-origins` | Origens permitidas no CORS, separadas por vírgula | `http://localhost:5173,http://localhost:3000` |
+| `APP_CORS_ALLOWED_ORIGINS` | `app.cors.allowed-origins` | Origens permitidas no CORS, separadas por vírgula | `http://localhost:5173,http://localhost:4173,http://localhost:3000` (dev, preview e alternativa) |
 | `APP_DEBUG_RESET_TOKEN` | `app.debug-reset-token` | **Somente testes**: devolve o token de redefinição de senha na resposta | `false` |
 | `VITE_API_BASE_URL` | (frontend, `.env`) | URL da API vista pelo navegador | `http://localhost:8080` |
 
@@ -141,6 +142,7 @@ Os erros seguem sempre o formato `{ timestamp, status, error, message }`: 400 (v
 - **Relatório de extrato.** O saldo inicial é calculado a partir das transações anteriores ao período (não do saldo atual), então o extrato de qualquer período fecha com o saldo daquela data. O período máximo é de um ano, para manter o relatório leve. O CSV traz só a tabela de lançamentos (data, tipo, descrição, categoria, autor, valor e saldo), pronta para planilha; os totais e a divisão por categoria ficam na tela e no PDF. Usa `;` e vírgula decimal (padrão das planilhas no Brasil), tem BOM UTF-8 para acentos e neutraliza textos que começam com `= + - @` (proteção contra _CSV injection_). O PDF é gerado pela impressão do navegador, sem dependência extra no backend.
 - **Tempo real com Server-Sent Events.** As atualizações só vão do servidor para o navegador, então SSE basta e é mais simples que WebSocket (HTTP comum, sem protocolo extra). Os services publicam um evento a cada alteração, e ele só é enviado **depois do commit** (`@TransactionalEventListener`), para ninguém ser avisado de algo que foi desfeito. Cada evento vai apenas para os membros da carteira. O navegador lê o stream com `fetch`, mantendo o JWT no cabeçalho `Authorization` (o `EventSource` nativo obrigaria a colocá-lo na URL), e reconecta sozinho: tenta de novo a cada poucos segundos (no máximo 5 s) e na hora em que o usuário volta para a aba ou a internet volta. Um _heartbeat_ a cada 25 s mantém a conexão aberta atrás de proxies como o do Render, e cada usuário pode ter no máximo 5 conexões abertas.
 - **Pronto para deploy.** O backend tem um `Dockerfile` (o Render executa Java por Docker), lê toda a configuração de variáveis de ambiente e funciona com MySQL ou PostgreSQL sem mudar código. Como o plano gratuito do Render bloqueia SMTP, em produção os e-mails saem pela API HTTPS do Brevo; localmente continuam pelo Gmail. O _health check_ (`/actuator/health`) não depende do servidor de e-mail.
+- **PWA.** O app pode ser instalado (manifest com ícones, inclusive _maskable_, e atalhos para Transações e Relatórios) e abre sem internet: o service worker guarda os arquivos do app na instalação, e qualquer rota offline cai no app em cache. As respostas da API **não** são guardadas, para não deixar dados financeiros no aparelho; offline, uma faixa avisa que os dados voltam ao reconectar. O service worker é gerado no build por um plugin no `vite.config.js`, com a lista exata de arquivos daquela versão, e cada deploy substitui o cache anterior. Sem dependências extras.
 - **Validação nos dois lados.** O frontend valida antes de enviar (e-mail, tamanho e força da senha, valores), e o backend repete as regras com Bean Validation.
 
 ## Segurança (OWASP Top 10)
@@ -164,4 +166,4 @@ Riscos considerados mais relevantes para um sistema financeiro compartilhado e c
 
 ## Próximos passos
 
-Itens ainda planejados para a entrega final: integração com IA, PWA, testes automatizados e a publicação (deploy).
+Itens ainda planejados para a entrega final: integração com IA, testes automatizados e a publicação (deploy).

@@ -15,7 +15,7 @@ npm run dev              # http://localhost:5173
 |---|---|
 | `npm run dev` | Servidor de desenvolvimento |
 | `npm run build` | Build de produção em `dist/` |
-| `npm run preview` | Serve o build localmente |
+| `npm run preview` | Serve o build localmente (é onde o service worker do PWA funciona; no `npm run dev` ele fica desligado) |
 | `npm run lint` | ESLint |
 
 O backend precisa estar no ar (`VITE_API_BASE_URL`). O CORS do backend aceita `http://localhost:5173` por padrão.
@@ -47,6 +47,7 @@ src/
 ├── components/  Input, Button, Modal, ConfirmDialog, AppLayout, PasswordStrength, ...
 │   ├── wallets/ · transactions/ · categories/   modais de cada recurso
 ├── realtime/    conexão SSE, provider, useWalletEvents, indicador "Live" e textos das notificações
+├── pwa/         service worker, registro, botão "Install app" e aviso de offline
 └── utils/       validators, password (regras de senha), format, errors, selectedWallet
 ```
 
