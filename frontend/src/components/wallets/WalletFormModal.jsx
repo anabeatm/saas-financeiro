@@ -76,6 +76,7 @@ export default function WalletFormModal({ wallet, onClose, onSaved }) {
           <textarea
             id="wallet-description"
             rows={3}
+            maxLength={255}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-[#cb9d6c]"
