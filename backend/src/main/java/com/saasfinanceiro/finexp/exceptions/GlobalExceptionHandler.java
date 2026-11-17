@@ -3,7 +3,10 @@ package com.saasfinanceiro.finexp.exceptions;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,6 +20,8 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex) {
@@ -77,9 +82,18 @@ public class GlobalExceptionHandler {
         return buildResponse(405, "Method Not Allowed", "Method not allowed for this resource");
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ErrorResponse> handleTooManyRequests(TooManyRequestsException ex) {
+        ErrorResponse body = new ErrorResponse(LocalDateTime.now(), 429, "Too Many Requests", ex.getMessage());
+        return ResponseEntity.status(429)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(body);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
-        ex.printStackTrace();
+        // Full details go to the server log only; the client gets a generic message.
+        log.error("Unexpected error", ex);
 
         return buildResponse(500, "Internal Server Error", "Internal server error");
     }
