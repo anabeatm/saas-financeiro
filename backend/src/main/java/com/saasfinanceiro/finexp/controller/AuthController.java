@@ -32,6 +32,7 @@ import com.saasfinanceiro.finexp.model.VerificationToken;
 import com.saasfinanceiro.finexp.repository.PasswordResetTokenRepository;
 import com.saasfinanceiro.finexp.repository.UserRepository;
 import com.saasfinanceiro.finexp.repository.VerificationTokenRepository;
+import com.saasfinanceiro.finexp.security.LoginAttemptService;
 import com.saasfinanceiro.finexp.service.CategoryService;
 import com.saasfinanceiro.finexp.service.EmailService;
 import com.saasfinanceiro.finexp.service.TokenService;
@@ -46,13 +47,14 @@ public class AuthController {
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
     private final CategoryService categoryService;
+    private final LoginAttemptService loginAttemptService;
     private final String dummyHash;
     private final String frontendUrl;
     private final boolean debugResetToken;
 
     public AuthController(UserRepository userRepository, PasswordResetTokenRepository passwordResetTokenRepository,
             PasswordEncoder passwordEncoder, TokenService tokenService, VerificationTokenRepository verificationTokenRepository, EmailService emailService,
-            CategoryService categoryService,
+            CategoryService categoryService, LoginAttemptService loginAttemptService,
             @Value("${app.frontend-url:http://localhost:5173}") String frontendUrl,
             @Value("${app.debug-reset-token:false}") boolean debugResetToken) {
         this.userRepository = userRepository;
@@ -62,6 +64,7 @@ public class AuthController {
         this.verificationTokenRepository = verificationTokenRepository;
         this.emailService = emailService;
         this.categoryService = categoryService;
+        this.loginAttemptService = loginAttemptService;
         this.frontendUrl = frontendUrl;
         this.debugResetToken = debugResetToken;
         this.dummyHash = passwordEncoder.encode(UUID.randomUUID().toString());
@@ -69,6 +72,9 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
+        // 429 while this account is blocked after repeated wrong passwords.
+        loginAttemptService.checkNotBlocked(request.email());
+
         Optional<User> uOptional = userRepository.findByEmail(request.email());
 
         // Always run a BCrypt comparison so response time does not reveal whether the email exists.
@@ -76,10 +82,12 @@ public class AuthController {
         boolean passwordMatches = passwordEncoder.matches(request.password(), hashToCompare);
 
         if (uOptional.isEmpty() || !passwordMatches) {
+            loginAttemptService.recordFailure(request.email());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect email or password");
         }
 
         User user = uOptional.get();
+        loginAttemptService.recordSuccess(request.email());
 
         // Only revealed after the password is proven correct, to avoid account enumeration.
         if (!user.isEnabled()) {
