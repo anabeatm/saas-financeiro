@@ -5,7 +5,10 @@ Aplicação web para controlar receitas e despesas e **compartilhar carteiras** 
 - **Frontend:** React 19 + Vite + Tailwind CSS, Recharts para os gráficos.
 - **Backend:** Spring Boot, Spring Security com JWT, Spring Data JPA/Hibernate, Swagger (springdoc). Banco MySQL no desenvolvimento e PostgreSQL em produção.
 
-> **Deploy:** _link a ser adicionado quando o sistema for publicado._ Frontend na Vercel, API no Render (Docker) e banco PostgreSQL na Aiven; passo a passo em [`docs/DEPLOY.md`](docs/DEPLOY.md).
+> **Sistema publicado:** **https://saas-financeiro-nine.vercel.app**
+> API: https://saas-financeiro.onrender.com · Swagger: https://saas-financeiro.onrender.com/swagger-ui.html
+> Frontend na Vercel, API no Render (Docker) e banco PostgreSQL na Aiven; detalhes em [Publicação (deploy)](#publicação-deploy).
+> No plano gratuito do Render a API "dorme" após 15 min sem uso: o primeiro acesso depois disso pode levar cerca de 1 minuto.
 
 ## Funcionalidades
 
@@ -169,6 +172,21 @@ Riscos considerados mais relevantes para um sistema financeiro compartilhado e c
 
 **Limites conhecidos:** os contadores de limite e de bloqueio ficam em memória, o que funciona com uma instância da API (caso do deploy). Com várias instâncias, precisariam de um armazenamento compartilhado, como o Redis. O token fica no `localStorage`; a CSP restrita reduz o risco de ele ser lido por um script injetado (XSS).
 
+## Publicação (deploy)
+
+| Parte | Onde | Observação |
+|---|---|---|
+| Frontend | **Vercel** (pasta `frontend`) | `VITE_API_BASE_URL` aponta para a API; `vercel.json` faz as rotas abrirem o app e define os cabeçalhos de segurança |
+| API | **Render**, plano gratuito, com Docker (pasta `backend`, `Dockerfile`) | Health check em `/actuator/health`; toda a configuração vem de variáveis de ambiente |
+| Banco | **Aiven for PostgreSQL**, plano gratuito | `DB_URL` no formato `jdbc:postgresql://HOST:PORT/defaultdb?sslmode=require`; as tabelas são criadas pela aplicação |
+| E-mails | **Brevo** (API HTTPS) | O plano gratuito do Render bloqueia SMTP, por isso em produção os e-mails saem pela API do Brevo (`BREVO_API_KEY`, `MAIL_FROM`) |
+
+Variáveis definidas no Render: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET` (segredo próprio da produção), `GEMINI_API_KEY`, `APP_FRONTEND_URL` e `APP_CORS_ALLOWED_ORIGINS` (ambas com a URL da Vercel, sem barra no final) e, quando configurado, `BREVO_API_KEY` e `MAIL_FROM`. Na Vercel: `VITE_API_BASE_URL`.
+
+**Por que PostgreSQL e Brevo?** A Aiven deixou de criar bancos MySQL gratuitos em novembro de 2026, e o Render gratuito bloqueia as portas SMTP desde setembro de 2025. Como o código escolhe o banco pela URL e o envio de e-mail pela presença da chave do Brevo, o mesmo código roda localmente (MySQL e Gmail) e em produção (PostgreSQL e Brevo).
+
+**Planos gratuitos:** a API no Render "dorme" após 15 minutos sem acesso e leva cerca de 1 minuto para acordar; o indicador de tempo real fica em "Connecting..." nesse intervalo e volta a "Live" sozinho. O banco da Aiven pode ser desligado depois de um longo período sem uso; nesse caso, basta ligá-lo de novo no painel da Aiven.
+
 ## Próximos passos
 
-Itens ainda planejados para a entrega final: testes automatizados e a publicação (deploy).
+Item opcional ainda planejado: testes de integração dos fluxos principais (os testes unitários já cobrem relatório, tempo real, e-mail, segurança e IA).

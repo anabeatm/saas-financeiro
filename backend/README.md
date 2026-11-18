@@ -24,7 +24,7 @@ docker build -t finexp-api .
 docker run -p 8080:8080 -e DB_URL=... -e DB_USERNAME=... -e DB_PASSWORD=... -e JWT_SECRET=... finexp-api
 ```
 
-O passo a passo da publicação (Aiven, Brevo, Render e Vercel) está em [`docs/DEPLOY.md`](../docs/DEPLOY.md).
+A API publicada roda exatamente essa imagem no Render: https://saas-financeiro.onrender.com (Swagger em `/swagger-ui.html`). A configuração da publicação (Aiven, Render, Vercel e Brevo) está na seção [Publicação (deploy)](../README.md#publicação-deploy) do README da raiz.
 
 ## Testar
 
