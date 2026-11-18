@@ -419,6 +419,7 @@ const Transactions = () => {
           categories={categories}
           onClose={() => setFormTransaction(null)}
           onSaved={handleSaved}
+          onCategoryCreated={(category) => setCategories((prev) => [...prev, category])}
         />
       )}
 

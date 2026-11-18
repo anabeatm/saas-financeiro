@@ -550,6 +550,7 @@ const Dashboard = () => {
           categories={categories}
           onClose={() => setShowTransactionForm(false)}
           onSaved={handleTransactionSaved}
+          onCategoryCreated={(category) => setCategories((prev) => [...prev, category])}
         />
       )}
     </div>

@@ -18,20 +18,24 @@ const TYPES = [
   { value: "INCOME", label: "Income", active: "bg-green-600 text-white" },
 ];
 
-// Creates a category, or edits `category` when it is passed in.
+// Creates a category, or edits `category` when it is passed in. `initialValues` ({ name, icon, color })
+// pre-fills a new category, e.g. with the one proposed by the AI.
 export default function CategoryFormModal({
   category,
   defaultType = "EXPENSE",
+  initialValues,
   onClose,
   onSaved,
 }) {
   const isEdit = Boolean(category);
   const { addToast } = useToast();
 
-  const [name, setName] = useState(category?.name ?? "");
+  const [name, setName] = useState(category?.name ?? initialValues?.name ?? "");
   const [type, setType] = useState(category?.type ?? defaultType);
-  const [color, setColor] = useState(category?.color ?? DEFAULT_CATEGORY_COLOR);
-  const [icon, setIcon] = useState(category?.icon ?? "");
+  const [color, setColor] = useState(
+    category?.color ?? initialValues?.color ?? DEFAULT_CATEGORY_COLOR,
+  );
+  const [icon, setIcon] = useState(category?.icon ?? initialValues?.icon ?? "");
   const [nameError, setNameError] = useState("");
   const [saving, setSaving] = useState(false);
 

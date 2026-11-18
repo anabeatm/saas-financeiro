@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ReportService from "../../../services/ReportService";
 import WalletService from "../../../services/WalletService";
+import AiInsightsCard from "../../components/reports/AiInsightsCard";
 import { useToast } from "../../components/useToast";
 import { useWalletEvents } from "../../realtime/useRealtime";
 import { getErrorMessage } from "../../utils/errors";
@@ -421,6 +422,13 @@ const Reports = () => {
               in {report.transactionCount} transaction
               {report.transactionCount === 1 ? "" : "s"}.
             </p>
+
+            <AiInsightsCard
+              key={`${walletId}|${period.startDate}|${period.endDate}`}
+              walletId={walletId}
+              startDate={period.startDate}
+              endDate={period.endDate}
+            />
 
             <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2 print:grid-cols-2">
               <CategoryBreakdown
