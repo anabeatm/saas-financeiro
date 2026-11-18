@@ -28,7 +28,7 @@ O passo a passo da publicação (Aiven, Brevo, Render e Vercel) está em [`docs/
 
 ## Testar
 
-- Testes automatizados: `./mvnw test`. Os testes unitários do relatório (`ReportServiceTest`, `StatementCsvExporterTest`) do tempo real (`WalletEventPublisherTest`, `SseConnectionRegistryTest`), do envio de e-mail (`EmailServiceTest`) e da segurança (`RateLimitFilterTest`, `LoginAttemptServiceTest`) rodam sem banco; o `FinExpApplicationTests` sobe o contexto completo e precisa do MySQL.
+- Testes automatizados: `./mvnw test`. Os testes unitários do relatório (`ReportServiceTest`, `StatementCsvExporterTest`) do tempo real (`WalletEventPublisherTest`, `SseConnectionRegistryTest`), do envio de e-mail (`EmailServiceTest`) e da segurança (`RateLimitFilterTest`, `LoginAttemptServiceTest`) e da IA (`GeminiClientTest`, `AiServiceTest`) rodam sem banco; o `FinExpApplicationTests` sobe o contexto completo e precisa do MySQL.
 
 Para os passos de recuperação de senha sem e-mail real, ative `app.debug-reset-token=true` no arquivo de segredos.
 
@@ -45,6 +45,7 @@ Para os passos de recuperação de senha sem e-mail real, ative `app.debug-reset
 | `exceptions` | `ResourceNotFoundException`, `BusinessException`, `ConflictException`, `BadRequestException` e o `GlobalExceptionHandler` |
 | `config` | Configuração do Swagger |
 | `realtime` | Tempo real (SSE): conexões abertas por usuário, publicação dos eventos de carteira e envio após o commit |
+| `ai` | Integração com o Google Gemini: `GeminiClient` (chamada HTTP) e `AiService` (sugestão de categoria e _insights_ do relatório, com validação da resposta) |
 
 ## Modelo de dados
 
