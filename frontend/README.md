@@ -48,6 +48,7 @@ src/
 │   ├── wallets/ · transactions/ · categories/   modais de cada recurso
 ├── realtime/    conexão SSE, provider, useWalletEvents, indicador "Live" e textos das notificações
 ├── pwa/         service worker, registro, botão "Install app" e aviso de offline
+├── components/reports/AiInsightsCard.jsx   card de insights por IA nos relatórios
 └── utils/       validators, password (regras de senha), format, errors, selectedWallet
 ```
 
