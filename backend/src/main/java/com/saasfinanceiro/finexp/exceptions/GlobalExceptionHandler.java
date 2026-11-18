@@ -82,6 +82,11 @@ public class GlobalExceptionHandler {
         return buildResponse(405, "Method Not Allowed", "Method not allowed for this resource");
     }
 
+    @ExceptionHandler(AiUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleAiUnavailable(AiUnavailableException ex) {
+        return buildResponse(503, "Service Unavailable", ex.getMessage());
+    }
+
     @ExceptionHandler(TooManyRequestsException.class)
     public ResponseEntity<ErrorResponse> handleTooManyRequests(TooManyRequestsException ex) {
         ErrorResponse body = new ErrorResponse(LocalDateTime.now(), 429, "Too Many Requests", ex.getMessage());
