@@ -181,7 +181,7 @@ Riscos considerados mais relevantes para um sistema financeiro compartilhado e c
 | Banco | **Aiven for PostgreSQL**, plano gratuito | `DB_URL` no formato `jdbc:postgresql://HOST:PORT/defaultdb?sslmode=require`; as tabelas são criadas pela aplicação |
 | E-mails | **Brevo** (API HTTPS) | O plano gratuito do Render bloqueia SMTP, por isso em produção os e-mails saem pela API do Brevo (`BREVO_API_KEY`, `MAIL_FROM`) |
 
-Variáveis definidas no Render: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET` (segredo próprio da produção), `GEMINI_API_KEY`, `APP_FRONTEND_URL` e `APP_CORS_ALLOWED_ORIGINS` (ambas com a URL da Vercel, sem barra no final) e, quando configurado, `BREVO_API_KEY` e `MAIL_FROM`. Na Vercel: `VITE_API_BASE_URL`.
+Variáveis definidas no Render: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET` (segredo próprio da produção), `GEMINI_API_KEY`, `APP_FRONTEND_URL` e `APP_CORS_ALLOWED_ORIGINS` (ambas com a URL da Vercel, sem barra no final) `BREVO_API_KEY` e `MAIL_FROM` (remetente verificado no Brevo). Na Vercel: `VITE_API_BASE_URL`.
 
 **Por que PostgreSQL e Brevo?** A Aiven deixou de criar bancos MySQL gratuitos em novembro de 2026, e o Render gratuito bloqueia as portas SMTP desde setembro de 2025. Como o código escolhe o banco pela URL e o envio de e-mail pela presença da chave do Brevo, o mesmo código roda localmente (MySQL e Gmail) e em produção (PostgreSQL e Brevo).
 
