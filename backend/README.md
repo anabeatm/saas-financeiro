@@ -28,7 +28,7 @@ A API publicada roda exatamente essa imagem no Render: https://saas-financeiro.o
 
 ## Testar
 
-- Testes automatizados: `./mvnw test`. Os testes unitários do relatório (`ReportServiceTest`, `StatementCsvExporterTest`) do tempo real (`WalletEventPublisherTest`, `SseConnectionRegistryTest`), do envio de e-mail (`EmailServiceTest`) e da segurança (`RateLimitFilterTest`, `LoginAttemptServiceTest`) e da IA (`GeminiClientTest`, `AiServiceTest`) rodam sem banco; o `FinExpApplicationTests` sobe o contexto completo e precisa do MySQL.
+- Testes automatizados: `./mvnw test`. Os testes unitários do relatório (`ReportServiceTest`, `StatementCsvExporterTest`) do tempo real (`WalletEventPublisherTest`, `SseConnectionRegistryTest`), do envio de e-mail (`EmailServiceTest`) e da segurança (`RateLimitFilterTest`, `LoginAttemptServiceTest`) da IA (`GeminiClientTest`, `AiServiceTest`) e da gamificação (`GamificationServiceTest`, `BudgetServiceTest`, `StreakTrackerTest`, `LevelCalculatorTest`) rodam sem banco; o `FinExpApplicationTests` sobe o contexto completo e precisa do MySQL.
 
 Para os passos de recuperação de senha sem e-mail real, ative `app.debug-reset-token=true` no arquivo de segredos.
 
@@ -45,11 +45,12 @@ Para os passos de recuperação de senha sem e-mail real, ative `app.debug-reset
 | `exceptions` | `ResourceNotFoundException`, `BusinessException`, `ConflictException`, `BadRequestException` e o `GlobalExceptionHandler` |
 | `config` | Configuração do Swagger |
 | `realtime` | Tempo real (SSE): conexões abertas por usuário, publicação dos eventos de carteira e envio após o commit |
+| `gamification` | `GamificationService` (XP, níveis, ofensiva, check-in, conquistas e fechamento do mês), `BudgetService` (orçamentos e alertas), regras puras em `LevelCalculator` e `StreakTracker`, e o `TransactionActivityListener`, que pontua depois do commit de cada transação |
 | `ai` | Integração com o Google Gemini: `GeminiClient` (chamada HTTP) e `AiService` (sugestão de categoria e _insights_ do relatório, com validação da resposta) |
 
 ## Modelo de dados
 
-`User` 1—N `Wallet` (dono) · `Wallet` N—N `User` via `WalletMember` (papel `OWNER`, `EDITOR` ou `VIEWER`, par carteira+usuário único) · `Wallet` 1—N `Transaction` · `User` 1—N `Category` · `VerificationToken` e `PasswordResetToken` (um por solicitação, com expiração).
+`User` 1—N `Wallet` (dono) · `Wallet` N—N `User` via `WalletMember` (papel `OWNER`, `EDITOR` ou `VIEWER`, par carteira+usuário único) · `Wallet` 1—N `Transaction` · `User` 1—N `Category` · `VerificationToken` e `PasswordResetToken` (um por solicitação, com expiração) · Gamificação: `User` 1—N `XpEvent` (livro-razão de XP, chave de origem única por usuário), `User` 1—1 `UserProgress` (ofensiva, congelamentos, último mês fechado), `User` 1—N `UserAchievement` (código único por usuário) e `Category` 1—1 `Budget` (limite mensal).
 
 ## Erros
 
@@ -65,5 +66,5 @@ Toda resposta de erro segue o mesmo formato:
 | 401 | Requisição sem autenticação válida |
 | 403 | Autenticado, mas sem permissão (papel insuficiente, carteira de outro usuário) |
 | 404 | Recurso inexistente (ou que o usuário não pode ver) |
-| 409 | Conflito, como e-mail ou membro já cadastrado |
-| 422 | Regra de negócio, como excluir categoria com transações ou senha atual incorreta |
+| 409 | Conflito, como e-mail ou membro já cadastrado, ou check-in repetido ou num dia com despesa |
+| 422 | Regra de negócio, como excluir categoria com transações, senha atual incorreta ou orçamento em categoria de receita |

@@ -1,6 +1,6 @@
 # FinEXP — Gestão financeira pessoal e compartilhada
 
-Aplicação web para controlar receitas e despesas e **compartilhar carteiras** com outras pessoas, cada uma com um papel (dono, editor ou visualizador). Projeto da disciplina de Programação para Web.
+Aplicação web para controlar receitas e despesas e **compartilhar carteiras** com outras pessoas, cada uma com um papel (dono, editor ou visualizador), com **gamificação**: bons hábitos financeiros rendem XP, níveis, ofensiva diária e conquistas. Projeto da disciplina de Programação para Web.
 
 - **Frontend:** React 19 + Vite + Tailwind CSS, Recharts para os gráficos.
 - **Backend:** Spring Boot, Spring Security com JWT, Spring Data JPA/Hibernate, Swagger (springdoc). Banco MySQL no desenvolvimento e PostgreSQL em produção.
@@ -19,7 +19,9 @@ Aplicação web para controlar receitas e despesas e **compartilhar carteiras** 
 | Compartilhamento | Convidar por e-mail, trocar o papel e remover membros (somente o dono) |
 | Transações | Criar, editar e excluir; filtros por tipo, categoria e período; paginação |
 | Categorias | Privadas de cada usuário; categorias padrão criadas no cadastro; cor e ícone |
-| Dashboard | Saldo, receitas e despesas do mês, gráfico dos últimos 6 meses e lançamentos recentes |
+| Dashboard | Nível, XP e ofensiva; saldo, receitas e despesas do mês, gráfico dos últimos 6 meses, orçamentos do mês e lançamentos recentes |
+| Orçamentos | Limite mensal por categoria de despesa, com barra de uso em Categorias e no Dashboard e alertas em tempo real ao chegar a 80% e ao passar do limite |
+| Gamificação | XP, níveis com títulos, ofensiva de dias seguidos (com "congelamentos"), check-in de dia sem gastos e 6 conquistas; página **Progress** com as regras. Detalhes em [Gamificação](#gamificação) |
 | Relatórios | Extrato da carteira por período: saldo inicial e final, saldo após cada lançamento, totais e participação por categoria; exportação em CSV e impressão/PDF |
 | Tempo real | Quando um membro lança, edita ou exclui uma transação, ou altera a carteira e seus membros, as telas dos demais membros se atualizam sozinhas e mostram um aviso (Server-Sent Events) |
 | PWA | Instalável no celular e no computador (botão "Install app" no menu); abre e navega sem internet, com aviso de modo offline |
@@ -36,6 +38,32 @@ Aplicação web para controlar receitas e despesas e **compartilhar carteiras** 
 
 As regras são verificadas **no service**, não apenas na controller.
 
+## Gamificação
+
+A ideia é **premiar comportamento, não volume**: registrar muitas transações rende pouco, enquanto a maior parte do XP vem de fechar o mês dentro do orçamento e guardando parte da renda. Os valores são comparados em **percentual**, então quem ganha mais não leva vantagem.
+
+### Como se ganha XP
+
+| Ação | XP | Regra |
+|---|---|---|
+| Registrar uma transação | +5 | No máximo 10 por dia, e só se a data for dos últimos 3 dias (lançamento retroativo não pontua). Excluir a transação em até 24 h devolve o XP |
+| Check-in "No spending today" | +5 | Uma vez por dia, e só se o usuário não lançou despesa no dia. Mantém a ofensiva sem precisar inventar um gasto |
+| Ofensiva de 7 dias | +30 | Uma vez por ofensiva |
+| Ofensiva de 30 dias | +150 | Uma vez por ofensiva |
+| Fechar o mês dentro de um orçamento | +50 | Por categoria que ficou dentro do limite |
+| Fechar o mês com receitas maiores que despesas | +100 a +200 | +10 a cada 5% da renda guardada (até +100 de bônus). Contam as transações criadas pelo próprio usuário |
+
+O sistema nunca tira XP como castigo (só desfaz o XP de uma transação excluída logo depois), porque punição desmotiva.
+
+### Níveis, ofensiva e conquistas
+
+- **Níveis:** chegar ao nível _n_ exige `50 · (n − 1) · n` XP no total (100, 300, 600, 1000...). A cada 5 níveis o título muda: _Beginner_, _Organized_ (5), _Saver_ (10), _Strategist_ (15) e _Finance Master_ (20). Na tela, o nível é uma moeda em pixel art cujo metal acompanha o título (bronze, prata, ouro, esmeralda e ametista).
+- **Ofensiva:** conta os dias seguidos com atividade (uma transação criada ou um check-in). A cada 7 dias seguidos o usuário ganha um **congelamento** (até 2), que salva a ofensiva num dia esquecido.
+- **Conquistas:** _First Step_ (primeira transação), _Iron Week_ (7 dias seguidos), _Flawless Month_ (30 dias seguidos), _On Plan_ (mês dentro de todos os orçamentos), _Saver_ (guardar 20% da renda num mês) e _Zero Day_ (5 dias sem gastos no mesmo mês). Cada uma tem um emblema em pixel art, cinza enquanto bloqueada.
+- **Orçamentos:** o limite vale para as despesas da categoria em qualquer carteira (as categorias são do usuário). O aviso sai só no momento em que um lançamento **cruza** 80% e quando **passa** do limite, então ninguém recebe o mesmo alerta duas vezes.
+
+XP, nível, conquistas e alertas de orçamento chegam na hora por Server-Sent Events, como notificações.
+
 ## Arquitetura
 
 ```
@@ -49,12 +77,14 @@ saas-financeiro/
 │       ├── dto/          objetos de entrada e saída (a API nunca devolve entidades)
 │       ├── security/     filtro JWT e configuração do Spring Security
 │       ├── exceptions/   exceções de negócio e @RestControllerAdvice
+│       ├── gamification/ XP, níveis, ofensiva, conquistas e orçamentos
 │       └── config/       Swagger
 └── frontend/   SPA React
     ├── services/         chamadas à API (axios)
     └── src/
         ├── pages/        telas (auth/ e api/)
         ├── components/   componentes reutilizáveis (Input, Modal, AppLayout, ...)
+        │   └── gamification/  sprites em pixel art, cards de progresso e de orçamentos
         └── utils/        validações, formatação, regras de senha
 ```
 
@@ -111,6 +141,7 @@ Cada valor pode vir do arquivo `application-secrets.properties` ou de uma variá
 | `APP_DEBUG_RESET_TOKEN` | `app.debug-reset-token` | **Somente testes**: devolve o token de redefinição de senha na resposta | `false` |
 | `GEMINI_API_KEY` | `app.ai.gemini-api-key` | Chave da API do Gemini (Google AI Studio). Sem ela, os botões de IA avisam que o recurso não está configurado | vazio |
 | `GEMINI_MODEL` | `app.ai.model` | Modelo do Gemini usado | `gemini-3.5-flash-lite` |
+| `GAMIFICATION_ZONE` | `app.gamification.zone` | Fuso horário dos usuários: define a que dia conta cada atividade da ofensiva e quando o mês termina | `America/Sao_Paulo` |
 | `VITE_API_BASE_URL` | (frontend, `.env`) | URL da API vista pelo navegador | `http://localhost:8080` |
 
 ### Documentação da API
@@ -133,7 +164,9 @@ Rotas de autenticação em `/auth/*` e demais recursos em `/api/v1/*`. Todas, ex
 | Transações | `GET`, `POST /api/v1/wallets/{id}/transactions`; `GET`, `PUT`, `DELETE .../transactions/{transactionId}` |
 | Resumo | `GET /api/v1/wallets/{id}/summary?startDate=&endDate=` |
 | Relatórios | `GET /api/v1/wallets/{id}/reports/statement?startDate=&endDate=` (JSON) e `.../reports/statement/csv` (download) |
-| Tempo real | `GET /api/v1/events/stream` (`text/event-stream`): eventos `wallet-event` das carteiras de que o usuário é membro |
+| Tempo real | `GET /api/v1/events/stream` (`text/event-stream`): eventos `wallet-event` das carteiras de que o usuário é membro e `gamification-event` do próprio progresso (XP, nível, conquista, alerta de orçamento) |
+| Gamificação | `GET /api/v1/gamification/me` (nível, XP, ofensiva, conquistas e XP recente) e `POST /api/v1/gamification/check-in` (409 se já fez check-in ou lançou despesa no dia) |
+| Orçamentos | `GET /api/v1/budgets?month=yyyy-MM`; `PUT`, `DELETE /api/v1/budgets/{categoryId}` (`{ monthlyLimit }`; 422 para categoria de receita) |
 | IA | `POST /api/v1/ai/category-suggestion` (`{ description, type }`) e `GET /api/v1/wallets/{id}/reports/insights?startDate=&endDate=`; 503 se a IA não estiver configurada |
 
 Os erros seguem sempre o formato `{ timestamp, status, error, message }`: 400 (validação), 401 (sem autenticação), 403 (sem permissão), 404, 409 (conflito), 422 (regra de negócio).
@@ -151,6 +184,7 @@ Os erros seguem sempre o formato `{ timestamp, status, error, message }`: 400 (v
 - **Pronto para deploy.** O backend tem um `Dockerfile` (o Render executa Java por Docker), lê toda a configuração de variáveis de ambiente e funciona com MySQL ou PostgreSQL sem mudar código. Como o plano gratuito do Render bloqueia SMTP, em produção os e-mails saem pela API HTTPS do Brevo; localmente continuam pelo Gmail. O _health check_ (`/actuator/health`) não depende do servidor de e-mail.
 - **IA com Google Gemini.** O backend chama a API do Gemini (`generateContent`) pedindo a resposta em JSON, e **nunca confia nela sem conferir**: a categoria sugerida precisa estar entre as categorias do próprio usuário que foram enviadas; numa categoria nova proposta, o nome é limpo e limitado a 40 caracteres, o ícone e a cor só são aceitos se estiverem nas listas que o app suporta, e um nome igual a uma categoria existente vira a sugestão dessa categoria; os textos dos _insights_ são aparados e limitados. Nada é criado sem o usuário confirmar no formulário. A descrição vai marcada como dado, com a instrução de ignorar ordens escritas nela (proteção contra _prompt injection_). Para privacidade, a sugestão envia só a descrição digitada e os nomes das categorias, e os _insights_ usam apenas totais por categoria (sem descrições nem nomes de membros). Cada usuário pode fazer até 10 chamadas por minuto, para proteger a cota gratuita. Sem a chave, o resto do app funciona normalmente.
 - **PWA.** O app pode ser instalado (manifest com ícones, inclusive _maskable_, e atalhos para Transações e Relatórios) e abre sem internet: o service worker guarda os arquivos do app na instalação, e qualquer rota offline cai no app em cache. As respostas da API **não** são guardadas, para não deixar dados financeiros no aparelho; offline, uma faixa avisa que os dados voltam ao reconectar. O service worker é gerado no build por um plugin no `vite.config.js`, com a lista exata de arquivos daquela versão, e cada deploy substitui o cache anterior. Sem dependências extras.
+- **Gamificação.** O XP fica num **livro-razão** (`XpEvent`): cada pontuação grava o motivo com uma chave única por usuário (por exemplo `TX:123`, `CHECKIN:2026-11-18`, `BUDGET:4:2026-10`). O total é a soma das linhas, então nunca fica inconsistente; a mesma coisa não pontua duas vezes; e desfazer é apagar a linha. O **fechamento do mês é preguiçoso**: acontece quando o usuário abre o próprio progresso, porque o plano gratuito do Render "dorme" e um agendamento para o dia 1º poderia nunca rodar (graças às chaves únicas, fechar duas vezes não duplica nada). A pontuação roda **depois do commit** da transação, numa transação própria do banco: um erro na gamificação só vai para o log e nunca impede salvar o lançamento. Os dias contam no fuso `America/Sao_Paulo`, já que o servidor roda em UTC. A pixel art é desenhada em SVG a partir de grades de caracteres no código, sem imagens nem fontes externas (a CSP do site só permite recursos próprios).
 - **Validação nos dois lados.** O frontend valida antes de enviar (e-mail, tamanho e força da senha, valores), e o backend repete as regras com Bean Validation.
 
 ## Segurança (OWASP Top 10)
@@ -189,4 +223,9 @@ Variáveis definidas no Render: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SEC
 
 ## Próximos passos
 
-Item opcional ainda planejado: testes de integração dos fluxos principais (os testes unitários já cobrem relatório, tempo real, e-mail, segurança e IA).
+Ideias planejadas para depois do MVP da gamificação:
+
+- **Metas coletivas** em carteiras compartilhadas: um valor-alvo que todos os membros ajudam a atingir, com XP para todos ao concluir (cooperação em vez de ranking).
+- **Desafios semanais com IA**, como "gaste no máximo R$ 85 com Delivery esta semana". O backend calcula a meta e o XP a partir do histórico; o Gemini só escreve o texto, porque número e pontuação não devem depender de um modelo de linguagem.
+- **Score de saúde financeira** (0 a 1000), combinando taxa de poupança, orçamentos cumpridos, constância nos registros e reserva.
+- Testes de integração dos fluxos principais (os testes unitários já cobrem relatório, tempo real, e-mail, segurança, IA e gamificação).
