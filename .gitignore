@@ -1,2 +1,2 @@
-# Local configuration of the Claude app (dev servers on this machine)
-.claude/
+.vscode
+.github
