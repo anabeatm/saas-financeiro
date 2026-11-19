@@ -6,9 +6,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
@@ -123,8 +121,8 @@ public class GamificationService {
         if (xpEventRepository.existsByUserIdAndSourceKey(user.getId(), checkInKey(today))) {
             throw new ConflictException("You already checked in today");
         }
-        if (transactionRepository.existsByCreatedByIdAndTypeAndCreatedAtGreaterThanEqual(user.getId(),
-                TransactionType.EXPENSE, startOfDayInServerTime(today))) {
+        // vale a data do gasto, não quando foi registrado (lançar o de ontem hoje não conta)
+        if (transactionRepository.existsByCreatedByIdAndTypeAndDate(user.getId(), TransactionType.EXPENSE, today)) {
             throw new ConflictException("You logged an expense today, so it is not a no-spending day");
         }
 
@@ -327,10 +325,6 @@ public class GamificationService {
     }
 
     /** createdAt tá no fuso do servidor */
-    private LocalDateTime startOfDayInServerTime(LocalDate day) {
-        return day.atStartOfDay(clock.getZone()).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
-    }
-
     private static String checkInKey(LocalDate day) {
         return "CHECKIN:" + day;
     }

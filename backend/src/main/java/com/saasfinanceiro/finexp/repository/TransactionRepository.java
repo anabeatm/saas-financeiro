@@ -2,7 +2,6 @@ package com.saasfinanceiro.finexp.repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,8 +39,8 @@ public interface TransactionRepository
     BigDecimal sumSignedAmountBefore(@Param("walletId") Long walletId, @Param("date") LocalDate date,
             @Param("income") TransactionType income);
 
-    boolean existsByCreatedByIdAndTypeAndCreatedAtGreaterThanEqual(Long userId, TransactionType type,
-            LocalDateTime from);
+    /** o usuário tem transação desse tipo com essa data? */
+    boolean existsByCreatedByIdAndTypeAndDate(Long userId, TransactionType type, LocalDate date);
 
     /** total por categoria do usuário, em todas as carteiras */
     @Query("""

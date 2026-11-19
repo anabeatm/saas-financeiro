@@ -169,11 +169,19 @@ class GamificationServiceTest {
 
     @Test
     void checkInIsRefusedOnADayWithExpenses() {
-        when(transactionRepository.existsByCreatedByIdAndTypeAndCreatedAtGreaterThanEqual(eq(7L),
-                eq(TransactionType.EXPENSE), any())).thenReturn(true);
+        when(transactionRepository.existsByCreatedByIdAndTypeAndDate(7L, TransactionType.EXPENSE, TODAY))
+                .thenReturn(true);
 
         assertThrows(ConflictException.class, () -> service.checkIn(user));
         verify(xpEventRepository, never()).save(any());
+    }
+
+    @Test
+    void checkInOnlyLooksAtExpensesDatedToday() {
+        service.checkIn(user);
+
+        verify(transactionRepository).existsByCreatedByIdAndTypeAndDate(7L, TransactionType.EXPENSE, TODAY);
+        assertEquals("CHECKIN:2026-11-18", savedXpEvents().get(0).getSourceKey());
     }
 
     @Test
