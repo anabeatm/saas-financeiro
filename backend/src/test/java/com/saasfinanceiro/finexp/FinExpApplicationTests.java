@@ -1,4 +1,4 @@
-package com.saas_financeiro.finEXP;
+package com.saasfinanceiro.finexp;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
