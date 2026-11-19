@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,6 +18,7 @@ import com.saasfinanceiro.finexp.dto.transaction.TransactionResponse;
 import com.saasfinanceiro.finexp.exceptions.BadRequestException;
 import com.saasfinanceiro.finexp.exceptions.BusinessException;
 import com.saasfinanceiro.finexp.exceptions.ResourceNotFoundException;
+import com.saasfinanceiro.finexp.gamification.TransactionActivity;
 import com.saasfinanceiro.finexp.model.Category;
 import com.saasfinanceiro.finexp.model.Transaction;
 import com.saasfinanceiro.finexp.model.User;
@@ -40,6 +42,7 @@ public class TransactionService {
     @Autowired private WalletMemberRepository walletMemberRepository;
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private WalletEventPublisher walletEventPublisher;
+    @Autowired private ApplicationEventPublisher applicationEventPublisher;
 
     private User getAuthenticatedUser() {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -100,6 +103,9 @@ public class TransactionService {
 
         walletEventPublisher.transactionChanged(WalletEventType.TRANSACTION_CREATED, member.getWallet(),
                 transaction, getAuthenticatedUser());
+        applicationEventPublisher.publishEvent(new TransactionActivity.Created(transaction.getId(),
+                getAuthenticatedUser().getId(), transaction.getType(), transaction.getAmount(), transaction.getDate(),
+                request.categoryId()));
         return new TransactionResponse(transaction);
     }
 
@@ -166,6 +172,8 @@ public class TransactionService {
 
         walletEventPublisher.transactionChanged(WalletEventType.TRANSACTION_DELETED, transaction.getWallet(),
                 transaction, getAuthenticatedUser());
+        applicationEventPublisher.publishEvent(
+                new TransactionActivity.Deleted(transaction.getId(), transaction.getCreatedBy().getId()));
     }
 
     private Transaction findInWallet(Long walletId, Long transactionId) {

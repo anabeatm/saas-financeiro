@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.saasfinanceiro.finexp.dto.category.CategoryRequest;
 import com.saasfinanceiro.finexp.dto.category.CategoryResponse;
@@ -15,6 +16,7 @@ import com.saasfinanceiro.finexp.exceptions.ResourceNotFoundException;
 import com.saasfinanceiro.finexp.model.Category;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.enums.TransactionType;
+import com.saasfinanceiro.finexp.repository.BudgetRepository;
 import com.saasfinanceiro.finexp.repository.CategoryRepository;
 import com.saasfinanceiro.finexp.repository.TransactionRepository;
 
@@ -38,6 +40,9 @@ public class CategoryService {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired
+    private BudgetRepository budgetRepository;
 
     private User getAuthenticatedUser() {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -84,6 +89,7 @@ public class CategoryService {
         return categories.stream().map(CategoryResponse::new).collect(Collectors.toList());
     }
 
+    @Transactional
     public CategoryResponse update(Long id, CategoryRequest request) {
         Category category = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
@@ -98,9 +104,15 @@ public class CategoryService {
         category.setIcon(request.icon());
 
         category = repository.save(category);
+
+        // Budgets only exist for expense categories.
+        if (category.getType() != TransactionType.EXPENSE) {
+            budgetRepository.deleteByCategoryId(id);
+        }
         return new CategoryResponse(category);
     }
 
+    @Transactional
     public void delete(Long id) {
         Category category = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
@@ -113,6 +125,7 @@ public class CategoryService {
             throw new BusinessException("Category has linked transactions and cannot be deleted");
         }
 
+        budgetRepository.deleteByCategoryId(id);
         repository.delete(category);
     }
 }

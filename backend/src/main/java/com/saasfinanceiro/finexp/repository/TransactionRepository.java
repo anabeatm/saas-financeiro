@@ -2,6 +2,7 @@ package com.saasfinanceiro.finexp.repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,4 +42,47 @@ public interface TransactionRepository
             """)
     BigDecimal sumSignedAmountBefore(@Param("walletId") Long walletId, @Param("date") LocalDate date,
             @Param("income") TransactionType income);
+
+    boolean existsByCreatedByIdAndTypeAndCreatedAtGreaterThanEqual(Long userId, TransactionType type,
+            LocalDateTime from);
+
+    /** Total of a type per category of a user (categories are private, so this spans every wallet). */
+    @Query("""
+            SELECT t.category.id AS categoryId, SUM(t.amount) AS total
+            FROM Transaction t
+            WHERE t.category.user.id = :userId AND t.type = :type AND t.date BETWEEN :startDate AND :endDate
+            GROUP BY t.category.id
+            """)
+    List<CategoryTotal> sumByCategory(@Param("userId") Long userId, @Param("type") TransactionType type,
+            @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("""
+            SELECT COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.category.id = :categoryId AND t.type = :type AND t.date BETWEEN :startDate AND :endDate
+            """)
+    BigDecimal sumByCategoryId(@Param("categoryId") Long categoryId, @Param("type") TransactionType type,
+            @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    /** Incomes and expenses a user created in a period, in any wallet. */
+    @Query("""
+            SELECT t.type AS type, SUM(t.amount) AS total
+            FROM Transaction t
+            WHERE t.createdBy.id = :userId AND t.date BETWEEN :startDate AND :endDate
+            GROUP BY t.type
+            """)
+    List<TypeTotal> sumByTypeCreatedBy(@Param("userId") Long userId, @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
+    interface CategoryTotal {
+        Long getCategoryId();
+
+        BigDecimal getTotal();
+    }
+
+    interface TypeTotal {
+        TransactionType getType();
+
+        BigDecimal getTotal();
+    }
 }

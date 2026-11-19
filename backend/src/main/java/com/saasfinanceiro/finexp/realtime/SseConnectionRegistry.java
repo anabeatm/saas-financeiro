@@ -25,6 +25,7 @@ public class SseConnectionRegistry {
     private static final Logger log = LoggerFactory.getLogger(SseConnectionRegistry.class);
 
     static final String EVENT_NAME = "wallet-event";
+    public static final String GAMIFICATION_EVENT_NAME = "gamification-event";
     /** The browser reconnects after this; it also bounds how long a dead connection is kept. */
     static final long CONNECTION_TIMEOUT_MS = Duration.ofMinutes(30).toMillis();
     /** Caps the resources a single account can hold open (oldest connection is closed first). */
@@ -56,6 +57,13 @@ public class SseConnectionRegistry {
             for (SseEmitter emitter : connections.getOrDefault(userId, List.of())) {
                 sendTo(userId, emitter, SseEmitter.event().name(EVENT_NAME).data(event, MediaType.APPLICATION_JSON));
             }
+        }
+    }
+
+    /** Pushes an event to every open connection of a single user. */
+    public void sendToUser(Long userId, String eventName, Object payload) {
+        for (SseEmitter emitter : connections.getOrDefault(userId, List.of())) {
+            sendTo(userId, emitter, SseEmitter.event().name(eventName).data(payload, MediaType.APPLICATION_JSON));
         }
     }
 
