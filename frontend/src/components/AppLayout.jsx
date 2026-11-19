@@ -6,6 +6,7 @@ import {
   LogOut,
   Settings,
   Tags,
+  Trophy,
   Wallet,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { to: "/app/categories", label: "Categories", icon: Tags },
   { to: "/app/wallets", label: "Wallets", icon: Wallet },
   { to: "/app/reports", label: "Reports", icon: FileText },
+  { to: "/app/progress", label: "Progress", icon: Trophy },
   { to: "/app/profile", label: "Profile", icon: Settings },
 ];
 

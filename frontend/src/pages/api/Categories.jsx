@@ -1,8 +1,11 @@
-import { Inbox, Pencil, Plus, Trash2 } from "lucide-react";
+import { Inbox, Pencil, Plus, Target, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import CategoryService from "../../../services/CategoryService";
 import CategoryFormModal from "../../components/categories/CategoryFormModal";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import BudgetBar from "../../components/gamification/BudgetBar";
+import BudgetFormModal from "../../components/gamification/BudgetFormModal";
+import useBudgets from "../../components/gamification/useBudgets";
 import { useToast } from "../../components/useToast";
 import {
   DEFAULT_CATEGORY_COLOR,
@@ -26,6 +29,10 @@ const Categories = () => {
   const [form, setForm] = useState(null);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  // Expense category whose monthly budget is being edited
+  const [budgetCategory, setBudgetCategory] = useState(null);
+  const { budgets, reload: reloadBudgets } = useBudgets();
+  const budgetByCategory = new Map(budgets.map((b) => [b.categoryId, b]));
 
   const loadCategories = useCallback(async () => {
     try {
@@ -44,7 +51,8 @@ const Categories = () => {
 
   const handleSaved = async () => {
     setForm(null);
-    await loadCategories();
+    // An expense category turned into an income one loses its budget.
+    await Promise.all([loadCategories(), reloadBudgets()]);
   };
 
   const handleDelete = async () => {
@@ -53,7 +61,7 @@ const Categories = () => {
       await new CategoryService().remove(categoryToDelete.id);
       addToast({ type: "success", title: "Category deleted" });
       setCategoryToDelete(null);
-      await loadCategories();
+      await Promise.all([loadCategories(), reloadBudgets()]);
     } catch (err) {
       // e.g. 422 when the category still has transactions
       addToast({
@@ -128,43 +136,68 @@ const Categories = () => {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {items.map((category) => {
                     const Icon = getCategoryIcon(category.icon);
+                    const isExpense = category.type === "EXPENSE";
+                    const budget = budgetByCategory.get(category.id);
                     return (
                       <div
                         key={category.id}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+                        className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
                       >
-                        <div className="flex min-w-0 items-center gap-3">
-                          <div
-                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
-                            style={{
-                              backgroundColor:
-                                category.color || DEFAULT_CATEGORY_COLOR,
-                            }}
-                          >
-                            <Icon size={18} />
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <div
+                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
+                              style={{
+                                backgroundColor:
+                                  category.color || DEFAULT_CATEGORY_COLOR,
+                              }}
+                            >
+                              <Icon size={18} />
+                            </div>
+                            <p className="truncate text-sm font-semibold text-gray-700">
+                              {category.name}
+                            </p>
                           </div>
-                          <p className="truncate text-sm font-semibold text-gray-700">
-                            {category.name}
-                          </p>
+                          <div className="flex shrink-0 items-center gap-1">
+                            {isExpense && (
+                              <button
+                                onClick={() => setBudgetCategory(category)}
+                                aria-label={`Monthly budget of ${category.name}`}
+                                title={budget ? "Change budget" : "Set monthly budget"}
+                                className={`cursor-pointer rounded p-1.5 hover:bg-gray-50 ${budget ? "text-[#a88d6f]" : "text-gray-400 hover:text-[#a88d6f]"}`}
+                              >
+                                <Target size={16} />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => setForm(category)}
+                              aria-label={`Edit ${category.name}`}
+                              title="Edit"
+                              className="cursor-pointer rounded p-1.5 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              onClick={() => setCategoryToDelete(category)}
+                              aria-label={`Delete ${category.name}`}
+                              title="Delete"
+                              className="cursor-pointer rounded p-1.5 text-gray-400 hover:bg-gray-50 hover:text-red-500"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex shrink-0 items-center gap-1">
-                          <button
-                            onClick={() => setForm(category)}
-                            aria-label={`Edit ${category.name}`}
-                            title="Edit"
-                            className="cursor-pointer rounded p-1.5 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            onClick={() => setCategoryToDelete(category)}
-                            aria-label={`Delete ${category.name}`}
-                            title="Delete"
-                            className="cursor-pointer rounded p-1.5 text-gray-400 hover:bg-gray-50 hover:text-red-500"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
+                        {isExpense &&
+                          (budget ? (
+                            <BudgetBar budget={budget} compact />
+                          ) : (
+                            <button
+                              onClick={() => setBudgetCategory(category)}
+                              className="cursor-pointer self-start text-xs font-medium text-gray-400 hover:text-[#a88d6f]"
+                            >
+                              + Set a monthly budget
+                            </button>
+                          ))}
                       </div>
                     );
                   })}
@@ -181,6 +214,18 @@ const Categories = () => {
           defaultType={form.type}
           onClose={() => setForm(null)}
           onSaved={handleSaved}
+        />
+      )}
+
+      {budgetCategory && (
+        <BudgetFormModal
+          category={budgetCategory}
+          budget={budgetByCategory.get(budgetCategory.id)}
+          onClose={() => setBudgetCategory(null)}
+          onSaved={async () => {
+            setBudgetCategory(null);
+            await reloadBudgets();
+          }}
         />
       )}
 

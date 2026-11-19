@@ -38,10 +38,12 @@ async function readMessages(body, onMessage) {
  * fetch: the JWT stays in the header instead of going into the URL (where it would end up in logs).
  *
  * @param onEvent  called with each wallet event (parsed JSON)
+ * @param onGamificationEvent called with each progress event of the user (XP, level, achievements,
+ *                 budget alerts)
  * @param onStatus called with "connecting" | "live" | "offline"
  * @returns a function that closes the stream
  */
-export function connectEventStream({ onEvent, onStatus }) {
+export function connectEventStream({ onEvent, onGamificationEvent, onStatus }) {
   const controller = new AbortController();
   let attempt = 0;
   let wakeUp = null;
@@ -105,6 +107,8 @@ export function connectEventStream({ onEvent, onStatus }) {
             onStatus("live");
           } else if (event === "wallet-event") {
             onEvent(JSON.parse(data));
+          } else if (event === "gamification-event") {
+            onGamificationEvent?.(JSON.parse(data));
           }
         });
         // The server closed the stream (it does so every 30 minutes): reconnect.

@@ -10,6 +10,8 @@ import { Link, useOutletContext } from "react-router-dom";
 import CategoryService from "../../../services/CategoryService";
 import TransactionService from "../../../services/TransactionService";
 import WalletService from "../../../services/WalletService";
+import BudgetsCard from "../../components/gamification/BudgetsCard";
+import ProgressCard from "../../components/gamification/ProgressCard";
 import TransactionFormModal from "../../components/transactions/TransactionFormModal";
 import { useToast } from "../../components/useToast";
 import { useWalletEvents } from "../../realtime/useRealtime";
@@ -112,12 +114,10 @@ const Dashboard = () => {
   const [summary, setSummary] = useState({ revenues: 0, expenses: 0 });
   const [chartData, setChartData] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [goalsSummary] = useState([]);
   const [categories, setCategories] = useState([]);
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [walletsKey, setWalletsKey] = useState(0);
-  // setGoalsSummary
 
   // Wallets the user belongs to (reloaded when they change in real time). The selected wallet is
   // kept while it still exists; otherwise the remembered or first one is used.
@@ -309,6 +309,8 @@ const Dashboard = () => {
         </div>
       )}
 
+      <ProgressCard />
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
           <div>
@@ -456,56 +458,9 @@ const Dashboard = () => {
         </div>
 
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold text-gray-800">My Goals</h2>
-              <Link
-                to="/app/wallets"
-                className="text-xs font-semibold text-[#a88d6f] hover:underline"
-              >
-                View all
-              </Link>
-            </div>
+          <BudgetsCard />
 
-            <div className="flex flex-col gap-4">
-              {goalsSummary.length > 0 ? (
-                goalsSummary.map((goal) => {
-                  const pct = Math.min((goal.current / goal.target) * 100, 100);
-                  return (
-                    <div
-                      key={goal.id}
-                      className="flex flex-col gap-1.5 p-2.5 rounded-lg bg-gray-50 border border-gray-100"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-semibold text-gray-700 truncate">
-                          {goal.title}
-                        </span>
-                        <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-gray-200 text-gray-600 capitalize">
-                          {goal.type}
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
-                        <div
-                          className="bg-[#a88d6f] h-full"
-                          style={{ width: `${pct}%` }}
-                        ></div>
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-400">
-                        <span>R$ {goal.current.toFixed(0)}</span>
-                        <span>of R$ {goal.target.toFixed(0)}</span>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="text-center text-sm text-gray-400 py-4 border border-dashed border-gray-200 rounded-lg">
-                  No goals defined yet.
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Recent transactions are placed below the goal summary to keep the layout compact. */}
+          {/* Recent transactions are placed below the budgets to keep the layout compact. */}
           <div className="mt-6 border-t border-gray-100 pt-4">
             <h4 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
               Recent Transactions

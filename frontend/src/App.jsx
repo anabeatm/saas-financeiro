@@ -9,6 +9,7 @@ import Dashboard from "./pages/api/Dashboard";
 import Transactions from "./pages/api/Transactions";
 import Reports from "./pages/api/Reports";
 import Profile from "./pages/api/Profile";
+import Progress from "./pages/api/Progress";
 import Wallets from "./pages/api/Wallets";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Login from "./pages/auth/Login";
@@ -93,6 +94,7 @@ const router = createBrowserRouter([
       { path: "/app/categories", element: <Categories /> },
       { path: "/app/wallets", element: <Wallets /> },
       { path: "/app/reports", element: <Reports /> },
+      { path: "/app/progress", element: <Progress /> },
       { path: "/app/profile", element: <Profile /> },
       { path: "/app/profile/password", element: <Profile /> },
     ],
