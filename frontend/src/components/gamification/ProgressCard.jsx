@@ -5,7 +5,7 @@ import LevelEmblem from "./LevelEmblem";
 import { StreakInfo, XpBar } from "./ProgressParts";
 import useGamificationProfile from "./useGamificationProfile";
 
-// Dashboard summary of the user's progress: level, XP, streak and the daily check-in.
+// resumo do progresso (dashboard)
 export default function ProgressCard() {
   const { profile, setProfile, loading, error } = useGamificationProfile();
 

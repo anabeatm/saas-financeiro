@@ -4,11 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-/**
- * Pushes wallet events to the connected browsers. Runs after the commit, so nobody is told about a
- * change that was rolled back; {@code fallbackExecution} also covers service methods that do not
- * run inside a transaction.
- */
+/** manda os eventos da carteira pro navegador depois do commit (se der rollback ninguém fica sabendo) */
 @Component
 public class WalletEventListener {
 

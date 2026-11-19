@@ -21,7 +21,7 @@ public class TokenService {
     @Value("${jwt.secret}")
     private String secret;
 
-    // Token lifetime in milliseconds (JWT_EXPIRATION); defaults to 24 hours.
+    // validade do token em ms (padrão 24h)
     @Value("${jwt.expiration:86400000}")
     private long expirationMillis;
 
@@ -48,7 +48,7 @@ public class TokenService {
         }
     }
 
-    /** Returns the user id stored in the token's subject, or an empty string if the token is invalid. */
+    /** devolve o id do usuário do token, ou "" se for inválido */
     public String validateToken(String token) {
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);

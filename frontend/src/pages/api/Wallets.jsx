@@ -20,7 +20,7 @@ const Wallets = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Which dialog is open: a form (null = closed, {} = new, wallet = edit), members or delete.
+  // modais abertos
   const [formWallet, setFormWallet] = useState(null);
   const [membersWallet, setMembersWallet] = useState(null);
   const [walletToDelete, setWalletToDelete] = useState(null);
@@ -41,8 +41,7 @@ const Wallets = () => {
     loadWallets();
   }, [loadWallets]);
 
-  // Balances, names, roles and memberships change in real time. If the wallet whose members are
-  // open was deleted, or you were removed from it, the dialog is closed.
+  // recarrega em tempo real; fecha o modal de membros se a carteira sumiu
   useWalletEvents((event) => {
     loadWallets();
     const lostAccess =

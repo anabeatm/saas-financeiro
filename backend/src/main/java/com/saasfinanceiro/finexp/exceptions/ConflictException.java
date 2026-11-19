@@ -1,6 +1,6 @@
 package com.saasfinanceiro.finexp.exceptions;
 
-/** The request conflicts with the current state of a resource (HTTP 409). */
+/** conflito com o estado atual (409) */
 public class ConflictException extends RuntimeException {
     public ConflictException(String message) {
         super(message);

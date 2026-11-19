@@ -131,7 +131,7 @@ class ReportServiceTest {
 
         List<CategoryBreakdownDTO> byCategory = service.getStatement(WALLET_ID, START, END).byCategory();
 
-        // expenses first, biggest total first; incomes after
+        // despesas primeiro, maior total primeiro; receitas depois
         assertEquals(3, byCategory.size());
 
         CategoryBreakdownDTO foodTotal = byCategory.get(0);

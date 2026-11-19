@@ -88,7 +88,7 @@ const RECENT_TRANSACTIONS = 5;
 
 const pad = (n) => String(n).padStart(2, "0");
 
-// Last CHART_MONTHS months (current one included) as yyyy-MM keys, plus the date range to query.
+// últimos CHART_MONTHS meses e o intervalo de datas
 const buildPeriod = () => {
   const now = new Date();
   const months = [];
@@ -119,8 +119,7 @@ const Dashboard = () => {
   const [reloadKey, setReloadKey] = useState(0);
   const [walletsKey, setWalletsKey] = useState(0);
 
-  // Wallets the user belongs to (reloaded when they change in real time). The selected wallet is
-  // kept while it still exists; otherwise the remembered or first one is used.
+  // carteiras do usuário (recarrega em tempo real)
   useEffect(() => {
     new WalletService()
       .list()
@@ -145,7 +144,7 @@ const Dashboard = () => {
       .catch((err) => console.error("Error loading categories", err));
   }, []);
 
-  // Summary, chart and recent transactions of the selected wallet.
+  // dados da carteira selecionada
   useEffect(() => {
     if (walletId === null) return;
     let cancelled = false;
@@ -191,8 +190,7 @@ const Dashboard = () => {
     };
   }, [walletId, reloadKey]);
 
-  // Another member (or another tab) changed a wallet: refresh balances, and the charts and recent
-  // transactions when it is the wallet on screen.
+  // alguma carteira mudou: atualiza os dados
   useWalletEvents((event) => {
     setWalletsKey((k) => k + 1);
     if (event.walletId === walletId) setReloadKey((k) => k + 1);
@@ -224,7 +222,7 @@ const Dashboard = () => {
 
   const handleTransactionSaved = () => {
     setShowTransactionForm(false);
-    // Refresh summary, chart, recent transactions and the wallet balance.
+    // atualiza o dashboard
     setWalletsKey((k) => k + 1);
     setReloadKey((k) => k + 1);
   };
@@ -460,7 +458,7 @@ const Dashboard = () => {
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
           <BudgetsCard />
 
-          {/* Recent transactions are placed below the budgets to keep the layout compact. */}
+          {/* transações recentes */}
           <div className="mt-6 border-t border-gray-100 pt-4">
             <h4 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
               Recent Transactions

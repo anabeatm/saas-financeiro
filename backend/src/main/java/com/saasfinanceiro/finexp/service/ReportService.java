@@ -30,12 +30,12 @@ import com.saasfinanceiro.finexp.repository.TransactionRepository;
 import com.saasfinanceiro.finexp.repository.WalletMemberRepository;
 import com.saasfinanceiro.finexp.repository.WalletRepository;
 
-/** Builds the wallet statement report. Any member of the wallet (viewers included) can generate it. */
+/** monta o extrato da carteira (qualquer membro pode gerar) */
 @Service
 public class ReportService {
 
     static final String UNCATEGORIZED = "Uncategorized";
-    /** Longest period accepted, so a single report stays a reasonable size (one year, leap years included). */
+    /** período máximo: um ano */
     static final long MAX_PERIOD_DAYS = 366;
 
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
@@ -104,10 +104,7 @@ public class ReportService {
         return wallet;
     }
 
-    /**
-     * Totals per category, expenses first, each group ordered by the biggest total.
-     * The percentage is the category's share of all the expenses (or all the income) of the period.
-     */
+    /** totais por categoria, despesas primeiro, maior primeiro */
     private List<CategoryBreakdownDTO> breakdownByCategory(List<Transaction> transactions,
             BigDecimal totalIncome, BigDecimal totalExpense) {
         Map<String, Accumulator> groups = new LinkedHashMap<>();

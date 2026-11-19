@@ -27,9 +27,7 @@ const NAV_ITEMS = [
   { to: "/app/profile", label: "Profile", icon: Settings },
 ];
 
-// Shell of the authenticated area: sidebar on desktop, top bar + bottom
-// navigation on small screens. Pages are rendered through <Outlet /> and can
-// read the logged user with useOutletContext().
+// layout da área logada: sidebar no desktop, menu embaixo no celular
 export default function AppLayout() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);

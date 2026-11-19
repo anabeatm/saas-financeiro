@@ -5,10 +5,7 @@ import java.time.Instant;
 import com.saasfinanceiro.finexp.model.enums.AchievementCode;
 import com.saasfinanceiro.finexp.model.enums.XpEventType;
 
-/**
- * Real-time notification about the user's own progress (sent only to that user). Fields that do not
- * apply to the event type are null.
- */
+/** evento de progresso mandado em tempo real pro usuário */
 public record GamificationEvent(
         GamificationEventType type,
         XpEventType xpReason,

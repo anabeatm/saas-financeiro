@@ -6,7 +6,7 @@ const SIZES = {
   lg: "h-24 w-24 text-2xl",
 };
 
-// Profile picture of a user, falling back to the initials of the name.
+// foto de perfil ou as iniciais
 export default function Avatar({ user, size = "md" }) {
   const sizeClass = SIZES[size] ?? SIZES.md;
 

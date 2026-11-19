@@ -7,7 +7,7 @@ import useBudgets from "./useBudgets";
 
 const SHIELD = ACHIEVEMENT_SPRITES.ON_BUDGET;
 
-// Dashboard list of this month's budgets.
+// orçamentos do mês (dashboard)
 export default function BudgetsCard() {
   const { budgets, loading, error } = useBudgets();
 

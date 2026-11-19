@@ -5,14 +5,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-/**
- * Sends progress events (XP, level, achievements, budget alerts) to the user's open connections,
- * only after the database transaction commits, like the wallet events.
- */
+/** manda eventos de progresso (xp, nível, conquistas, orçamentos) depois do commit */
 @Component
 public class GamificationEventPublisher {
 
-    /** Application event carrying a {@link GamificationEvent} and its only recipient. */
+    /** evento + quem recebe */
     public record Message(Long userId, GamificationEvent event) {}
 
     private final ApplicationEventPublisher applicationEventPublisher;

@@ -19,11 +19,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * Limits how often one client (IP address) can call the public authentication endpoints, which are
- * the targets of brute force, credential stuffing and e-mail flooding. Over the limit the API answers
- * 429 with a {@code Retry-After} header.
- */
+/** limite de requests por ip nos endpoints de auth (429 + Retry-After) */
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
 
@@ -31,7 +27,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     record Rule(int limit, Duration window) {}
 
-    /** POST endpoint → hits allowed per IP in the window. */
+    /** endpoint → max de requests por ip */
     static final Map<String, Rule> RULES = Map.of(
             "/auth/login", new Rule(10, Duration.ofMinutes(1)),
             "/auth/register", new Rule(5, Duration.ofHours(1)),

@@ -7,7 +7,7 @@ import Input from "../Input";
 import Modal from "../Modal";
 import { useToast } from "../useToast";
 
-// Creates a wallet, or edits it when a `wallet` is passed in.
+// cria ou edita carteira
 export default function WalletFormModal({ wallet, onClose, onSaved }) {
   const isEdit = Boolean(wallet);
   const { addToast } = useToast();

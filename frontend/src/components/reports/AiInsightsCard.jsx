@@ -3,8 +3,7 @@ import { useState } from "react";
 import AiService from "../../../services/AiService";
 import { getErrorMessage } from "../../utils/errors";
 
-// AI reading of the period shown in the report. Generated on request (it uses the AI quota);
-// the parent gives it a `key` per wallet + period, so changing either clears the previous text.
+// insights da ia pro período do relatório (só gera quando clica)
 export default function AiInsightsCard({ walletId, startDate, endDate }) {
   const [insights, setInsights] = useState(null);
   const [loading, setLoading] = useState(false);

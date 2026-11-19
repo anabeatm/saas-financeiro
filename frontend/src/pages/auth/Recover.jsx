@@ -29,7 +29,7 @@ const Recover = () => {
       setEmail("");
 
       if (response.debugToken) {
-        // Only present when the backend runs with app.debug-reset-token=true.
+        // só aparece no modo debug
         console.info(
           "Password reset link:",
           `${window.location.origin}/forgot-password/${response.debugToken}`,

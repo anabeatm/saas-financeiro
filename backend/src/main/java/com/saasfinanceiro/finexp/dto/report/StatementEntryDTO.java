@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 import com.saasfinanceiro.finexp.model.enums.TransactionType;
 
-/** One line of the statement; {@code balanceAfter} is the wallet balance right after this transaction. */
+/** linha do extrato com o saldo depois dela */
 public record StatementEntryDTO(
     Long id,
     LocalDate date,

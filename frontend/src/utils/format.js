@@ -4,7 +4,7 @@ export const formatCurrency = (value) =>
     currency: "BRL",
   });
 
-// "2025-01-31" -> "31/01/2025" (string based, so no timezone shifts)
+// "2025-01-31" -> "31/01/2025"
 export const formatDate = (isoDate) => {
   if (!isoDate) return "";
   const [year, month, day] = isoDate.split("-");
@@ -18,7 +18,7 @@ export const getInitials = (name) => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-// Today as yyyy-MM-dd in the user's local timezone (what <input type="date"> uses).
+// hoje em yyyy-MM-dd
 export const todayISO = () => {
   const now = new Date();
   const pad = (n) => String(n).padStart(2, "0");

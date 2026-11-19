@@ -19,7 +19,7 @@ import com.saasfinanceiro.finexp.dto.ai.CategorySuggestionRequest;
 import com.saasfinanceiro.finexp.dto.ai.CategorySuggestionResponse;
 import com.saasfinanceiro.finexp.dto.ai.InsightsResponse;
 
-/** AI features (Google Gemini). Answer 503 when the server has no AI key configured. */
+/** endpoints de ia (503 se não tiver chave configurada) */
 @RestController
 @RequestMapping("/api/v1")
 public class AiController {

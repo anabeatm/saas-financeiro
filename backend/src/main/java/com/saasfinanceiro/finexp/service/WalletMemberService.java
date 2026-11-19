@@ -114,7 +114,7 @@ public class WalletMemberService {
             throw new BusinessException("Cannot remove the wallet OWNER");
         }
 
-        // Published before the delete, so the removed member is still among the recipients.
+        // publica antes de apagar, pro membro removido também ser avisado
         walletEventPublisher.memberChanged(WalletEventType.MEMBER_REMOVED, wallet, targetUser,
                 getAuthenticatedUser());
         walletMemberRepository.delete(targetMember);

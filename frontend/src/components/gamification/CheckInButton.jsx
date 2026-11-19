@@ -5,7 +5,7 @@ import { useRealtimeStatus } from "../../realtime/useRealtime";
 import { getErrorMessage } from "../../utils/errors";
 import { useToast } from "../useToast";
 
-// "I spent nothing today": keeps the streak without having to log an expense.
+// botão de "não gastei nada hoje"
 export default function CheckInButton({ profile, onCheckedIn, className = "" }) {
   const { addToast } = useToast();
   const realtime = useRealtimeStatus();
@@ -15,7 +15,7 @@ export default function CheckInButton({ profile, onCheckedIn, className = "" }) 
     setBusy(true);
     try {
       onCheckedIn(await new GamificationService().checkIn());
-      // With the live connection the XP notification arrives by itself.
+      // o toast de xp chega sozinho pela conexão em tempo real
       if (realtime !== "live") {
         addToast({ type: "reward", title: "+5 XP", description: "No-spending day checked in" });
       }

@@ -10,10 +10,10 @@ const subscribeOnline = (callback) => {
   };
 };
 
-// false while the device has no network connection.
+// tá online ou não
 export const useOnline = () =>
   useSyncExternalStore(subscribeOnline, () => navigator.onLine);
 
-// true when the browser allows installing the app (and it is not installed yet).
+// se dá pra instalar o app
 export const useCanInstall = () =>
   useSyncExternalStore(subscribeInstallPrompt, () => getInstallPrompt() !== null);

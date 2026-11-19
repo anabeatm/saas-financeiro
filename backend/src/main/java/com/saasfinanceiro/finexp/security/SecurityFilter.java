@@ -56,7 +56,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         try {
             return Optional.of(Long.parseLong(subject));
         } catch (NumberFormatException e) {
-            // Tokens issued before the subject became the user id are simply rejected.
+            // token no formato antigo: rejeita
             return Optional.empty();
         }
     }

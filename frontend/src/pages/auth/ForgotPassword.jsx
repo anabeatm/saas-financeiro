@@ -12,7 +12,7 @@ import {
   validatePasswordConfirmation,
 } from "../../utils/password";
 
-// Second step of the password recovery: the token comes from the link sent by e-mail.
+// redefine a senha com o token do email
 const ResetPassword = () => {
   const { token } = useParams();
   const [password, setPassword] = useState("");
@@ -61,7 +61,7 @@ const ResetPassword = () => {
         navigate("/login");
       }, 2000);
     } catch (errorMessage) {
-      // Invalid, expired or already used token.
+      // token inválido ou expirado
       setTokenError(
         typeof errorMessage === "string"
           ? errorMessage

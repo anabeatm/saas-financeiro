@@ -12,7 +12,7 @@ import { StreakInfo, XpBar } from "../../components/gamification/ProgressParts";
 import { ACHIEVEMENT_SPRITES } from "../../components/gamification/sprites";
 import useGamificationProfile from "../../components/gamification/useGamificationProfile";
 
-// Level, streak, achievements, recent XP and the rules of the game.
+// página de progresso
 const Progress = () => {
   const { profile, setProfile, loading, error } = useGamificationProfile();
 

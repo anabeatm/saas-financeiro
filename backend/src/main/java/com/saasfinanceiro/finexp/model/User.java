@@ -21,8 +21,7 @@ import org.hibernate.type.SqlTypes;
 
 import lombok.Data;
 
-// "user" is a reserved word in PostgreSQL; the backticks make Hibernate quote the table name
-// in whichever database is used (the table keeps the same name in MySQL).
+// "user" é palavra reservada no postgres, por isso o nome vai entre aspas
 @Entity
 @Table(name = "`user`")
 @Data
@@ -44,9 +43,7 @@ public class User {
     @Size(min = 8,max=100, message = "{user.password.size}")
     private String password;
 
-    // Profile picture as a data URL (e.g. "data:image/jpeg;base64,..."). The
-    // frontend resizes it before upload, so it stays small.
-    // Large text column in any database (LONGTEXT in MySQL, TEXT in PostgreSQL).
+    // foto de perfil em base64
     @JdbcTypeCode(SqlTypes.LONG32VARCHAR)
     private String avatar;
 

@@ -2,10 +2,7 @@ package com.saasfinanceiro.finexp.dto.budget;
 
 import java.math.BigDecimal;
 
-/**
- * A category's budget and its spending in the requested month. {@code status}: OK below 80% of the
- * limit, WARNING from 80% up to the limit, EXCEEDED above it.
- */
+/** orçamento + gasto do mês. status: OK (<80%), WARNING (80-100%), EXCEEDED (>100%) */
 public record BudgetResponse(
     Long categoryId,
     String categoryName,

@@ -3,7 +3,7 @@ import LevelEmblem from "./LevelEmblem";
 import PixelSprite from "./PixelSprite";
 import { ACHIEVEMENT_SPRITES } from "./sprites";
 
-// Notification shown for a progress event pushed by the API (see GamificationEvent on the backend).
+// toast de evento de progresso
 export const gamificationToast = (event) => {
   switch (event.type) {
     case "XP_GAINED":

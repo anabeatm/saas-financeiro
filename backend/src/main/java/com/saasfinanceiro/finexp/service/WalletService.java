@@ -112,7 +112,7 @@ public class WalletService {
             throw new AccessDeniedException("Only the OWNER can delete this wallet");
         }
 
-        // Published before the delete: the members (recipients) are resolved now.
+        // publica antes de apagar, enquanto os membros ainda existem
         walletEventPublisher.walletChanged(WalletEventType.WALLET_DELETED, wallet, member.getUser());
         walletRepository.delete(wallet);
     }

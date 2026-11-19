@@ -16,10 +16,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import lombok.Data;
 
-/**
- * Monthly spending limit of an expense category. Categories are private to their owner, so the
- * budget is too; spending counts the category's expenses in every wallet.
- */
+/** limite de gasto mensal de uma categoria de despesa */
 @Entity
 @Data
 public class Budget {

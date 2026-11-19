@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import process from "node:process";
 import { defineConfig } from "vite";
 
-// Files from public/ that make up the installed app (the built JS/CSS are added automatically).
+// arquivos do public/ pra cachear
 const PUBLIC_APP_FILES = [
   "/",
   "/index.html",
@@ -16,9 +16,7 @@ const PUBLIC_APP_FILES = [
   "/icons/icon-maskable-512.png",
 ];
 
-// Builds dist/sw.js from src/pwa/service-worker.js with this build's file list, so the service
-// worker caches exactly the files the app needs. The cache name changes with the files, which makes
-// each deploy replace the previous cache.
+// gera o dist/sw.js com a lista de arquivos desse build
 function serviceWorker() {
   return {
     name: "finexp-service-worker",

@@ -34,25 +34,16 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
-/**
- * AI features built on {@link GeminiClient}:
- * <ul>
- *   <li>suggest a category for a transaction from its description, among the user's own categories;</li>
- *   <li>write a short reading of a wallet's period (summary + tips) from the statement report.</li>
- * </ul>
- * The model's answer is never trusted as is: the suggested category must exist in the list that was
- * sent, and the texts are trimmed and size-limited. Only the description being typed is sent for the
- * suggestion; the insights use aggregated numbers only (no descriptions or member names).
- */
+/** funções de ia: sugere categoria e gera insights do período. a resposta do modelo sempre é validada */
 @Service
 public class AiService {
 
-    /** Calls per user per minute: protects the provider quota (and cost). */
+    /** max de chamadas de ia por usuário por minuto */
     static final int MAX_CALLS_PER_MINUTE = 10;
     static final int MAX_TIPS = 3;
     static final int MAX_NEW_NAME_LENGTH = 40;
 
-    // Icons and colors the frontend can show (frontend/src/utils/categoryIcons.js); keep both lists in sync.
+    // ícones e cores que o front sabe desenhar (mesma lista do categoryIcons.js)
     static final List<String> CATEGORY_ICONS = List.of("wallet", "piggy-bank", "banknote", "briefcase",
             "trending-up", "gift", "utensils", "coffee", "shopping-cart", "shirt", "bus", "car", "plane", "home",
             "zap", "smartphone", "receipt", "heart-pulse", "dumbbell", "graduation-cap", "gamepad-2");
@@ -79,10 +70,7 @@ public class AiService {
         this.rateLimiter = rateLimiter;
     }
 
-    /**
-     * Picks one of the user's categories for the description or, when none fits (or the user has none
-     * of that type), proposes a new category with a name, an icon and a color the app supports.
-     */
+    /** escolhe uma categoria do usuário, ou sugere uma nova se nenhuma servir */
     public CategorySuggestionResponse suggestCategory(CategorySuggestionRequest request) {
         User user = getAuthenticatedUser();
         checkRateLimit(user);
@@ -129,7 +117,7 @@ public class AiService {
         if (name.isBlank()) {
             return CategorySuggestionResponse.none();
         }
-        // The "new" name may already exist: then that category is the answer.
+        // se o nome sugerido já existe, usa essa categoria mesmo
         Optional<Category> sameName = categories.stream().filter(c -> c.getName().equalsIgnoreCase(name)).findFirst();
         if (sameName.isPresent()) {
             return toResponse(sameName.get());
@@ -143,7 +131,7 @@ public class AiService {
         return CategorySuggestionResponse.existing(category.getId(), category.getName(), category.getType());
     }
 
-    /** Single line, without control characters, quotes or angle brackets, at most MAX_NEW_NAME_LENGTH characters. */
+    /** limpa o nome sugerido: uma linha só, sem caractere estranho e com tamanho máximo */
     static String cleanName(String name) {
         String cleaned = name.replaceAll("[\\p{Cntrl}\"`<>]", " ").replaceAll("\\s+", " ").trim();
         return cleaned.length() <= MAX_NEW_NAME_LENGTH ? cleaned : cleaned.substring(0, MAX_NEW_NAME_LENGTH).trim();
@@ -160,7 +148,7 @@ public class AiService {
     }
 
     public InsightsResponse insights(Long walletId, LocalDate startDate, LocalDate endDate) {
-        // Validates the period and that the user is a member of the wallet.
+        // checa o período e se o usuário é membro da carteira
         StatementReportResponse report = reportService.getStatement(walletId, startDate, endDate);
 
         if (report.transactionCount() == 0) {
@@ -191,7 +179,7 @@ public class AiService {
         return new InsightsResponse(summary, tips, true, LocalDateTime.now());
     }
 
-    /** Aggregated figures of the period; no descriptions or names of members are sent. */
+    /** só os totais do período, sem descrição nem nome de ninguém */
     static String describe(StatementReportResponse report) {
         StringBuilder text = new StringBuilder()
                 .append("Period: ").append(report.startDate()).append(" to ").append(report.endDate()).append('\n')
@@ -227,7 +215,7 @@ public class AiService {
         }
     }
 
-    /** Some models wrap JSON in ```json ... ``` even when asked not to. */
+    /** tira o ```json que alguns modelos colocam na resposta */
     static String stripCodeFence(String text) {
         String trimmed = text.trim();
         if (trimmed.startsWith("```")) {

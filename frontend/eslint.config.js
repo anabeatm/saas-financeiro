@@ -27,7 +27,7 @@ export default defineConfig([
     },
   },
   {
-    // Runs as a service worker, not in a page
+    // globals do service worker
     files: ['src/pwa/service-worker.js'],
     languageOptions: { globals: globals.serviceworker },
   },

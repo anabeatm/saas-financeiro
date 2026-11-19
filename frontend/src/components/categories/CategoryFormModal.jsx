@@ -18,8 +18,7 @@ const TYPES = [
   { value: "INCOME", label: "Income", active: "bg-green-600 text-white" },
 ];
 
-// Creates a category, or edits `category` when it is passed in. `initialValues` ({ name, icon, color })
-// pre-fills a new category, e.g. with the one proposed by the AI.
+// cria ou edita categoria (pode vir preenchida com a sugestão da ia)
 export default function CategoryFormModal({
   category,
   defaultType = "EXPENSE",

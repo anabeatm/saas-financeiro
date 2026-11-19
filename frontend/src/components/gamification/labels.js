@@ -1,6 +1,6 @@
 import { formatCurrency } from "../../utils/format";
 
-// Texts of the gamification, shared by the cards, the progress page and the notifications.
+// textos da gamificação
 
 export const XP_REASONS = {
   TRANSACTION: "Transaction logged",
@@ -10,7 +10,7 @@ export const XP_REASONS = {
   MONTH_SAVINGS: "Month closed with savings",
 };
 
-// Mirrors the rules of the API (GamificationService), shown on the progress page.
+// regras do jogo (iguais às da api)
 export const XP_RULES = [
   { action: "Log a transaction", xp: "+5", note: "Up to 10 per day, dated in the last 3 days. Deleting it within 24 h takes the XP back." },
   { action: "Check in a no-spending day", xp: "+5", note: "Once a day, only on days without expenses." },
@@ -20,7 +20,7 @@ export const XP_RULES = [
   { action: "Close a month with savings", xp: "+100 to +200", note: "+10 for every 5% of your income saved." },
 ];
 
-// Title of each tier and the level where it starts.
+// títulos por nível
 export const TIERS = [
   { title: "Beginner", from: 1 },
   { title: "Organized", from: 5 },
@@ -31,17 +31,17 @@ export const TIERS = [
 
 export const nextTier = (level) => TIERS.find((t) => t.from > level) ?? null;
 
-// Spent vs limit, e.g. "R$ 80,00 of R$ 100,00".
+// "R$ 80,00 of R$ 100,00"
 export const budgetUsage = (budget) =>
   `${formatCurrency(budget.spent)} of ${formatCurrency(budget.monthlyLimit)}`;
 
-// Bar color of a budget by status (OK / WARNING / EXCEEDED).
+// cor da barra pelo status
 export const BUDGET_BAR_COLORS = {
   OK: "bg-[#a88d6f]",
   WARNING: "bg-amber-500",
   EXCEEDED: "bg-red-500",
 };
 
-// Instant from the API -> "18/11/2026"
+// data da api -> "18/11/2026"
 export const formatInstant = (instant) =>
   instant ? new Date(instant).toLocaleDateString("pt-BR") : "";

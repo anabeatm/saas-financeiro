@@ -1,7 +1,7 @@
 import PixelSprite from "./PixelSprite";
 import { levelCoin, TIER_PALETTES } from "./sprites";
 
-// The level as a pixel coin; its metal shows the title tier.
+// moeda do nível
 export default function LevelEmblem({ level, title, size = 64 }) {
   return (
     <PixelSprite

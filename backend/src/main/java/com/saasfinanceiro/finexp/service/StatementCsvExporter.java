@@ -14,11 +14,7 @@ import com.saasfinanceiro.finexp.dto.report.StatementEntryDTO;
 import com.saasfinanceiro.finexp.dto.report.StatementReportResponse;
 import com.saasfinanceiro.finexp.model.enums.TransactionType;
 
-/**
- * Writes the statement's transactions (one row each, with the running balance) as CSV in the
- * format spreadsheets use in Brazil: ';' between columns, ',' as decimal separator and a UTF-8 BOM
- * so accents open correctly in Excel. Totals and the category breakdown stay on the screen/PDF.
- */
+/** exporta o extrato em csv no formato do excel br (';' e vírgula decimal) */
 @Component
 public class StatementCsvExporter {
 
@@ -44,7 +40,7 @@ public class StatementCsvExporter {
         return withBom;
     }
 
-    /** Download name without user-provided text, e.g. statement-3-2025-01-01-2025-01-31.csv */
+    /** nome do arquivo, ex: statement-3-2025-01-01-2025-01-31.csv */
     public String fileName(StatementReportResponse report) {
         return "statement-%d-%s-%s.csv".formatted(report.walletId(), report.startDate(), report.endDate());
     }
@@ -62,10 +58,7 @@ public class StatementCsvExporter {
         return cell;
     }
 
-    /**
-     * Free text typed by users. A leading = + - @ (or tab/CR) would make a spreadsheet run it as a
-     * formula (CSV injection), so such values are prefixed with an apostrophe.
-     */
+    /** evita csv injection (coloca ' na frente de fórmula) */
     static String text(String value) {
         if (value == null || value.isEmpty()) {
             return "";

@@ -56,20 +56,18 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(this::writeUnauthorized))
-            // Spring Security already sends X-Content-Type-Options: nosniff, X-Frame-Options: DENY and
-            // no-cache headers; these complete the set recommended by OWASP.
+            // headers de segurança extras (owasp)
             .headers(headers -> headers
-                // Browsers must use HTTPS for a year (sent on HTTPS responses, i.e. in production)
+                // força https por um ano
                 .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31_536_000))
                 .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.NO_REFERRER))
                 .addHeaderWriter(new StaticHeadersWriter("Permissions-Policy",
                         "camera=(), microphone=(), geolocation=(), payment=()"))
-                // The API only returns data: nothing in a response may run, load or be framed.
-                // Swagger UI is an HTML page with its own scripts, so it is left out.
+                // csp bem restrito (menos no swagger)
                 .addHeaderWriter(new DelegatingRequestMatcherHeaderWriter(notSwaggerUi(),
                         new StaticHeadersWriter("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'"))))
             .authorizeHttpRequests(auth -> auth
-                // SSE responses finish in an async dispatch; the request was already authenticated.
+                // dispatch async do sse (já tá autenticado)
                 .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
@@ -89,7 +87,7 @@ public class SecurityConfig {
                 paths.matcher("/swagger-ui/**"), paths.matcher("/swagger-ui.html")));
     }
 
-    // Unauthenticated requests get a 401 in the same JSON format as the rest of the API.
+    // 401 em json
     private void writeUnauthorized(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException exception) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

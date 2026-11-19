@@ -23,7 +23,7 @@ import {
   Zap,
 } from "lucide-react";
 
-// The API stores the icon as a name; these are the ones the app can draw (the seeded defaults included).
+// ícones de categoria disponíveis
 export const CATEGORY_ICONS = {
   wallet: Wallet,
   "piggy-bank": PiggyBank,

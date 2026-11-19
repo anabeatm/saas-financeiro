@@ -1,6 +1,6 @@
 import api from "../configs/axiosConfig";
 
-// Wallet statement report: JSON for the screen and CSV for download.
+// extrato (json e csv)
 class ReportService {
   async getStatement(walletId, startDate, endDate) {
     const response = await api.get(

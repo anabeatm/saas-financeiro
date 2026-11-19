@@ -41,26 +41,15 @@ import com.saasfinanceiro.finexp.repository.UserProgressRepository;
 import com.saasfinanceiro.finexp.repository.UserRepository;
 import com.saasfinanceiro.finexp.repository.XpEventRepository;
 
-/**
- * XP, levels, streak and achievements.
- *
- * <p>The rules reward behaviour, not volume: logging transactions gives a little XP (capped per day,
- * only for recent dates, taken back when the transaction is deleted soon after), while most XP
- * comes from closing a month within budget and with savings. Amounts are compared as percentages,
- * so users with higher incomes have no advantage.
- *
- * <p>Months are closed lazily, when the user opens their progress: the free hosting plan sleeps,
- * so a job scheduled for the 1st of the month could never run. The ledger's unique source keys make
- * closing a month twice harmless.
- */
+/** xp, níveis, streak e conquistas. o mês só fecha quando o usuário abre o progresso (o render free dorme, então não dá pra agendar) */
 @Service
 public class GamificationService {
 
     static final int TRANSACTION_XP = 5;
     static final int DAILY_TRANSACTION_XP_LIMIT = 10;
-    /** Transactions dated further back than this give no XP (no farming by back-filling). */
+    /** transação mais antiga que isso não dá xp */
     static final int RECENT_DAYS = 3;
-    /** Deleting a transaction within this window takes its XP back. */
+    /** apagou dentro desse prazo, perde o xp */
     static final Duration XP_REVERT_WINDOW = Duration.ofHours(24);
     static final int CHECK_IN_XP = 5;
     static final int STREAK_7_XP = 30;
@@ -70,7 +59,7 @@ public class GamificationService {
     static final int MAX_SAVINGS_BONUS_XP = 100;
     static final int ZERO_DAY_CHECK_INS = 5;
     static final BigDecimal SAVER_RATE = new BigDecimal("0.20");
-    /** Upper bound of months closed at once, for accounts that were away for a long time. */
+    /** max de meses fechados de uma vez */
     static final int MAX_MONTHS_TO_CLOSE = 12;
 
     private final XpEventRepository xpEventRepository;
@@ -98,7 +87,7 @@ public class GamificationService {
 
     // ---------------------------------------------------------------- transactions
 
-    /** Runs after the transaction was committed, in a transaction of its own. */
+    /** roda depois do commit */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onTransactionCreated(TransactionActivity.Created event) {
         User user = userRepository.findById(event.userId()).orElse(null);
@@ -116,7 +105,7 @@ public class GamificationService {
         registerActivity(user, progressFor(user), today);
     }
 
-    /** Deleting a transaction soon after creating it takes its XP back, so create/delete earns nothing. */
+    /** tira o xp de uma transação criada há pouco tempo */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onTransactionDeleted(TransactionActivity.Deleted event) {
         xpEventRepository.findByUserIdAndSourceKey(event.creatorId(), "TX:" + event.transactionId())
@@ -126,7 +115,7 @@ public class GamificationService {
 
     // ---------------------------------------------------------------- check-in
 
-    /** "I spent nothing today": keeps the streak without having to invent an expense. */
+    /** "não gastei nada hoje": mantém o streak */
     @Transactional
     public GamificationProfileResponse checkIn(User user) {
         LocalDate today = LocalDate.now(clock);
@@ -184,7 +173,7 @@ public class GamificationService {
 
     // ---------------------------------------------------------------- month closing
 
-    /** Rewards every month that ended since the last one rewarded. */
+    /** dá a recompensa dos meses que fecharam desde a última vez */
     void closePendingMonths(User user, UserProgress progress) {
         YearMonth current = YearMonth.now(clock);
         YearMonth month = YearMonth.from(progress.getLastClosedMonth()).plusMonths(1);
@@ -209,7 +198,7 @@ public class GamificationService {
         LocalDate start = month.atDay(1);
         LocalDate end = month.atEndOfMonth();
 
-        // Budgets created after the month do not apply to it.
+        // ignora orçamento criado depois do mês
         List<Budget> budgets = budgetRepository.findAllByUserId(user.getId()).stream()
                 .filter(b -> b.getCreatedAt() == null || !YearMonth.from(b.getCreatedAt()).isAfter(month))
                 .toList();
@@ -251,7 +240,7 @@ public class GamificationService {
         }
     }
 
-    /** +10 XP for every full 5% of income saved, up to {@link #MAX_SAVINGS_BONUS_XP}. */
+    /** +10 xp a cada 5% da renda guardada (tem limite) */
     static int savingsBonus(BigDecimal savingsRate) {
         int steps = savingsRate.multiply(BigDecimal.valueOf(20)).setScale(0, RoundingMode.FLOOR).intValue();
         return Math.min(MAX_SAVINGS_BONUS_XP, steps * 10);
@@ -275,7 +264,7 @@ public class GamificationService {
         }
     }
 
-    /** Adds XP once per source key; announces the XP and, when it happens, the new level. */
+    /** dá o xp uma vez só por sourceKey e avisa do xp/level up */
     private boolean award(User user, XpEventType type, String sourceKey, int xp) {
         if (xpEventRepository.existsByUserIdAndSourceKey(user.getId(), sourceKey)) {
             return false;
@@ -318,7 +307,7 @@ public class GamificationService {
         return progressRepository.findByUserId(user.getId()).orElseGet(() -> {
             UserProgress progress = new UserProgress();
             progress.setUser(user);
-            // Months before the account existed are never rewarded.
+            // pula os meses antes da conta existir
             YearMonth firstMonth = user.getCreatedAt() != null ? YearMonth.from(user.getCreatedAt())
                     : YearMonth.now(clock);
             progress.setLastClosedMonth(firstMonth.minusMonths(1).atDay(1));
@@ -337,7 +326,7 @@ public class GamificationService {
         return age >= 0 && age <= RECENT_DAYS;
     }
 
-    /** Transaction.createdAt is stored in the server's time zone. */
+    /** createdAt tá no fuso do servidor */
     private LocalDateTime startOfDayInServerTime(LocalDate day) {
         return day.atStartOfDay(clock.getZone()).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
     }

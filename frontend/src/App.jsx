@@ -17,7 +17,7 @@ import Recover from "./pages/auth/Recover";
 import Register from "./pages/auth/Register";
 import VerifyAccount from "./pages/auth/VerifyAccount";
 
-// Only authenticated users can see the app area.
+// só usuário logado entra na área do app
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -26,7 +26,7 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// Login/registration pages send an already authenticated user to the dashboard.
+// se já tá logado vai direto pro dashboard
 const PublicRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -71,11 +71,11 @@ const router = createBrowserRouter([
 
   { path: "/forgot-password/:token", element: <ForgotPassword /> },
 
-  // Portuguese aliases for the routes named in the assignment.
+  // rotas em português (as da atividade)
   { path: "/recuperar-senha", element: <Navigate to="/recover" replace /> },
   { path: "/redefinir-senha/:token", element: <ForgotPassword /> },
 
-  // Portuguese aliases for the profile/password routes named in the assignment.
+  // rotas em português (as da atividade)
   { path: "/app/perfil", element: <Navigate to="/app/profile" replace /> },
   {
     path: "/app/perfil/senha",

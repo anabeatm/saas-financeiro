@@ -5,7 +5,7 @@ import { getErrorMessage } from "../../utils/errors";
 
 const RELOAD_DELAY_MS = 400;
 
-// Budgets of the current month with their spending, reloaded when transactions change.
+// orçamentos do mês (recarrega quando muda algo)
 export default function useBudgets() {
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);

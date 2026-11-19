@@ -1,7 +1,6 @@
-// Pixel-art sprites of the gamification. Each sprite is a grid of characters (one per pixel,
-// "." = transparent) and a palette mapping the characters to colors, drawn by <PixelSprite />.
+// sprites em pixel art: grid de caracteres ("." = transparente) + paleta de cores
 
-// 3x5 digits, used to write numbers inside sprites (the level on the coin, the streak count).
+// dígitos 3x5
 const DIGITS = {
   0: ["###", "#.#", "#.#", "#.#", "###"],
   1: [".#.", "##.", ".#.", ".#.", "###"],
@@ -15,7 +14,7 @@ const DIGITS = {
   9: ["###", "#.#", "###", "..#", "###"],
 };
 
-// A number as a grid, digits separated by one empty column.
+// número como grid
 export const numberGrid = (value, char = "o") => {
   const digits = String(value).split("");
   return DIGITS[0].map((_, row) =>
@@ -23,7 +22,7 @@ export const numberGrid = (value, char = "o") => {
   );
 };
 
-// Writes `overlay` over `grid` with its top-left corner at (x, y); "." leaves the pixel below.
+// desenha `overlay` em cima do `grid` na posição (x, y)
 const stamp = (grid, overlay, x, y) =>
   grid.map((line, row) => {
     const over = overlay[row - y];
@@ -37,7 +36,7 @@ const stamp = (grid, overlay, x, y) =>
       .join("");
   });
 
-// Round coin with a raised rim, lit from the top-left.
+// moeda
 const makeCoin = (size) => {
   const c = (size - 1) / 2;
   const r = size / 2 - 0.3;
@@ -60,20 +59,20 @@ const makeCoin = (size) => {
     }
     rows.push(line);
   }
-  // A glint on the rim.
+  // brilho
   return stamp(rows, ["s.", ".s"], Math.round(c - r / 2), Math.round(c - r / 2) + 1);
 };
 
 export const COIN = makeCoin(16);
 
-// The coin of a level: its color shows the title tier, the level is written in the middle.
+// moeda do nível (a cor muda pelo título)
 export const levelCoin = (level) => {
   const digits = numberGrid(Math.min(level, 99));
   const x = Math.floor((16 - digits[0].length) / 2);
   return stamp(COIN, digits, x, 6);
 };
 
-// One color set per title (every 5 levels): bronze, silver, gold, emerald, amethyst.
+// cores de cada título
 export const TIER_PALETTES = {
   Beginner: { o: "#5c3a1e", d: "#9a5b2c", b: "#c47a3d", l: "#e3a066", s: "#f7d3ac" },
   Organized: { o: "#3f4855", d: "#8a94a3", b: "#b8c0cc", l: "#dde2e8", s: "#ffffff" },
@@ -115,9 +114,9 @@ export const SNOWFLAKE = {
   palette: { o: "#3b82f6", w: "#bfdbfe" },
 };
 
-// Badge of each achievement (keys are the API's achievement codes).
+// badges das conquistas
 export const ACHIEVEMENT_SPRITES = {
-  // A sprout in a pot: the journey starts.
+  // brotinho
   FIRST_STEP: {
     grid: [
       "............",
@@ -136,7 +135,7 @@ export const ACHIEVEMENT_SPRITES = {
     palette: { o: "#2f4a2a", g: "#6cc070", G: "#3f8f47", b: "#a0764f", B: "#7a5434" },
   },
   STREAK_7: FLAME,
-  // A trophy: a whole month without breaking the streak.
+  // troféu
   STREAK_30: {
     grid: [
       "..oooooooo..",
@@ -154,7 +153,7 @@ export const ACHIEVEMENT_SPRITES = {
     ],
     palette: { o: "#6b4a12", y: "#e8b931", l: "#f7d76b", d: "#c08a1e" },
   },
-  // A shield with a check: every budget respected.
+  // escudo
   ON_BUDGET: {
     grid: [
       ".oooooooooo.",
@@ -172,7 +171,7 @@ export const ACHIEVEMENT_SPRITES = {
     ],
     palette: { o: "#5c4632", b: "#a88d6f", l: "#c9b293", c: "#166534" },
   },
-  // A money bag with a gold coin: part of the income was kept.
+  // saco de dinheiro
   SAVER_20: {
     grid: [
       "...oo..oo...",
@@ -190,7 +189,7 @@ export const ACHIEVEMENT_SPRITES = {
     ],
     palette: { o: "#5c4632", b: "#d9bf9f", d: "#a88d6f", t: "#7a5434", y: "#e8b931", Y: "#c08a1e" },
   },
-  // A quiet night: days without spending.
+  // lua
   ZERO_DAY: {
     grid: [
       "...oooo.....",

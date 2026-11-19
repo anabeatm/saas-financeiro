@@ -52,7 +52,7 @@ import com.saasfinanceiro.finexp.repository.XpEventRepository;
 class GamificationServiceTest {
 
     private static final ZoneId ZONE = ZoneId.of("America/Sao_Paulo");
-    /** Noon of 18 Nov 2026 in São Paulo. */
+    /** meio-dia de 18/11/2026 em são paulo */
     private static final Instant NOW = Instant.parse("2026-11-18T15:00:00Z");
     private static final LocalDate TODAY = LocalDate.of(2026, 11, 18);
 
@@ -200,7 +200,7 @@ class GamificationServiceTest {
 
     @Test
     void endedMonthRewardsBudgetsMetAndSavings() {
-        progress.setLastClosedMonth(LocalDate.of(2026, 9, 1)); // October still open
+        progress.setLastClosedMonth(LocalDate.of(2026, 9, 1)); // outubro ainda aberto
         Budget food = budget(2L, "500.00");
         Budget leisure = budget(3L, "100.00");
         when(budgetRepository.findAllByUserId(7L)).thenReturn(List.of(food, leisure));
@@ -217,7 +217,7 @@ class GamificationServiceTest {
         assertEquals(Map.of(
                 "BUDGET:2:2026-10", GamificationService.BUDGET_MET_XP,
                 "BUDGET:3:2026-10", GamificationService.BUDGET_MET_XP,
-                // 30% saved: 100 + 6 x 10
+                // guardou 30%: 100 + 6 x 10
                 "MONTH:2026-10", 160), xpByKey);
         verify(achievementRepository).save(argThat(a -> a.getCode() == AchievementCode.ON_BUDGET));
         verify(achievementRepository).save(argThat(a -> a.getCode() == AchievementCode.SAVER_20));
@@ -239,7 +239,7 @@ class GamificationServiceTest {
 
     @Test
     void closedMonthsAreNotEvaluatedAgain() {
-        // October already closed; November is the current month.
+        // outubro já fechado; novembro é o mês atual
         service.getProfile(user);
 
         verify(budgetRepository, never()).findAllByUserId(anyLong());
@@ -252,7 +252,7 @@ class GamificationServiceTest {
 
         service.getProfile(user);
 
-        // Account created in September: September and October are closed, August is not.
+        // conta criada em setembro: fecha setembro e outubro, agosto não
         verify(transactionRepository).sumByTypeCreatedBy(7L, LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30));
         verify(transactionRepository).sumByTypeCreatedBy(7L, LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 31));
         verify(transactionRepository, times(2)).sumByTypeCreatedBy(anyLong(), any(), any());

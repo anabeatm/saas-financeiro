@@ -42,7 +42,7 @@ const Transactions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // null = closed, {} = new transaction, transaction = edit
+  // null = fechado, {} = nova, transaction = editar
   const [formTransaction, setFormTransaction] = useState(null);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -50,7 +50,7 @@ const Transactions = () => {
   const periodInvalid =
     filters.startDate && filters.endDate && filters.startDate > filters.endDate;
 
-  // Wallets (reloaded when they change in real time); the selected one is kept while it exists.
+  // carteiras (recarrega em tempo real)
   useEffect(() => {
     new WalletService()
       .list()
@@ -67,7 +67,7 @@ const Transactions = () => {
       });
   }, [walletsKey]);
 
-  // Categories, loaded once.
+  // categorias
   useEffect(() => {
     new CategoryService()
       .list()
@@ -75,7 +75,7 @@ const Transactions = () => {
       .catch((err) => console.error("Error loading categories", err));
   }, []);
 
-  // The transactions of the selected wallet for the current filters and page.
+  // transações com os filtros e a página atuais
   useEffect(() => {
     if (walletId === null || periodInvalid) return;
     let cancelled = false;
@@ -105,7 +105,7 @@ const Transactions = () => {
     };
   }, [walletId, filters, pageNumber, reloadKey, periodInvalid]);
 
-  // Changes made by other members (or in another tab) show up without reloading the page.
+  // recarrega quando chega mudança em tempo real
   useWalletEvents((event) => {
     if (!event.type.startsWith("TRANSACTION_")) setWalletsKey((k) => k + 1);
     if (event.walletId === walletId) setReloadKey((k) => k + 1);
@@ -155,7 +155,7 @@ const Transactions = () => {
       await new TransactionService().remove(walletId, transactionToDelete.id);
       addToast({ type: "success", title: "Transaction deleted" });
       setTransactionToDelete(null);
-      // Removing the last item of a page goes back one page.
+      // apagou o último item da página: volta uma página
       if (transactions.length === 1 && pageNumber > 0) {
         goToPage(pageNumber - 1);
       } else {

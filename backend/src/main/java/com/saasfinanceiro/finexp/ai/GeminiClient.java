@@ -22,13 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.saasfinanceiro.finexp.exceptions.AiUnavailableException;
 import com.saasfinanceiro.finexp.exceptions.TooManyRequestsException;
 
-/**
- * Calls Google's Gemini API ({@code generateContent}) and returns the model's answer as text.
- * The answer is requested as JSON; callers parse and validate it.
- *
- * <p>Configured by {@code app.ai.gemini-api-key} (env GEMINI_API_KEY) and {@code app.ai.model}
- * (env GEMINI_MODEL). Without a key the AI features answer 503 and the rest of the app works normally.
- */
+/** chama a api do gemini e devolve a resposta (json) como texto. sem chave dá 503 */
 @Component
 public class GeminiClient {
 
@@ -56,7 +50,7 @@ public class GeminiClient {
     @Autowired
     public GeminiClient(@Value("${app.ai.gemini-api-key:}") String apiKey,
             @Value("${app.ai.model:gemini-3.5-flash-lite}") String model,
-            // Only changed to point at a local fake server in manual tests
+            // dá pra trocar nos testes
             @Value("${app.ai.base-url:" + BASE_URL + "}") String baseUrl) {
         this(RestClient.builder().requestFactory(requestFactory()), apiKey, model, baseUrl);
     }
@@ -76,11 +70,7 @@ public class GeminiClient {
         return !apiKey.isBlank();
     }
 
-    /**
-     * @param instructions fixed rules for the model (system instruction)
-     * @param prompt       the request itself, with the user's data
-     * @return the text of the answer (JSON, as requested)
-     */
+    /** manda as instruções + prompt e devolve o texto da resposta */
     public String generateJson(String instructions, String prompt) {
         if (!isConfigured()) {
             throw new AiUnavailableException("AI features are not configured on this server");

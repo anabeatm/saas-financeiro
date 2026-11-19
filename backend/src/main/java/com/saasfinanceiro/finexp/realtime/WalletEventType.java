@@ -1,6 +1,6 @@
 package com.saasfinanceiro.finexp.realtime;
 
-/** What changed in a wallet. Sent to the browser as the event's {@code type}. */
+/** tipos de evento da carteira */
 public enum WalletEventType {
     TRANSACTION_CREATED,
     TRANSACTION_UPDATED,

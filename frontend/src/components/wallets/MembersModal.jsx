@@ -21,7 +21,7 @@ const ROLE_HINTS = {
   VIEWER: "can only view",
 };
 
-// Lists the members of a wallet. The owner can also invite, change roles and remove members.
+// membros da carteira (o dono pode gerenciar)
 export default function MembersModal({ wallet, isOwner, onClose }) {
   const { addToast } = useToast();
   const [members, setMembers] = useState([]);

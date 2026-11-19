@@ -1,7 +1,7 @@
 import { WifiOff } from "lucide-react";
 import { useOnline } from "./usePwa";
 
-// Tells the user why data is not loading while the device is offline.
+// aviso de offline
 export default function OfflineBanner() {
   const online = useOnline();
   if (online) return null;

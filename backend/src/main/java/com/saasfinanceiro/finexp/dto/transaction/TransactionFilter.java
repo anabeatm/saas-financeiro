@@ -6,7 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.saasfinanceiro.finexp.model.enums.TransactionType;
 
-/** Optional query parameters accepted by the transaction listing; null means "no filter". */
+/** filtros opcionais da lista de transações (null = sem filtro) */
 public record TransactionFilter(
     TransactionType type,
     Long categoryId,

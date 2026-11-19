@@ -7,7 +7,7 @@ import Input from "../Input";
 import Modal from "../Modal";
 import { useToast } from "../useToast";
 
-// Creates, changes or removes the monthly limit of an expense category.
+// cria, edita ou remove o orçamento da categoria
 export default function BudgetFormModal({ category, budget, onClose, onSaved }) {
   const { addToast } = useToast();
   const [limit, setLimit] = useState(budget ? String(budget.monthlyLimit) : "");

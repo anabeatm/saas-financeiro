@@ -6,7 +6,7 @@ export const TRANSACTION_EVENTS = [
   "TRANSACTION_DELETED",
 ];
 
-// Text of the notification shown to the other members. `me` is the id of the signed-in user.
+// texto da notificação de um evento de carteira
 export const describeWalletEvent = (event, me) => {
   const who = event.actorName;
   const wallet = `"${event.walletName}"`;

@@ -19,12 +19,7 @@ import com.saasfinanceiro.finexp.model.enums.XpEventType;
 
 import lombok.Data;
 
-/**
- * One entry of a user's XP ledger. The total XP is the sum of the entries, so it never drifts, and
- * an award is undone by deleting its entry. {@code sourceKey} names what the XP was given for
- * (e.g. {@code TX:123}, {@code CHECKIN:2026-11-18}); being unique per user, the same thing can
- * never be rewarded twice.
- */
+/** registro de xp. o {@code sourceKey} (ex: TX:123) é único, então nada é recompensado duas vezes */
 @Entity
 @Data
 @Table(uniqueConstraints = {

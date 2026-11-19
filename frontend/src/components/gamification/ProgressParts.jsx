@@ -3,7 +3,7 @@ import { FLAME, SNOWFLAKE } from "./sprites";
 
 const MAX_FREEZES = 2;
 
-// Progress bar from the start of the current level to the next one.
+// barra de xp até o próximo nível
 export function XpBar({ profile }) {
   const span = profile.nextLevelXp - profile.levelStartXp;
   const done = profile.xp - profile.levelStartXp;
@@ -19,7 +19,7 @@ export function XpBar({ profile }) {
         aria-valuenow={profile.xp}
         aria-label="XP to the next level"
       >
-        {/* Stepped fill, like a game bar */}
+        {/* preenchimento em degraus */}
         <div
           className="h-full bg-[repeating-linear-gradient(90deg,#a88d6f_0_6px,#91755a_6px_8px)] transition-[width] duration-500"
           style={{ width: `${pct}%` }}
@@ -34,7 +34,7 @@ export function XpBar({ profile }) {
   );
 }
 
-// Days in a row with activity, the best streak and the freezes in stock.
+// info do streak
 export function StreakInfo({ profile }) {
   const active = profile.currentStreak > 0;
   return (

@@ -72,12 +72,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
-        // 429 while this account is blocked after repeated wrong passwords.
+        // 429 se a conta tá bloqueada por um tempo
         loginAttemptService.checkNotBlocked(request.email());
 
         Optional<User> uOptional = userRepository.findByEmail(request.email());
 
-        // Always run a BCrypt comparison so response time does not reveal whether the email exists.
+        // sempre compara o hash, assim o tempo de resposta não entrega se o email existe
         String hashToCompare = uOptional.map(User::getPassword).orElse(dummyHash);
         boolean passwordMatches = passwordEncoder.matches(request.password(), hashToCompare);
 
@@ -89,7 +89,7 @@ public class AuthController {
         User user = uOptional.get();
         loginAttemptService.recordSuccess(request.email());
 
-        // Only revealed after the password is proven correct, to avoid account enumeration.
+        // só checa isso depois que a senha tá certa
         if (!user.isEnabled()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Please verify your email before logging in.");
         }

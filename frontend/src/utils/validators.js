@@ -1,6 +1,6 @@
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Each validator returns an error message, or an empty string when the value is valid.
+// os validators devolvem a msg de erro ou ""
 
 export const validateEmail = (value) => {
   const email = value.trim();
@@ -29,7 +29,7 @@ export const validateAmount = (value) => {
   return "";
 };
 
-// `today` is yyyy-MM-dd; the API does not accept dates in the future.
+// sem data no futuro
 export const validatePastOrPresentDate = (value, today) => {
   if (!value) return "Required field";
   if (value > today) return "Date cannot be in the future";
@@ -38,7 +38,7 @@ export const validatePastOrPresentDate = (value, today) => {
 
 export const validateCategoryName = (value) => validateName(value, 80);
 
-// Matches the backend rule for names: 2 to 100 characters.
+// nome: de 2 a 100 caracteres
 export const validateFullName = (value) => {
   const name = value.trim();
   if (!name) return "Required field";

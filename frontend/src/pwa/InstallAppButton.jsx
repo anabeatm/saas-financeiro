@@ -2,7 +2,7 @@ import { Download } from "lucide-react";
 import { promptInstall } from "./pwa";
 import { useCanInstall } from "./usePwa";
 
-// Shown only when the browser offers installation (Chrome/Edge on desktop and Android).
+// botão de instalar (só aparece se o navegador deixar)
 export default function InstallAppButton({ compact = false }) {
   const canInstall = useCanInstall();
   if (!canInstall) return null;

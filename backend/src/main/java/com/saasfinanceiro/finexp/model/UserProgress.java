@@ -13,7 +13,7 @@ import jakarta.persistence.OneToOne;
 
 import lombok.Data;
 
-/** Gamification state of a user that is not derived from the XP ledger: the activity streak. */
+/** dados do streak do usuário */
 @Entity
 @Data
 public class UserProgress {
@@ -31,15 +31,15 @@ public class UserProgress {
     @Column(nullable = false)
     private int bestStreak;
 
-    /** Day the current streak started; makes streak bonuses unique per streak. */
+    /** dia que o streak atual começou */
     private LocalDate streakStartDate;
 
     private LocalDate lastActiveDate;
 
-    /** Missed days the streak can survive. */
+    /** quantos dias perdidos o streak aguenta */
     @Column(nullable = false)
     private int freezes;
 
-    /** First day of the last month whose budgets and savings were already rewarded. */
+    /** último mês que já ganhou recompensa */
     private LocalDate lastClosedMonth;
 }

@@ -1,6 +1,6 @@
 package com.saasfinanceiro.finexp.realtime;
 
-/** What happened to the user's progress. Sent to the browser as the event's {@code type}. */
+/** tipos de evento de progresso */
 public enum GamificationEventType {
     XP_GAINED,
     LEVEL_UP,

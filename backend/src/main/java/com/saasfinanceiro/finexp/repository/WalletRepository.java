@@ -16,7 +16,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     @Query("SELECT w FROM Wallet w JOIN w.members m WHERE m.user = :user")
     List<Wallet> findAllWalletsByMember(@Param("user") User user);
 
-    // Atomic in the database, so concurrent transactions cannot overwrite each other's balance change.
+    // atualiza o saldo direto no banco (atômico, sem conflito)
     @Modifying
     @Query("UPDATE Wallet w SET w.balance = w.balance + :delta WHERE w.id = :walletId")
     int adjustBalance(@Param("walletId") Long walletId, @Param("delta") BigDecimal delta);

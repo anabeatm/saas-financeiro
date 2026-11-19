@@ -9,7 +9,7 @@ export const RealtimeContext = createContext({
 // "connecting" | "live" | "offline"
 export const useRealtimeStatus = () => useContext(RealtimeContext).status;
 
-// Keeps the latest handler without re-subscribing on every render.
+// guarda o handler mais recente
 function useSubscription(subscribe, handler) {
   const handlerRef = useRef(handler);
 
@@ -20,12 +20,12 @@ function useSubscription(subscribe, handler) {
   useEffect(() => subscribe((event) => handlerRef.current(event)), [subscribe]);
 }
 
-// Calls `handler` for every wallet event received while the component is mounted.
+// escuta eventos de carteira
 export function useWalletEvents(handler) {
   useSubscription(useContext(RealtimeContext).subscribe, handler);
 }
 
-// Calls `handler` for every progress event of the user (XP, level, achievements, budget alerts).
+// escuta eventos de progresso
 export function useGamificationEvents(handler) {
   useSubscription(useContext(RealtimeContext).subscribeGamification, handler);
 }

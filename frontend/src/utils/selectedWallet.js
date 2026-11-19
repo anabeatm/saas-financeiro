@@ -1,15 +1,15 @@
 const STORAGE_KEY = "selectedWalletId";
 
-// The wallet chosen in one page is remembered by the others (dashboard, transactions).
+// lembra a carteira selecionada
 export const saveSelectedWallet = (walletId) => {
   try {
     localStorage.setItem(STORAGE_KEY, String(walletId));
   } catch {
-    // storage unavailable: the selection just won't be remembered
+    // storage unavailable
   }
 };
 
-// Returns the remembered wallet id if the user still has it, otherwise the first wallet (or null).
+// carteira salva, ou a primeira
 export const pickWalletId = (wallets) => {
   if (wallets.length === 0) return null;
   let saved = null;

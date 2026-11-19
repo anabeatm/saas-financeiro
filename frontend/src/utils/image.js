@@ -1,5 +1,5 @@
 export const AVATAR_ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp"];
-export const AVATAR_MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB before resizing
+export const AVATAR_MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 mb antes de redimensionar
 
 const loadImage = (file) =>
   new Promise((resolve, reject) => {
@@ -16,8 +16,7 @@ const loadImage = (file) =>
     img.src = url;
   });
 
-// Crops the image to a centered square and scales it down, returning a JPEG
-// data URL small enough to be stored with the user profile.
+// corta num quadrado e diminui a imagem (vira jpeg em base64)
 export const resizeImageToDataUrl = async (file, size = 256, quality = 0.85) => {
   const img = await loadImage(file);
   const side = Math.min(img.naturalWidth, img.naturalHeight);
@@ -29,7 +28,7 @@ export const resizeImageToDataUrl = async (file, size = 256, quality = 0.85) => 
   canvas.width = target;
   canvas.height = target;
   const ctx = canvas.getContext("2d");
-  // JPEG has no transparency, so transparent PNGs get a white background.
+  // fundo branco (jpeg não tem transparência)
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, target, target);
   ctx.drawImage(img, sx, sy, side, side, 0, 0, target, target);

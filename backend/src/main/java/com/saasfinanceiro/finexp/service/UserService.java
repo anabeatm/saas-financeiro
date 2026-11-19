@@ -13,10 +13,7 @@ import com.saasfinanceiro.finexp.exceptions.BusinessException;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.repository.UserRepository;
 
-/**
- * Operations on the authenticated user's own account. There is deliberately no
- * API to read, change or delete other users.
- */
+/** operações na conta do próprio usuário logado */
 @Service
 public class UserService {
     @Autowired

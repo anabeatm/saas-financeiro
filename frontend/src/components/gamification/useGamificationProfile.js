@@ -3,10 +3,10 @@ import GamificationService from "../../../services/GamificationService";
 import { useGamificationEvents, useWalletEvents } from "../../realtime/useRealtime";
 import { getErrorMessage } from "../../utils/errors";
 
-// Events usually come in bursts (XP + level + achievement): reload once after they settle.
+// espera a rajada de eventos acabar antes de recarregar
 const RELOAD_DELAY_MS = 400;
 
-// The user's progress, kept up to date with the real-time events.
+// progresso do usuário, atualizado em tempo real
 export default function useGamificationProfile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +35,7 @@ export default function useGamificationProfile() {
   };
 
   useGamificationEvents(scheduleReload);
-  // Deleting a transaction can take XP back without a progress event.
+  // recarrega quando muda transação também (apagar pode tirar xp)
   useWalletEvents((event) => {
     if (event.type === "TRANSACTION_DELETED") scheduleReload();
   });

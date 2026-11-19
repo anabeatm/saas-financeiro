@@ -1,8 +1,8 @@
 import api from "../configs/axiosConfig";
 
-// Monthly spending limits per expense category.
+// requests de orçamento
 class BudgetService {
-  // month: "yyyy-MM" (current month when omitted)
+  // month: "yyyy-MM" (opcional)
   async list(month) {
     const response = await api.get("/api/v1/budgets", {
       params: month ? { month } : {},

@@ -27,7 +27,7 @@ const Register = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
-  // Every rule of the form, evaluated against the values being passed in.
+  // validação do form
   const validate = (values) => ({
     name: validateFullName(values.name),
     email: validateEmail(values.email),
@@ -70,7 +70,7 @@ const Register = () => {
       const message =
         typeof errorMessage === "string" ? errorMessage : "Error registering";
 
-      // The "e-mail already registered" answer belongs to the e-mail field; nothing is cleared.
+      // email já cadastrado
       if (/e-?mail/i.test(message)) {
         setErrors((prev) => ({ ...prev, email: message }));
       } else {
@@ -90,7 +90,7 @@ const Register = () => {
     const values = { ...user, [field]: e.target.value };
     setUser(values);
 
-    // Fields that already show an error are re-checked while the user fixes them.
+    // revalida os campos que tão com erro
     if (errors[field]) validateField(field, values);
     if (field === "password" && errors.confirmPassword) {
       validateField("confirmPassword", values);

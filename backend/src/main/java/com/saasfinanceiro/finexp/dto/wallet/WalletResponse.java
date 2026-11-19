@@ -15,7 +15,7 @@ public record WalletResponse(
     Long ownerId,
     WalletRole role
 ) {
-    /** @param role the role the authenticated user has in this wallet */
+    /** @param role papel do usuário logado nessa carteira */
     public WalletResponse(Wallet wallet, WalletRole role) {
         this(
             wallet.getId(), 

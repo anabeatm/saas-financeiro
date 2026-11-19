@@ -57,7 +57,7 @@ class StreakTrackerTest {
         activeFor(7);
         assertEquals(1, progress.getFreezes());
 
-        // Day 8 missed, back on day 9.
+        // perdeu o dia 8, voltou no 9
         StreakTracker.registerActivity(progress, DAY.plusDays(8));
 
         assertEquals(8, progress.getCurrentStreak());

@@ -65,7 +65,7 @@ public class TransactionService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        // Categories are private to their owner; report others as missing to avoid leaking their existence.
+        // categoria de outro usuário vira "não encontrada" (pra não vazar que existe)
         if (!category.getUser().getId().equals(getAuthenticatedUser().getId())) {
             throw new ResourceNotFoundException("Category not found");
         }
@@ -122,8 +122,7 @@ public class TransactionService {
         if (request.categoryId() != null) {
             Category current = transaction.getCategory();
             boolean unchanged = current != null && current.getId().equals(request.categoryId());
-            // Keeping the category a transaction already has is always allowed, even when another
-            // wallet member owns it; a different category must belong to the caller.
+            // manter a categoria atual pode; trocar só pra uma do próprio usuário
             category = unchanged ? keepCategory(current, request.type())
                     : resolveCategory(request.categoryId(), request.type());
         }
@@ -186,7 +185,7 @@ public class TransactionService {
         return transaction;
     }
 
-    // Signed impact of a transaction on the wallet balance.
+    // quanto soma/subtrai do saldo
     private BigDecimal effectOf(TransactionType type, BigDecimal amount) {
         return type == TransactionType.INCOME ? amount : amount.negate();
     }

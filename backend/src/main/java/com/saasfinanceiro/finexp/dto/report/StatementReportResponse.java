@@ -5,10 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Wallet statement for a period: balance before the period, every transaction in date order with
- * the running balance, totals and a breakdown by category.
- */
+/** extrato da carteira: saldo inicial, transações, totais e categorias */
 public record StatementReportResponse(
     Long walletId,
     String walletName,

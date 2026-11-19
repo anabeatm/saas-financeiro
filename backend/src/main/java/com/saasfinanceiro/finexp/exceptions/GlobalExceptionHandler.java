@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
-        // Full details go to the server log only; the client gets a generic message.
+        // detalhe só no log, o cliente recebe uma msg genérica
         log.error("Unexpected error", ex);
 
         return buildResponse(500, "Internal Server Error", "Internal server error");

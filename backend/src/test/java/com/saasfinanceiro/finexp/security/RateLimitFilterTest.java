@@ -55,7 +55,7 @@ class RateLimitFilterTest {
         assertEquals("60", blocked.getHeader("Retry-After"));
         assertTrue(blocked.getContentAsString().contains("Too many attempts"));
 
-        // other clients are not affected
+        // outros clientes não são afetados
         assertEquals(200, post("/auth/login", "198.51.100.20").getStatus());
 
         now.addAndGet(Duration.ofMinutes(1).toMillis());

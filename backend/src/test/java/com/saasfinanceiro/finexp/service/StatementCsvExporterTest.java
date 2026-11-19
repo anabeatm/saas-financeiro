@@ -28,7 +28,7 @@ class StatementCsvExporterTest {
                 entry(TransactionType.INCOME, "Salário", "Salary", "1000", "1500"),
                 entry(TransactionType.EXPENSE, "Groceries", "Food", "150.5", "1349.5"))));
 
-        // expenses are written with a negative sign so the column can be summed
+        // despesa sai negativa pra dar pra somar a coluna
         assertEquals(
                 "Date;Type;Description;Category;Created by;Amount;Balance\r\n"
                         + "05/01/2025;Income;Salário;Salary;Ana;1000,00;1500,00\r\n"

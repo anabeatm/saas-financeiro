@@ -1,8 +1,8 @@
 import api from "../configs/axiosConfig";
 
-// AI features (Google Gemini on the backend).
+// requests de ia
 class AiService {
-  // Picks one of the user's categories for a transaction description; categoryId is null when none fits.
+  // sugere uma categoria pela descrição
   async suggestCategory(description, type) {
     const response = await api.post("/api/v1/ai/category-suggestion", {
       description,
@@ -11,7 +11,7 @@ class AiService {
     return response.data;
   }
 
-  // Short natural-language summary and tips for a wallet's period.
+  // resumo e dicas do período
   async getInsights(walletId, startDate, endDate) {
     const response = await api.get(
       `/api/v1/wallets/${walletId}/reports/insights`,

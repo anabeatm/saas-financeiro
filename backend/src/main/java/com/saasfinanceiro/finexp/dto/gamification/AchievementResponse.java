@@ -4,7 +4,7 @@ import java.time.Instant;
 
 import com.saasfinanceiro.finexp.model.enums.AchievementCode;
 
-/** An achievement and whether the user has it ({@code unlockedAt} is null while locked). */
+/** conquista; {@code unlockedAt} fica null enquanto tá bloqueada */
 public record AchievementResponse(
     AchievementCode code,
     String title,

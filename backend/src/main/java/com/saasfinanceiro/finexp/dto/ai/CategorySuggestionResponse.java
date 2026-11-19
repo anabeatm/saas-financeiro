@@ -2,11 +2,7 @@ package com.saasfinanceiro.finexp.dto.ai;
 
 import com.saasfinanceiro.finexp.model.enums.TransactionType;
 
-/**
- * Result of the category suggestion: either an existing category of the user ({@code categoryId},
- * {@code categoryName}, {@code type}) or, when none fits, a proposal for a new one ({@code newCategory}).
- * All fields are null when the AI had nothing useful to suggest.
- */
+/** categoria sugerida, ou uma nova em {@code newCategory}; tudo null se nada servir */
 public record CategorySuggestionResponse(Long categoryId, String categoryName, TransactionType type,
         NewCategorySuggestion newCategory) {
 

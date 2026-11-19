@@ -48,7 +48,7 @@ public class CategoryService {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
-    /** Seeds the starter categories for a newly created account. */
+    /** cria as categorias padrão pra conta nova */
     public void createDefaultCategories(User user) {
         List<Category> categories = DEFAULT_CATEGORIES.stream().map(d -> {
             Category category = new Category();
@@ -105,7 +105,7 @@ public class CategoryService {
 
         category = repository.save(category);
 
-        // Budgets only exist for expense categories.
+        // só categoria de despesa tem orçamento
         if (category.getType() != TransactionType.EXPENSE) {
             budgetRepository.deleteByCategoryId(id);
         }

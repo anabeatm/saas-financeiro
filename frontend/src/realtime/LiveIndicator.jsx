@@ -6,7 +6,7 @@ const STATES = {
   offline: { dot: "bg-gray-300", label: "Offline" },
 };
 
-// Shows whether the real-time updates are working.
+// indicador do tempo real
 export default function LiveIndicator({ compact = false }) {
   const status = useRealtimeStatus();
   const state = STATES[status] ?? STATES.offline;

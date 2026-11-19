@@ -30,7 +30,7 @@ import com.saasfinanceiro.finexp.repository.BudgetRepository;
 import com.saasfinanceiro.finexp.repository.CategoryRepository;
 import com.saasfinanceiro.finexp.repository.TransactionRepository;
 
-/** Monthly limits per expense category, and the alerts when spending gets close to or over them. */
+/** orçamentos mensais por categoria e os alertas */
 @Service
 public class BudgetService {
 
@@ -51,7 +51,7 @@ public class BudgetService {
         this.clock = clock;
     }
 
-    /** @param month {@code yyyy-MM}; the current month when null */
+    /** @param month yyyy-MM (mês atual se for null) */
     @Transactional(readOnly = true)
     public List<BudgetResponse> list(User user, String month) {
         YearMonth period = parseMonth(month);
@@ -95,11 +95,7 @@ public class BudgetService {
         budgetRepository.delete(budget);
     }
 
-    /**
-     * Runs after a transaction was committed. Alerts the owner when this expense made the month's
-     * spending cross 80% of the limit or go over it; since only the crossing alerts, nobody is told
-     * the same thing twice and no alert state has to be stored.
-     */
+    /** avisa quando uma despesa passa de 80% ou 100% do orçamento */
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public void onTransactionCreated(TransactionActivity.Created event) {
         if (event.type() != TransactionType.EXPENSE || event.categoryId() == null) {

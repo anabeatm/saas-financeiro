@@ -5,10 +5,7 @@ import java.time.LocalDate;
 
 import com.saasfinanceiro.finexp.model.enums.TransactionType;
 
-/**
- * Application events published by the transaction service. They carry plain values because they are
- * handled after the commit, outside the persistence context that loaded the transaction.
- */
+/** eventos de quando uma transação é criada ou apagada */
 public final class TransactionActivity {
 
     private TransactionActivity() {
@@ -17,6 +14,6 @@ public final class TransactionActivity {
     public record Created(Long transactionId, Long userId, TransactionType type, BigDecimal amount,
             LocalDate date, Long categoryId) {}
 
-    /** {@code creatorId} is who created the transaction (and earned its XP), not who deleted it. */
+    /** {@code creatorId} é quem criou a transação (não quem apagou) */
     public record Deleted(Long transactionId, Long creatorId) {}
 }

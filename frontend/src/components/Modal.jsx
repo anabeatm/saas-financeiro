@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { useEffect } from "react";
 
-// Generic dialog: closes with Esc, the close button or a click on the backdrop.
+// modal genérico (fecha com esc ou clicando fora)
 export default function Modal({
   title,
   onClose,

@@ -1,4 +1,4 @@
-// The axios interceptor rejects with a plain message string when the API explains the failure.
+// pega a msg de erro
 export const getErrorMessage = (
   err,
   fallback = "Something went wrong. Please try again.",

@@ -2,10 +2,7 @@ package com.saasfinanceiro.finexp.dto.gamification;
 
 import java.util.List;
 
-/**
- * The user's progress. {@code levelStartXp} and {@code nextLevelXp} are the total XP at which the
- * current and the next level start, for the progress bar.
- */
+/** progresso do usuário; levelStartXp/nextLevelXp são usados na barra de xp */
 public record GamificationProfileResponse(
     long xp,
     int level,

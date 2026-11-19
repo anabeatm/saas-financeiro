@@ -13,13 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.saasfinanceiro.finexp.exceptions.TooManyRequestsException;
 
-/**
- * Protects each account against password guessing: after {@link #MAX_FAILURES} wrong logins in
- * {@link #LOCK_WINDOW}, that e-mail is blocked until the window ends. Complements the per-IP limit,
- * which does not stop an attacker spreading attempts over many addresses.
- *
- * <p>Failures are counted for unknown e-mails too, so the lockout does not reveal which accounts exist.
- */
+/** bloqueia o email por um tempo depois de muitas senhas erradas */
 @Service
 public class LoginAttemptService {
 
@@ -41,7 +35,7 @@ public class LoginAttemptService {
         this.clock = clock;
     }
 
-    /** Throws 429 when the account is temporarily blocked. */
+    /** 429 se a conta tá bloqueada */
     public void checkNotBlocked(String email) {
         Failures current = active(key(email));
         if (current != null && current.count() >= MAX_FAILURES) {
@@ -87,7 +81,7 @@ public class LoginAttemptService {
         return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
     }
 
-    /** "ana@example.com" → "a***@example.com", so logs do not expose full addresses. */
+    /** esconde parte do email nos logs */
     static String mask(String email) {
         int at = email.indexOf('@');
         return at <= 0 ? "***" : email.charAt(0) + "***" + email.substring(at);

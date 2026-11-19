@@ -33,7 +33,7 @@ const pad = (n) => String(n).padStart(2, "0");
 const toISO = (d) =>
   `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-// Start and end dates (yyyy-MM-dd) of a preset, relative to today.
+// datas de cada atalho de período
 const presetPeriod = (preset) => {
   const now = new Date();
   const y = now.getFullYear();
@@ -53,7 +53,7 @@ const presetPeriod = (preset) => {
 const daysBetween = (start, end) =>
   Math.round((new Date(`${end}T00:00:00`) - new Date(`${start}T00:00:00`)) / 86400000);
 
-// Same rules as the API, checked before calling it.
+// valida o período (mesmas regras da api)
 const periodError = ({ startDate, endDate }) => {
   if (!startDate || !endDate) return "Choose the start and end dates.";
   if (startDate > endDate) return "The start date must not be after the end date.";
@@ -146,7 +146,7 @@ const Reports = () => {
       });
   }, [walletsKey]);
 
-  // The report on screen is regenerated when its wallet changes in real time.
+  // recarrega o relatório quando a carteira muda
   useWalletEvents((event) => {
     if (!event.type.startsWith("TRANSACTION_")) setWalletsKey((k) => k + 1);
     if (event.walletId === walletId) setReportKey((k) => k + 1);
@@ -247,7 +247,7 @@ const Reports = () => {
 
   return (
     <div className="mx-auto w-full max-w-7xl">
-      {/* Title used only when printing / saving as PDF */}
+      {/* título pra impressão */}
       {report && (
         <div className="mb-6 hidden print:block">
           <p className="text-xl font-bold">FinEXP — Statement</p>

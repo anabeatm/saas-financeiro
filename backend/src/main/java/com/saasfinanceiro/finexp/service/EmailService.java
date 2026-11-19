@@ -20,13 +20,7 @@ import org.springframework.web.client.RestClient;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-/**
- * Sends the application's e-mails (account verification, password reset).
- *
- * <p>Two transports: when {@code app.mail.brevo-api-key} is set, mails go through Brevo's HTTPS API
- * (used in production, because Render's free plan blocks the SMTP ports); otherwise they go through
- * SMTP with the {@code spring.mail.*} settings (Gmail, in local development).
- */
+/** manda os emails pelo brevo (produção) ou smtp (local) */
 @Service
 public class EmailService {
 
@@ -62,10 +56,7 @@ public class EmailService {
         }
     }
 
-    /**
-     * Renders a Thymeleaf template from {@code templates/} and sends it as HTML. Runs in the
-     * background, so a slow or failing mail server never blocks or breaks the request.
-     */
+    /** monta o template e manda como html, em background */
     @Async
     public void sendEmailTemplate(String to, String subject, String template, Context context) {
         String html = templateEngine.process(template, context);

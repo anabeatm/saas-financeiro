@@ -1,13 +1,13 @@
-// PWA wiring: service worker registration and the browser's "install app" prompt.
+// registra o service worker e guarda o prompt de instalar
 
-// The prompt event can fire before any component is mounted, so it is kept here.
+// evento do prompt de instalar (pode disparar antes dos componentes montarem)
 let installPrompt = null;
 const listeners = new Set();
 const notify = () => listeners.forEach((listener) => listener());
 
 export function setUpPwa() {
   window.addEventListener("beforeinstallprompt", (event) => {
-    // Keep the browser from showing its own banner; the app offers an "Install app" button instead.
+    // esconde o banner do navegador, a gente usa o nosso botão
     event.preventDefault();
     installPrompt = event;
     notify();
@@ -18,7 +18,7 @@ export function setUpPwa() {
     notify();
   });
 
-  // Only in production builds: in development the worker would cache files that Vite reloads.
+  // só em produção (no dev ia cachear os arquivos do vite)
   if (import.meta.env.PROD && "serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker
@@ -35,7 +35,7 @@ export const subscribeInstallPrompt = (listener) => {
 
 export const getInstallPrompt = () => installPrompt;
 
-// Shows the browser's install dialog; resolves to true when the user accepts.
+// mostra o popup de instalar; true se aceitar
 export async function promptInstall() {
   if (!installPrompt) return false;
   const event = installPrompt;

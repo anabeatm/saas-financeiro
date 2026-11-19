@@ -5,14 +5,10 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Fixed-window request counter, kept in memory: at most {@code limit} hits per key in each window.
- * Enough for a single API instance; with several instances the counters would have to move to a
- * shared store (e.g. Redis).
- */
+/** contador de requests em memória por chave e janela de tempo */
 public class RateLimiter {
 
-    /** Whether the hit was allowed and, if not, in how many seconds the window resets. */
+    /** se passou ou não, e quantos segundos faltam pra resetar */
     public record Decision(boolean allowed, long retryAfterSeconds) {}
 
     private record Window(long startMillis, long durationMillis, int count) {
@@ -44,7 +40,7 @@ public class RateLimiter {
         return new Decision(false, Math.max(1, (remainingMillis + 999) / 1000));
     }
 
-    /** Drops expired windows so the map does not grow forever. */
+    /** limpa as entradas expiradas */
     public void evictExpired() {
         long now = clock.millis();
         windows.values().removeIf(w -> w.expired(now));

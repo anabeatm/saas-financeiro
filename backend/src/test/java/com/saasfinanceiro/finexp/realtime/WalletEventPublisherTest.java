@@ -80,7 +80,7 @@ class WalletEventPublisherTest {
 
     @Test
     void memberEventAlsoReachesTheAffectedUser() {
-        // e.g. a member that is being removed and is no longer listed
+        // membro sendo removido
         User removed = user(3L, "Bia");
 
         publisher.memberChanged(WalletEventType.MEMBER_REMOVED, wallet, removed, owner);

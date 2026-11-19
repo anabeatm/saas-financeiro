@@ -1,14 +1,4 @@
-// FinEXP service worker. Built into dist/sw.js by the plugin in vite.config.js, which fills in the
-// cache version and the list of files of that build.
-//
-// Offline strategy:
-//  - the app itself (HTML, JS, CSS, icons) is cached when the worker installs, so the app opens
-//    even without a connection;
-//  - page navigations try the network first and fall back to the cached app (every route works
-//    offline, since the app is a single page);
-//  - other static files: cache first, network as a fallback (and cached for next time).
-// Calls to the API are never cached: financial data is not stored on the device and is always
-// fresh when there is a connection.
+// service worker: guarda os arquivos do app pra abrir offline. chamada da api nunca vai pro cache
 
 const CACHE_VERSION = "__CACHE_VERSION__";
 const CACHE_NAME = `finexp-${CACHE_VERSION}`;
@@ -24,7 +14,7 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// A new build replaces the previous cache.
+// apaga os caches velhos
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
@@ -47,7 +37,7 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Only this site's GET requests; the API lives on another origin and is left alone.
+  // só os GET desse site
   if (request.method !== "GET" || url.origin !== self.location.origin || isApiCall(url)) {
     return;
   }

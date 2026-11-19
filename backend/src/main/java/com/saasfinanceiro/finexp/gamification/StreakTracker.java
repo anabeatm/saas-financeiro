@@ -5,10 +5,7 @@ import java.time.temporal.ChronoUnit;
 
 import com.saasfinanceiro.finexp.model.UserProgress;
 
-/**
- * Activity streak rules. A day counts when the user logs a transaction or checks in a no-spending
- * day. Every 7 days in a row earn a freeze (up to 2); each freeze covers one missed day.
- */
+/** regras do streak: a cada 7 dias seguidos ganha um freeze (max 2), cada freeze cobre um dia perdido */
 public final class StreakTracker {
 
     public static final int MAX_FREEZES = 2;
@@ -17,10 +14,7 @@ public final class StreakTracker {
     private StreakTracker() {
     }
 
-    /**
-     * Records activity on {@code day}. Returns true when the streak grew, false when the day was
-     * already counted.
-     */
+    /** registra atividade no dia; true se o streak aumentou */
     public static boolean registerActivity(UserProgress progress, LocalDate day) {
         LocalDate last = progress.getLastActiveDate();
         if (last != null && !day.isAfter(last)) {
@@ -49,10 +43,7 @@ public final class StreakTracker {
         return true;
     }
 
-    /**
-     * The streak as it stands today: still alive while the missed days since the last activity can
-     * be covered by freezes (they are only spent when the user comes back), otherwise 0.
-     */
+    /** streak de hoje: continua vivo se os freezes cobrem os dias perdidos, senão zera */
     public static int currentStreak(UserProgress progress, LocalDate today) {
         LocalDate last = progress.getLastActiveDate();
         if (last == null) {

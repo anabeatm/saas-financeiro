@@ -15,7 +15,7 @@ public record CategoryRequest(
     @NotNull(message = "Transaction type is required (INCOME or EXPENSE)") 
     TransactionType type,
 
-    // Used as a CSS color by the frontend: only #RRGGBB is accepted
+    // só aceita #RRGGBB
     @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Color must be a hex code like #FF5733")
     String color,
     

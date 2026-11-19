@@ -11,7 +11,7 @@ export function ToastProvider({ children }) {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
-  // type: "info" | "success" | "error" | "warning" | "reward"; `icon` replaces the default one.
+  // type: info | success | error | warning | reward
   const addToast = useCallback(
     ({ type = "info", title, description, icon, duration = 4000 }) => {
       const id = Math.random().toString(36).substring(2, 9);

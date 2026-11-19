@@ -1,6 +1,6 @@
 package com.saasfinanceiro.finexp.exceptions;
 
-/** Too many attempts in a short time (HTTP 429); the client may retry after {@code retryAfterSeconds}. */
+/** tentativas demais (429) */
 public class TooManyRequestsException extends RuntimeException {
 
     private final long retryAfterSeconds;

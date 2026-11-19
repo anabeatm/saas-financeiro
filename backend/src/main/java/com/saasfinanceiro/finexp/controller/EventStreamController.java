@@ -12,10 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.realtime.SseConnectionRegistry;
 
-/**
- * Real-time updates (Server-Sent Events). The authenticated user receives an event whenever a
- * wallet they belong to changes: transactions, wallet data or members.
- */
+/** stream em tempo real (sse): o usuário recebe um evento quando alguma carteira dele muda */
 @RestController
 @RequestMapping("/api/v1/events")
 public class EventStreamController {
@@ -28,7 +25,7 @@ public class EventStreamController {
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@AuthenticationPrincipal User user, HttpServletResponse response) {
-        // Proxies must not cache or buffer the stream, or events would arrive late.
+        // proxy não pode fazer cache/buffer, senão os eventos chegam atrasados
         response.setHeader("Cache-Control", "no-cache");
         response.setHeader("X-Accel-Buffering", "no");
         return registry.register(user.getId());

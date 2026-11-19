@@ -1,9 +1,6 @@
 package com.saasfinanceiro.finexp.gamification;
 
-/**
- * Levels from total XP. Reaching level {@code n} takes {@code 50 * (n - 1) * n} XP in total, so
- * each level costs 100 XP more than the previous one: 0, 100, 300, 600, 1000...
- */
+/** nível a partir do xp total: nível n precisa de 50 * (n - 1) * n xp (0, 100, 300, 600...) */
 public final class LevelCalculator {
 
     static final int XP_STEP = 50;
@@ -11,7 +8,7 @@ public final class LevelCalculator {
     private LevelCalculator() {
     }
 
-    /** Total XP needed to reach a level (level 1 needs none). */
+    /** xp total pra chegar num nível */
     public static long xpForLevel(int level) {
         return (long) XP_STEP * (level - 1) * level;
     }
@@ -24,7 +21,7 @@ public final class LevelCalculator {
         return level;
     }
 
-    /** A new title every 5 levels. */
+    /** título novo a cada 5 níveis */
     public static String titleFor(int level) {
         if (level >= 20) return "Finance Master";
         if (level >= 15) return "Strategist";

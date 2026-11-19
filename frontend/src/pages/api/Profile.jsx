@@ -90,7 +90,7 @@ const ProfileInfoForm = ({ user, onUserChange }) => {
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
-    e.target.value = ""; // allows picking the same file again
+    e.target.value = ""; // deixa escolher o mesmo arquivo de novo
     if (!file) return;
 
     if (!AVATAR_ACCEPTED_TYPES.includes(file.type)) {
@@ -250,7 +250,7 @@ const PasswordForm = () => {
   const setError = (field, message) =>
     setErrors((prev) => ({ ...prev, [field]: message }));
 
-  // The new password must be valid and different from the current one.
+  // senha nova tem que ser válida e diferente da atual
   const checkNewPassword = (value, current = currentPassword) => {
     const error = validateNewPassword(value);
     if (error) return error;
@@ -290,7 +290,7 @@ const PasswordForm = () => {
         err,
         "We couldn't update your password at this time.",
       );
-      // A wrong current password is reported on that field.
+      // senha atual errada
       if (/current password/i.test(message)) {
         setError("currentPassword", message);
       } else {
@@ -404,7 +404,7 @@ const Profile = () => {
   const { user, setUser } = useOutletContext();
   const location = useLocation();
 
-  // /app/profile/password opens the page at the password section.
+  // rola até a parte da senha
   useEffect(() => {
     if (location.pathname.endsWith("/password")) {
       document

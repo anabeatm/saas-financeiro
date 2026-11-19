@@ -15,10 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-/**
- * Open Server-Sent Events connections, per user. A user may have the app open in a few tabs or
- * devices; each one is a connection. Events are pushed only to the users given as recipients.
- */
+/** conexões sse abertas por usuário (uma por aba/dispositivo) */
 @Component
 public class SseConnectionRegistry {
 
@@ -26,9 +23,9 @@ public class SseConnectionRegistry {
 
     static final String EVENT_NAME = "wallet-event";
     public static final String GAMIFICATION_EVENT_NAME = "gamification-event";
-    /** The browser reconnects after this; it also bounds how long a dead connection is kept. */
+    /** timeout da conexão */
     static final long CONNECTION_TIMEOUT_MS = Duration.ofMinutes(30).toMillis();
-    /** Caps the resources a single account can hold open (oldest connection is closed first). */
+    /** max de conexões por usuário (fecha a mais velha primeiro) */
     static final int MAX_CONNECTIONS_PER_USER = 5;
 
     private final Map<Long, List<SseEmitter>> connections = new ConcurrentHashMap<>();
@@ -47,7 +44,7 @@ public class SseConnectionRegistry {
         emitter.onTimeout(() -> remove(userId, emitter));
         emitter.onError(error -> remove(userId, emitter));
 
-        // First message, so the client knows the stream is open.
+        // primeira msg, pro cliente saber que abriu
         sendTo(userId, emitter, SseEmitter.event().name("connected").data("ok"));
         return emitter;
     }
@@ -60,17 +57,14 @@ public class SseConnectionRegistry {
         }
     }
 
-    /** Pushes an event to every open connection of a single user. */
+    /** manda o evento pra todas as conexões do usuário */
     public void sendToUser(Long userId, String eventName, Object payload) {
         for (SseEmitter emitter : connections.getOrDefault(userId, List.of())) {
             sendTo(userId, emitter, SseEmitter.event().name(eventName).data(payload, MediaType.APPLICATION_JSON));
         }
     }
 
-    /**
-     * A comment line every 25 s keeps idle connections open behind proxies (Render, for example,
-     * closes connections with no traffic) and detects clients that went away.
-     */
+    /** heartbeat a cada 25s pro proxy não derrubar a conexão */
     @Scheduled(fixedRate = 25_000)
     public void heartbeat() {
         connections.forEach((userId, userConnections) -> userConnections
@@ -85,7 +79,7 @@ public class SseConnectionRegistry {
         try {
             emitter.send(message);
         } catch (IOException | IllegalStateException e) {
-            // Client disconnected or connection already completed.
+            // cliente desconectou
             log.debug("Dropping SSE connection of user {}: {}", userId, e.getMessage());
             remove(userId, emitter);
         }

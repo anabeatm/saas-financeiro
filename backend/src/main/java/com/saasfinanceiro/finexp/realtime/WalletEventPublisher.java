@@ -12,11 +12,7 @@ import com.saasfinanceiro.finexp.model.User;
 import com.saasfinanceiro.finexp.model.Wallet;
 import com.saasfinanceiro.finexp.repository.WalletMemberRepository;
 
-/**
- * Called by the services when a wallet changes. It resolves who must be notified (the wallet's
- * members at this moment) and publishes a {@link WalletEventMessage}; {@link WalletEventListener}
- * pushes it to the browsers only after the database transaction commits.
- */
+/** chamado quando uma carteira muda: pega os membros e publica o evento */
 @Component
 public class WalletEventPublisher {
 
@@ -40,7 +36,7 @@ public class WalletEventPublisher {
                 null, null, null, null, LocalDateTime.now()), wallet, null);
     }
 
-    /** The affected user is always notified, even when they were just removed from the wallet. */
+    /** avisa o usuário afetado também (mesmo se acabou de ser removido) */
     public void memberChanged(WalletEventType type, Wallet wallet, User affectedUser, User actor) {
         publish(new WalletEvent(type, wallet.getId(), wallet.getName(), actor.getId(), actor.getName(),
                 null, null, null, affectedUser.getId(), LocalDateTime.now()), wallet, affectedUser.getId());

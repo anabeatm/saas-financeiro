@@ -25,11 +25,11 @@ const Categories = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // null = closed; { type } = new category of that type; category = edit
+  // null = fechado, { type } = nova, category = editar
   const [form, setForm] = useState(null);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  // Expense category whose monthly budget is being edited
+  // categoria que tá com o orçamento sendo editado
   const [budgetCategory, setBudgetCategory] = useState(null);
   const { budgets, reload: reloadBudgets } = useBudgets();
   const budgetByCategory = new Map(budgets.map((b) => [b.categoryId, b]));
@@ -51,7 +51,7 @@ const Categories = () => {
 
   const handleSaved = async () => {
     setForm(null);
-    // An expense category turned into an income one loses its budget.
+    // categoria de receita não tem orçamento
     await Promise.all([loadCategories(), reloadBudgets()]);
   };
 
@@ -63,7 +63,7 @@ const Categories = () => {
       setCategoryToDelete(null);
       await Promise.all([loadCategories(), reloadBudgets()]);
     } catch (err) {
-      // e.g. 422 when the category still has transactions
+      // ex: 422 quando a categoria ainda tem transações
       addToast({
         type: "error",
         title: "Could not delete the category",

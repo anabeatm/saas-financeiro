@@ -18,8 +18,7 @@ const TYPES = [
   { value: "INCOME", label: "Income", active: "bg-green-600 text-white" },
 ];
 
-// Creates a transaction in `walletId`, or edits `transaction` when it is passed in.
-// A category can also be created from here; `onCategoryCreated` lets the page update its own list.
+// cria ou edita transação (dá pra criar categoria por aqui também)
 export default function TransactionFormModal({
   walletId,
   transaction,
@@ -47,13 +46,13 @@ export default function TransactionFormModal({
   const [saving, setSaving] = useState(false);
   const [suggesting, setSuggesting] = useState(false);
   const [suggestionNote, setSuggestionNote] = useState(null);
-  // Categories created from this form, and the "new category" dialog (null = closed).
+  // categorias novas e o modal de categoria (null = fechado)
   const [createdCategories, setCreatedCategories] = useState([]);
   const [newCategoryForm, setNewCategoryForm] = useState(null);
 
   const categories = [...initialCategories, ...createdCategories];
 
-  // Only categories of the chosen type; a category owned by another member is kept as read-only option.
+  // categorias do tipo escolhido
   const options = categories.filter((c) => c.type === type);
   const keepsForeignCategory =
     isEdit &&
@@ -61,7 +60,7 @@ export default function TransactionFormModal({
     transaction.type === type &&
     !categories.some((c) => c.id === transaction.categoryId);
 
-  // Asks the AI which of the user's categories fits the description (of the selected type).
+  // pede uma categoria pra ia
   const handleSuggestCategory = async () => {
     setSuggesting(true);
     setSuggestionNote(null);
@@ -71,7 +70,7 @@ export default function TransactionFormModal({
         setCategoryId(String(suggestion.categoryId));
         setSuggestionNote({ ok: true, text: `Suggested by AI: ${suggestion.categoryName}` });
       } else if (suggestion.newCategory) {
-        // None of the user's categories fits: offer to create the one the AI proposed.
+        // nenhuma serviu: oferece a categoria nova da ia
         setSuggestionNote({
           ok: true,
           text: `No matching category. AI suggests creating "${suggestion.newCategory.name}".`,
@@ -90,7 +89,7 @@ export default function TransactionFormModal({
     }
   };
 
-  // A category was created in the dialog: list it and select it when it matches the transaction type.
+  // adiciona e já seleciona a categoria nova
   const handleCategoryCreated = (category) => {
     setNewCategoryForm(null);
     setCreatedCategories((prev) => [...prev, category]);
@@ -335,7 +334,7 @@ export default function TransactionFormModal({
       </form>
     </Modal>
 
-    {/* Opens on top of the transaction form; empty, or filled with the AI proposal. */}
+    {/* modal de categoria nova */}
     {newCategoryForm && (
       <CategoryFormModal
         defaultType={newCategoryForm.type ?? type}

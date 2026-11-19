@@ -1,6 +1,6 @@
 import { BUDGET_BAR_COLORS, budgetUsage } from "./labels";
 
-// Spending of a budget in the month: bar colored by status plus "R$ x of R$ y".
+// barra do orçamento
 export default function BudgetBar({ budget, compact = false }) {
   const pct = Math.min(budget.percent, 100);
   return (

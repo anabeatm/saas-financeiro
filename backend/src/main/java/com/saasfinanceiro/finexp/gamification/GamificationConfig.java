@@ -10,10 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GamificationConfig {
 
-    /**
-     * Clock in the users' time zone. The server runs in UTC, so without it a transaction logged at
-     * 10 p.m. in Brazil would count for the next day's streak.
-     */
+    /** relógio no fuso dos usuários (o servidor roda em utc) */
     @Bean
     public Clock gamificationClock(@Value("${app.gamification.zone:America/Sao_Paulo}") String zone) {
         return Clock.system(ZoneId.of(zone));

@@ -1,4 +1,4 @@
-// Draws a pixel-art grid as crisp SVG squares. `muted` shows it in grey (e.g. a locked badge).
+// desenha o grid de pixel art em svg (`muted` = cinza)
 export default function PixelSprite({
   grid,
   palette,

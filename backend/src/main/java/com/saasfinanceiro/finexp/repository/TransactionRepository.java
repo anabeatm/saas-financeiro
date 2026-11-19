@@ -20,7 +20,7 @@ public interface TransactionRepository
 
     List<Transaction> findAllByWalletIdAndDateBetween(Long walletId, LocalDate startDate, LocalDate endDate);
 
-    /** Transactions of a period in statement order, with category and author loaded in the same query. */
+    /** transações do período na ordem do extrato */
     @Query("""
             SELECT t FROM Transaction t
             LEFT JOIN FETCH t.category
@@ -31,10 +31,7 @@ public interface TransactionRepository
     List<Transaction> findStatementEntries(@Param("walletId") Long walletId,
             @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
-    /**
-     * Sum of incomes minus expenses dated before {@code date}, i.e. the wallet balance when the period starts.
-     * Returns null when there is no such transaction.
-     */
+    /** saldo antes de {@code date} (null se não tiver transação) */
     @Query("""
             SELECT SUM(CASE WHEN t.type = :income THEN t.amount ELSE -t.amount END)
             FROM Transaction t
@@ -46,7 +43,7 @@ public interface TransactionRepository
     boolean existsByCreatedByIdAndTypeAndCreatedAtGreaterThanEqual(Long userId, TransactionType type,
             LocalDateTime from);
 
-    /** Total of a type per category of a user (categories are private, so this spans every wallet). */
+    /** total por categoria do usuário, em todas as carteiras */
     @Query("""
             SELECT t.category.id AS categoryId, SUM(t.amount) AS total
             FROM Transaction t
@@ -64,7 +61,7 @@ public interface TransactionRepository
     BigDecimal sumByCategoryId(@Param("categoryId") Long categoryId, @Param("type") TransactionType type,
             @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
-    /** Incomes and expenses a user created in a period, in any wallet. */
+    /** transações que o usuário criou no período */
     @Query("""
             SELECT t.type AS type, SUM(t.amount) AS total
             FROM Transaction t

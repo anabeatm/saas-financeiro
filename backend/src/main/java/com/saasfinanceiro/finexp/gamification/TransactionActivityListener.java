@@ -6,11 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-/**
- * Feeds transaction activity into the gamification after the transaction is committed. Each step
- * runs in its own database transaction and a failure is only logged: rewards must never make
- * saving a transaction fail.
- */
+/** atualiza xp e orçamentos depois que a transação salva; se der erro só loga, nunca quebra o save */
 @Component
 public class TransactionActivityListener {
 

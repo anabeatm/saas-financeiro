@@ -1,11 +1,8 @@
-// Password rules shared by the sign-up, password reset and change password forms.
-// They mirror the backend: at least MIN_LENGTH characters (and at most MAX_LENGTH).
+// regras de senha (iguais às do back)
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 100;
 
-// Score from 0 (too short) to 3 (strong):
-//   +1 minimum length, +1 upper and lower case letters, +1 a digit and a symbol.
-// Below the minimum length the score is always 0.
+// nota de 0 (curta demais) a 3 (forte)
 export const getPasswordScore = (password) => {
   if (password.length < MIN_PASSWORD_LENGTH) return 0;
   let score = 1;
@@ -14,7 +11,7 @@ export const getPasswordScore = (password) => {
   return score;
 };
 
-// A new password must have the minimum length and be at least "Medium".
+// válida se for pelo menos "Medium"
 export const validateNewPassword = (password) => {
   if (!password) return "Required field";
   if (password.length < MIN_PASSWORD_LENGTH) {

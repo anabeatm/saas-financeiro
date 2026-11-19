@@ -6,11 +6,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.saasfinanceiro.finexp.model.enums.TransactionType;
 
-/**
- * Payload pushed to every member of a wallet when something changes in it. It carries just enough
- * for a notification; the screens reload their data from the API when they receive it.
- * Transaction fields are only filled for TRANSACTION_* events, {@code affectedUserId} only for MEMBER_* events.
- */
+/** evento mandado pros membros quando algo muda na carteira */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record WalletEvent(
     WalletEventType type,

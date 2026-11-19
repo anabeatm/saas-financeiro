@@ -21,7 +21,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import lombok.Data;
 
-// Only changed columns are written, so renaming a wallet never overwrites a concurrently updated balance.
+// só atualiza as colunas que mudaram (pra não sobrescrever o saldo)
 @Entity
 @DynamicUpdate
 @Data

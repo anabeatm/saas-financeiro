@@ -1,6 +1,6 @@
 package com.saasfinanceiro.finexp.model.enums;
 
-/** Why a user earned XP. */
+/** motivo do xp */
 public enum XpEventType {
     TRANSACTION,
     CHECK_IN,

@@ -1,6 +1,6 @@
 package com.saasfinanceiro.finexp.model.enums;
 
-/** Achievements a user can unlock. Each one is unlocked at most once. */
+/** conquistas que dá pra desbloquear */
 public enum AchievementCode {
     FIRST_STEP("First Step", "Log your first transaction"),
     STREAK_7("Iron Week", "Stay active for 7 days in a row"),
