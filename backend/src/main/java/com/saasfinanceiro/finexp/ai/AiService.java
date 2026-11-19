@@ -8,9 +8,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -50,6 +53,16 @@ public class AiService {
     static final List<String> CATEGORY_COLORS = List.of("#2ECC71", "#27AE60", "#3498DB", "#9B59B6", "#E74C3C",
             "#E67E22", "#F1C40F", "#1ABC9C", "#A88D6F", "#7F8C8D");
     static final String DEFAULT_COLOR = "#A88D6F";
+
+    // formato obrigatório da resposta dos insights (responseSchema do gemini)
+    static final Map<String, Object> INSIGHTS_SCHEMA = Map.of(
+            "type", "OBJECT",
+            "properties", Map.of(
+                    "summary", Map.of("type", "STRING"),
+                    "tips", Map.of("type", "ARRAY", "items", Map.of("type", "STRING"))),
+            "required", List.of("summary", "tips"));
+
+    private static final Logger log = LoggerFactory.getLogger(AiService.class);
 
     private final GeminiClient gemini;
     private final CategoryRepository categoryRepository;
@@ -162,11 +175,12 @@ public class AiService {
                 summary (2 or 3 sentences) of how the period went and up to 3 short, practical tips based only
                 on those figures. Amounts are in Brazilian reais (R$). Do not invent numbers.
                 Answer only with JSON in this format: {"summary": "...", "tips": ["...", "..."]}
-                """, describe(report));
+                """, describe(report), INSIGHTS_SCHEMA);
 
         JsonNode node = parse(answer);
         String summary = limit(node.path("summary").asString(""), 800);
         if (summary.isBlank()) {
+            log.warn("Gemini insights answer has no summary: {}", preview(answer));
             throw new AiUnavailableException("The AI service returned an unexpected answer. Please try again.");
         }
         List<String> tips = new ArrayList<>();
@@ -208,11 +222,24 @@ public class AiService {
     }
 
     private JsonNode parse(String answer) {
+        JsonNode node;
         try {
-            return json.readTree(stripCodeFence(answer));
+            node = json.readTree(stripCodeFence(answer));
         } catch (JacksonException e) {
+            log.warn("Gemini answer is not valid JSON: {}", preview(answer));
             throw new AiUnavailableException("The AI service returned an unexpected answer. Please try again.");
         }
+        // às vezes o modelo devolve [{...}] em vez de {...}
+        if (node.isArray() && !node.isEmpty() && node.get(0).isObject()) {
+            return node.get(0);
+        }
+        return node;
+    }
+
+    /** começo da resposta, numa linha só, pra aparecer no log */
+    private static String preview(String answer) {
+        String oneLine = answer.replaceAll("\\s+", " ").trim();
+        return oneLine.length() <= 300 ? oneLine : oneLine.substring(0, 300) + "…";
     }
 
     /** tira o ```json que alguns modelos colocam na resposta */

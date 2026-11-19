@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -200,7 +202,7 @@ class AiServiceTest {
     @Test
     void insightsUseOnlyAggregatedFiguresAndKeepAtMostThreeTips() {
         when(reportService.getStatement(5L, START, END)).thenReturn(report(2));
-        when(gemini.generateJson(anyString(), anyString())).thenReturn("""
+        when(gemini.generateJson(anyString(), anyString(), eq(AiService.INSIGHTS_SCHEMA))).thenReturn("""
                 {"summary": "You spent less than you earned.",
                  "tips": ["Keep it up", "Review Food", "Save the surplus", "A fourth tip"]}
                 """);
@@ -224,7 +226,28 @@ class AiServiceTest {
         InsightsResponse insights = service.insights(5L, START, END);
 
         assertFalse(insights.generatedByAi());
-        verify(gemini, never()).generateJson(anyString(), anyString());
+        verify(gemini, never()).generateJson(anyString(), anyString(), any());
+    }
+
+    @Test
+    void insightsAcceptAnAnswerWrappedInAnArray() {
+        when(reportService.getStatement(5L, START, END)).thenReturn(report(2));
+        when(gemini.generateJson(anyString(), anyString(), any())).thenReturn("""
+                [{"summary": "Good month.", "tips": ["Save more"]}]
+                """);
+
+        InsightsResponse insights = service.insights(5L, START, END);
+
+        assertEquals("Good month.", insights.summary());
+        assertEquals(List.of("Save more"), insights.tips());
+    }
+
+    @Test
+    void insightsWithoutSummaryAreAnError() {
+        when(reportService.getStatement(5L, START, END)).thenReturn(report(2));
+        when(gemini.generateJson(anyString(), anyString(), any())).thenReturn("{\"tips\": [\"Save more\"]}");
+
+        assertThrows(AiUnavailableException.class, () -> service.insights(5L, START, END));
     }
 
     private CategorySuggestionRequest expense(String description) {

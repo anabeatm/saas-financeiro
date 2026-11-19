@@ -55,6 +55,21 @@ class GeminiClientTest {
     }
 
     @Test
+    void sendsTheResponseSchemaWhenGiven() {
+        server.expect(requestTo(URL))
+                .andExpect(jsonPath("$.generationConfig.responseSchema.type").value("OBJECT"))
+                .andExpect(jsonPath("$.generationConfig.responseSchema.required[0]").value("summary"))
+                .andRespond(withSuccess("""
+                        {"candidates":[{"content":{"parts":[{"text":"{\\"summary\\": \\"ok\\"}"}]}}]}
+                        """, MediaType.APPLICATION_JSON));
+
+        String answer = client("test-key").generateJson("rules", "question", AiService.INSIGHTS_SCHEMA);
+
+        assertEquals("{\"summary\": \"ok\"}", answer);
+        server.verify();
+    }
+
+    @Test
     void withoutKeyTheFeatureIsUnavailable() {
         GeminiClient client = client("");
 

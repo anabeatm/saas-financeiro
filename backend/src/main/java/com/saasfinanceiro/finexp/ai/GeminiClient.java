@@ -2,6 +2,7 @@ package com.saasfinanceiro.finexp.ai;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,7 +34,7 @@ public class GeminiClient {
     record GenerateResponse(List<Candidate> candidates) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    record Candidate(Content content) {}
+    record Candidate(Content content, String finishReason) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     record Content(List<Part> parts) {}
@@ -72,14 +73,25 @@ public class GeminiClient {
 
     /** manda as instruções + prompt e devolve o texto da resposta */
     public String generateJson(String instructions, String prompt) {
+        return generateJson(instructions, prompt, null);
+    }
+
+    /** igual, mas com um responseSchema que obriga o modelo a devolver o json nesse formato */
+    public String generateJson(String instructions, String prompt, Map<String, Object> responseSchema) {
         if (!isConfigured()) {
             throw new AiUnavailableException("AI features are not configured on this server");
         }
 
+        Map<String, Object> generationConfig = new HashMap<>();
+        generationConfig.put("responseMimeType", "application/json");
+        generationConfig.put("temperature", 0.2);
+        if (responseSchema != null) {
+            generationConfig.put("responseSchema", responseSchema);
+        }
         Map<String, Object> body = Map.of(
                 "systemInstruction", Map.of("parts", List.of(Map.of("text", instructions))),
                 "contents", List.of(Map.of("role", "user", "parts", List.of(Map.of("text", prompt)))),
-                "generationConfig", Map.of("responseMimeType", "application/json", "temperature", 0.2));
+                "generationConfig", generationConfig);
 
         GenerateResponse response;
         try {
@@ -104,6 +116,13 @@ public class GeminiClient {
                 .map(Part::text)
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining());
+
+        String finishReason = response == null || response.candidates() == null ? null : response.candidates().stream()
+                .map(Candidate::finishReason).filter(Objects::nonNull).findFirst().orElse(null);
+        if (finishReason != null && !"STOP".equals(finishReason)) {
+            // ex.: MAX_TOKENS corta o json no meio
+            log.warn("Gemini answer finished with {}", finishReason);
+        }
 
         if (text.isBlank()) {
             throw new AiUnavailableException("The AI service returned an empty answer. Please try again.");
